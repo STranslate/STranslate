@@ -366,7 +366,11 @@ internal class UACHelper
         xml.AppendLine($"    <URI>\\{SecurityElement.Escape(config.TaskName)}</URI>");
         xml.AppendLine($"    <Date>{DateTime.Now:yyyy-MM-ddTHH:mm:ss}</Date>");
         xml.AppendLine("  </RegistrationInfo>");
-        xml.AppendLine("  <Triggers />");
+        xml.AppendLine("  <Triggers>");
+        xml.AppendLine("    <LogonTrigger>");
+        xml.AppendLine("      <Enabled>true</Enabled>");
+        xml.AppendLine("    </LogonTrigger>");
+        xml.AppendLine("  </Triggers>");
         xml.AppendLine("  <Principals>");
         xml.AppendLine("    <Principal id=\"Author\">");
         xml.AppendLine($"      <UserId>{userSid}</UserId>");
