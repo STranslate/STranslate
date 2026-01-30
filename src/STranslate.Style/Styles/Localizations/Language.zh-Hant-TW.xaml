@@ -250,7 +250,7 @@
     <system:String x:Key="Preference.Navi.Common">常規設置</system:String>
     <system:String x:Key="Preference.Navi.Hotkey">熱鍵設置</system:String>
     <system:String x:Key="Preference.Navi.Service">服務設置</system:String>
-    <system:String x:Key="Preference.Navi.Replace">替換翻譯</system:String>
+    <!-- <system:String x:Key="Preference.Navi.Replace">替換翻譯</system:String> -->
     <system:String x:Key="Preference.Navi.History">歷史記錄</system:String>
     <system:String x:Key="Preference.Navi.Backup">匯入匯出</system:String>
     <system:String x:Key="Preference.Navi.About">關於軟體</system:String>
@@ -546,6 +546,7 @@
     <!--#region Service 设置项-->
 
     <system:String x:Key="Service.Navi.Translator">文本翻譯</system:String>
+    <system:String x:Key="Service.Navi.Replace">替換翻譯</system:String>
     <system:String x:Key="Service.Navi.OCR">文本識別</system:String>
     <system:String x:Key="Service.Navi.TTS">語音合成</system:String>
     <system:String x:Key="Service.Navi.VocabularyBook">生詞本</system:String>
@@ -553,6 +554,8 @@
     <system:String x:Key="Service.Translator.SubTitle">翻譯功能的核心服務支援配置，下方開啟的服務將被使用。</system:String>
     <system:String x:Key="Service.Translator.Duplicate">建立副本</system:String>
     <system:String x:Key="Service.Translator.Delete">刪除服務</system:String>
+    <system:String x:Key="Service.Replace.Title">替換翻譯</system:String>
+    <system:String x:Key="Service.Replace.SubTitle">替換當前應用中的選中文本為翻譯結果，新增你的替換翻譯服務並選擇使用</system:String>
     <system:String x:Key="Service.OCR.Title">文本識別</system:String>
     <system:String x:Key="Service.OCR.SubTitle">文字識別服務，新增你的OCR服務並選擇使用</system:String>
     <system:String x:Key="Service.TTS.Title">文本識別</system:String>

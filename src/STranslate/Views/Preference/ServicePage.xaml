@@ -110,6 +110,9 @@
             <TabItem Header="{DynamicResource Service.Navi.Translator}">
                 <uc:TranslatorPage />
             </TabItem>
+            <TabItem Header="{DynamicResource Service.Navi.Replace}">
+                <uc:ReplacePage />
+            </TabItem>
             <TabItem Header="{DynamicResource Service.Navi.OCR}">
                 <uc:OCRPage />
             </TabItem>

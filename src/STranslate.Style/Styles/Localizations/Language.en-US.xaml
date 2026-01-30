@@ -250,7 +250,7 @@
     <system:String x:Key="Preference.Navi.Common">General</system:String>
     <system:String x:Key="Preference.Navi.Hotkey">Hotkey</system:String>
     <system:String x:Key="Preference.Navi.Service">Service</system:String>
-    <system:String x:Key="Preference.Navi.Replace">Replace</system:String>
+    <!-- <system:String x:Key="Preference.Navi.Replace">Replace</system:String> -->
     <system:String x:Key="Preference.Navi.History">History</system:String>
     <system:String x:Key="Preference.Navi.Backup">Backup</system:String>
     <system:String x:Key="Preference.Navi.About">About</system:String>
@@ -546,6 +546,7 @@
     <!--#region Service 设置项-->
 
     <system:String x:Key="Service.Navi.Translator">Text Translation</system:String>
+    <system:String x:Key="Service.Navi.Replace">Replace</system:String>
     <system:String x:Key="Service.Navi.OCR">Text Recognition</system:String>
     <system:String x:Key="Service.Navi.TTS">Text-to-Speech</system:String>
     <system:String x:Key="Service.Navi.VocabularyBook">Vocabulary Book</system:String>
@@ -553,6 +554,8 @@
     <system:String x:Key="Service.Translator.SubTitle">Core service support configuration for translation functionality.</system:String>
     <system:String x:Key="Service.Translator.Duplicate">Create Duplicate</system:String>
     <system:String x:Key="Service.Translator.Delete">Delete Translator</system:String>
+    <system:String x:Key="Service.Replace.Title">Replace</system:String>
+    <system:String x:Key="Service.Replace.SubTitle">Core service support configuration for replace translation functionality.</system:String>
     <system:String x:Key="Service.OCR.Title">Text Recognition</system:String>
     <system:String x:Key="Service.OCR.SubTitle">Text recognition services. Add your OCR service and select for use</system:String>
     <system:String x:Key="Service.TTS.Title">Text Recognition</system:String>

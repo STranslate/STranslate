@@ -162,12 +162,12 @@
                     <!--  //  分隔符号  //  -->
                     <!--<Separator Background="DarkGray" Margin="10,20"/>-->
 
-                    <menu:Btn
+                    <!-- <menu:Btn
                         Command="{Binding ReplacePageCommand}"
                         IsChecked="{Binding PType, Converter={StaticResource PreferenceType2BooleanConverter}, ConverterParameter=Replace}"
                         Style="{StaticResource BtnStyle}">
                         <TextBlock Style="{StaticResource Text_Style}" Text="{DynamicResource Preference.Navi.Replace}" />
-                    </menu:Btn>
+                    </menu:Btn> -->
 
                     <menu:Btn
                         Command="{Binding FavoritePageCommand}"

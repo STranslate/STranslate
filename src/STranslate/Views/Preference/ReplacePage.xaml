@@ -18,15 +18,27 @@
     <Border CornerRadius="5">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition Height="60" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Orientation="Vertical">
+            <!--  // Header //  -->
+            <StackPanel Margin="10,5">
+                <!--<TextBlock FontSize="{DynamicResource FontSize20}" Text="{DynamicResource Service.Replace.Title}" />-->
+                <TextBlock FontSize="{DynamicResource FontSize18}" Text="{DynamicResource Service.Replace.SubTitle}" />
+            </StackPanel>
+            
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="60" />
+                </Grid.RowDefinitions>
                 <Border
-                    Margin="8"
+                    Margin="10"
                     props:ThemeProps.Background="{DynamicResource BorderContentBackground}"
-                    CornerRadius="5">
+                    props:ThemeProps.BorderBrush="{DynamicResource BorderBrushColor}"
+                    BorderThickness="1"
+                    CornerRadius="6">
                     <StackPanel Orientation="Vertical">
 
                         <DockPanel Margin="20,10">
@@ -191,27 +203,27 @@
                         </DockPanel>
                     </StackPanel>
                 </Border>
-            </StackPanel>
-
-
-            <Grid Grid.Row="1" Margin="20,0">
-                <Button
-                    Width="60"
-                    Margin="0,0,76,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    Command="{Binding ResetCommand}"
-                    Content="{DynamicResource Preference.Reset}" />
-                <Button
-                    Width="60"
-                    Padding="3"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Command="{Binding SaveCommand}"
-                    Content="{DynamicResource Preference.Save}" />
+                
+                <Grid Grid.Row="1" Margin="20,0">
+                    <Button
+                        Width="60"
+                        Margin="0,0,76,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Command="{Binding ResetCommand}"
+                        Content="{DynamicResource Preference.Reset}" />
+                    <Button
+                        Width="60"
+                        Padding="3"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Command="{Binding SaveCommand}"
+                        Content="{DynamicResource Preference.Save}" />
+                </Grid>
             </Grid>
+
 
         </Grid>
     </Border>
