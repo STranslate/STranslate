@@ -1,0 +1,10 @@
+{
+  "PluginID": "f1c5a94d802a4d2b8b41e3a6e1b7c4d5",
+  "Name": "Qwen3-TTS (Local)",
+  "Description": "Local Qwen3-TTS HTTP service plugin for STranslate",
+  "Author": "zggsong",
+  "Version": "1.0.0",
+  "Website": "https://github.com/QwenLM/Qwen3-TTS",
+  "ExecuteFileName": "STranslate.Plugin.Tts.Qwen3.dll",
+  "IconPath": "icon.png"
+}

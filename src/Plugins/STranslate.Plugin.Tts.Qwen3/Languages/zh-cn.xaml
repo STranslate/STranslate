@@ -1,0 +1,18 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_BaseUrl">服务地址</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_BaseUrl_Description">本地 qwen3-tts-server 的基础地址，例如 http://127.0.0.1:9880</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Speaker">说话人</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Speaker_Description">CustomVoice 模型支持的说话人（全小写），如 ryan/aiden/vivian/uncle_fu。可访问 {BaseUrl}/speakers 查询完整列表</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Language">语言</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Language_Description">Auto 为自动识别；也可指定 Chinese / English / Japanese 等</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Instruct">风格指令</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Instruct_Description">可选。用自然语言描述期望的语气、情绪等。留空则使用默认风格</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Timeout">超时（秒）</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Support">支持</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Support_Description">本插件基于 Qwen3-TTS 开源项目，点击链接前往项目主页</sys:String>
+
+</ResourceDictionary>

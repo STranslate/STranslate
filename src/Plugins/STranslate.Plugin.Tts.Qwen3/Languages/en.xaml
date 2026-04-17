@@ -1,0 +1,18 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_BaseUrl">Server URL</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_BaseUrl_Description">Base URL of your local qwen3-tts-server, e.g. http://127.0.0.1:9880</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Speaker">Speaker</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Speaker_Description">CustomVoice speaker. Query {BaseUrl}/speakers for the full list</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Language">Language</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Language_Description">Use Auto for auto-detect, or specify Chinese / English / Japanese etc.</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Instruct">Style Instruction</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Instruct_Description">Optional natural-language description of tone / emotion. Leave empty for default</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Timeout">Timeout (sec)</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Support">Support</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Support_Description">This plugin is based on the Qwen3-TTS open-source project. Click the link to visit the project page</sys:String>
+
+</ResourceDictionary>

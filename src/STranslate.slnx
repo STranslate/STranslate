@@ -40,6 +40,7 @@
 
     <!-- 其他插件 -->
     <Project Path="Plugins/STranslate.Plugin.Tts.MicrosoftEdge/STranslate.Plugin.Tts.MicrosoftEdge.csproj" />
+    <Project Path="Plugins/STranslate.Plugin.Tts.Qwen3/STranslate.Plugin.Tts.Qwen3.csproj" />
     <Project Path="Plugins/STranslate.Plugin.Vocabulary.Eudict/STranslate.Plugin.Vocabulary.Eudict.csproj" />
   </Folder>
   

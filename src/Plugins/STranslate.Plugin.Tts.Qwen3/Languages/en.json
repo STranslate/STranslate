@@ -1,0 +1,4 @@
+{
+  "Name": "Qwen3-TTS (Local)",
+  "Description": "Local Qwen3-TTS HTTP service plugin for STranslate"
+}

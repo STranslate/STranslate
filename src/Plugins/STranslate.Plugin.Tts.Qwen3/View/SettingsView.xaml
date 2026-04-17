@@ -1,0 +1,106 @@
+<UserControl
+    x:Class="STranslate.Plugin.Tts.Qwen3.View.SettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:vm="clr-namespace:STranslate.Plugin.Tts.Qwen3.ViewModel"
+    d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <ikw:SimpleStackPanel Spacing="12">
+        <!--  BaseUrl  -->
+        <ui:SettingsCard Header="{DynamicResource STranslate_Plugin_Tts_Qwen3_BaseUrl}">
+            <ui:SettingsCard.Description>
+                <TextBlock Text="{DynamicResource STranslate_Plugin_Tts_Qwen3_BaseUrl_Description}" TextWrapping="Wrap" />
+            </ui:SettingsCard.Description>
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Globe_24_Regular}" />
+            </ui:SettingsCard.HeaderIcon>
+            <TextBox
+                MinWidth="300"
+                ui:ControlHelper.PlaceholderText="http://127.0.0.1:9880"
+                Text="{Binding BaseUrl, UpdateSourceTrigger=PropertyChanged}" />
+        </ui:SettingsCard>
+
+        <!--  Speaker  -->
+        <ui:SettingsCard Header="{DynamicResource STranslate_Plugin_Tts_Qwen3_Speaker}">
+            <ui:SettingsCard.Description>
+                <TextBlock Text="{DynamicResource STranslate_Plugin_Tts_Qwen3_Speaker_Description}" TextWrapping="Wrap" />
+            </ui:SettingsCard.Description>
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PersonVoice_24_Regular}" />
+            </ui:SettingsCard.HeaderIcon>
+            <TextBox
+                MinWidth="200"
+                ui:ControlHelper.PlaceholderText="ryan"
+                Text="{Binding Speaker, UpdateSourceTrigger=PropertyChanged}" />
+        </ui:SettingsCard>
+
+        <!--  Language  -->
+        <ui:SettingsCard Header="{DynamicResource STranslate_Plugin_Tts_Qwen3_Language}">
+            <ui:SettingsCard.Description>
+                <TextBlock Text="{DynamicResource STranslate_Plugin_Tts_Qwen3_Language_Description}" TextWrapping="Wrap" />
+            </ui:SettingsCard.Description>
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.LocalLanguage_24_Regular}" />
+            </ui:SettingsCard.HeaderIcon>
+            <TextBox
+                MinWidth="200"
+                ui:ControlHelper.PlaceholderText="Auto"
+                Text="{Binding Language, UpdateSourceTrigger=PropertyChanged}" />
+        </ui:SettingsCard>
+
+        <!--  Instruct  -->
+        <ui:SettingsCard Header="{DynamicResource STranslate_Plugin_Tts_Qwen3_Instruct}">
+            <ui:SettingsCard.Description>
+                <TextBlock Text="{DynamicResource STranslate_Plugin_Tts_Qwen3_Instruct_Description}" TextWrapping="Wrap" />
+            </ui:SettingsCard.Description>
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.StyleGuide_24_Regular}" />
+            </ui:SettingsCard.HeaderIcon>
+            <TextBox
+                MinWidth="300"
+                ui:ControlHelper.PlaceholderText="用温柔的语气说"
+                Text="{Binding Instruct, UpdateSourceTrigger=PropertyChanged}" />
+        </ui:SettingsCard>
+
+        <!--  Timeout  -->
+        <ui:SettingsCard Header="{DynamicResource STranslate_Plugin_Tts_Qwen3_Timeout}">
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Timer_24_Regular}" />
+            </ui:SettingsCard.HeaderIcon>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="40" />
+                </Grid.ColumnDefinitions>
+                <Slider
+                    IsSnapToTickEnabled="True"
+                    LargeChange="30"
+                    Maximum="300"
+                    Minimum="10"
+                    SmallChange="5"
+                    TickFrequency="5"
+                    Value="{Binding TimeoutSeconds}" />
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Text="{Binding TimeoutSeconds}" />
+            </Grid>
+        </ui:SettingsCard>
+
+        <!--  Support  -->
+        <ui:SettingsCard Description="{DynamicResource STranslate_Plugin_Tts_Qwen3_Support_Description}" Header="{DynamicResource STranslate_Plugin_Tts_Qwen3_Support}">
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PersonSupport_20_Regular}" />
+            </ui:SettingsCard.HeaderIcon>
+            <ui:HyperlinkButton Content="github.com/QwenLM/Qwen3-TTS" NavigateUri="https://github.com/QwenLM/Qwen3-TTS" />
+        </ui:SettingsCard>
+    </ikw:SimpleStackPanel>
+</UserControl>

@@ -1,0 +1,18 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_BaseUrl">서버 URL</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_BaseUrl_Description">로컬 qwen3-tts-server 기본 주소 (예: http://127.0.0.1:9880)</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Speaker">화자</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Speaker_Description">CustomVoice 모델의 화자. {BaseUrl}/speakers 로 전체 목록 확인</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Language">언어</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Language_Description">Auto는 자동 감지. Chinese / English / Japanese 등 직접 지정 가능</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Instruct">스타일 지시</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Instruct_Description">선택 사항. 어조, 감정 등을 자연어로 기술. 비워두면 기본값</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Timeout">시간 초과(초)</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Support">지원</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Support_Description">본 플러그인은 Qwen3-TTS 오픈소스 프로젝트 기반입니다. 링크를 클릭하여 프로젝트 페이지로 이동</sys:String>
+
+</ResourceDictionary>

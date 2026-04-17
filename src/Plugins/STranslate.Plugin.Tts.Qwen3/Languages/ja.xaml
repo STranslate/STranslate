@@ -1,0 +1,18 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_BaseUrl">サーバーURL</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_BaseUrl_Description">ローカル qwen3-tts-server のベースURL（例：http://127.0.0.1:9880）</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Speaker">話者</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Speaker_Description">CustomVoice モデルの話者。{BaseUrl}/speakers で一覧を取得できます</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Language">言語</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Language_Description">Auto は自動判別。Chinese / English / Japanese 等の明示指定も可能</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Instruct">スタイル指示</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Instruct_Description">任意。自然言語で口調・感情を記述。空欄でデフォルト</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Timeout">タイムアウト（秒）</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Support">サポート</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_Qwen3_Support_Description">本プラグインは Qwen3-TTS オープンソースプロジェクトに基づいています。リンクをクリックしてプロジェクトページへ</sys:String>
+
+</ResourceDictionary>
