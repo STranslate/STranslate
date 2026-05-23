@@ -9,8 +9,9 @@ namespace STranslate.Plugin.Translate.ICibaBuiltIn;
 public class Main : DictionaryPluginBase
 {
     private const string WordPageUrl = "https://www.iciba.com/word";
-    private const string NextDataStartTag = "<script id=\"__NEXT_DATA__\" type=\"application/json\">";
+    private const string ScriptStartTag = "<script";
     private const string ScriptEndTag = "</script>";
+    private const string NextDataScriptId = "__NEXT_DATA__";
 
     private Control? _settingUi;
     private SettingsViewModel? _viewModel;
@@ -57,7 +58,13 @@ public class Main : DictionaryPluginBase
             return;
         }
 
-        using var jsonDoc = JsonDocument.Parse(nextDataJson);
+        using var jsonDoc = ParseNextDataJson(nextDataJson, content);
+        if (jsonDoc is null)
+        {
+            result.ResultType = DictionaryResultType.NoResult;
+            return;
+        }
+
         if (!TryGetWordInfo(jsonDoc.RootElement, out var wordInfo) ||
             !wordInfo.TryGetProperty("baesInfo", out var root))
         {
@@ -106,19 +113,56 @@ public class Main : DictionaryPluginBase
     private static string? ExtractNextDataJson(string response)
     {
         var trimmedResponse = response.TrimStart();
-        if (trimmedResponse.StartsWith('{'))
+        if (IsJsonPayload(trimmedResponse))
             return trimmedResponse;
 
-        var startIndex = response.IndexOf(NextDataStartTag, StringComparison.OrdinalIgnoreCase);
-        if (startIndex < 0)
-            return null;
+        var searchIndex = 0;
+        while (searchIndex < response.Length)
+        {
+            var scriptStartIndex = response.IndexOf(ScriptStartTag, searchIndex, StringComparison.OrdinalIgnoreCase);
+            if (scriptStartIndex < 0)
+                return null;
 
-        startIndex += NextDataStartTag.Length;
-        var endIndex = response.IndexOf(ScriptEndTag, startIndex, StringComparison.OrdinalIgnoreCase);
-        if (endIndex <= startIndex)
-            return null;
+            var startTagEndIndex = response.IndexOf('>', scriptStartIndex);
+            if (startTagEndIndex < 0)
+                return null;
 
-        return response[startIndex..endIndex];
+            var startTag = response[scriptStartIndex..startTagEndIndex];
+            if (!startTag.Contains(NextDataScriptId, StringComparison.OrdinalIgnoreCase))
+            {
+                searchIndex = startTagEndIndex + 1;
+                continue;
+            }
+
+            var contentStartIndex = startTagEndIndex + 1;
+            var scriptEndIndex = response.IndexOf(ScriptEndTag, contentStartIndex, StringComparison.OrdinalIgnoreCase);
+            if (scriptEndIndex <= contentStartIndex)
+                return null;
+
+            var scriptContent = response[contentStartIndex..scriptEndIndex].Trim();
+            return IsJsonPayload(scriptContent) ? scriptContent : null;
+        }
+
+        return null;
+    }
+
+    private JsonDocument? ParseNextDataJson(string nextDataJson, string content)
+    {
+        try
+        {
+            return JsonDocument.Parse(nextDataJson);
+        }
+        catch (JsonException ex)
+        {
+            Context.Logger.LogWarning(ex, "Failed to parse iCIBA __NEXT_DATA__ for content: {Content}", content);
+            return null;
+        }
+    }
+
+    private static bool IsJsonPayload(string value)
+    {
+        var trimmedValue = value.TrimStart();
+        return trimmedValue.StartsWith('{') || trimmedValue.StartsWith('[');
     }
 
     private static bool TryGetWordInfo(JsonElement root, out JsonElement wordInfo)
