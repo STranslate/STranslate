@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using STranslate.Plugin.Translate.ICibaBuiltIn.View;
 using STranslate.Plugin.Translate.ICibaBuiltIn.ViewModel;
 using System.Collections.ObjectModel;
