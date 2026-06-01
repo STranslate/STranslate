@@ -750,6 +750,13 @@
     <sys:String x:Key="TtsServiceNotFound">未配置语音合成服务，请前往「设置-服务-语音合成」配置</sys:String>
     <sys:String x:Key="ImtransFailed">图片翻译失败</sys:String>
     <sys:String x:Key="NoTranslateService">未找到可用的翻译服务</sys:String>
+    <sys:String x:Key="GoToSettings">点击前往</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundTitle">无法获取图片翻译服务</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundMessage">当前未配置启用图片翻译服务，请先前往「设置-服务-文本翻译」配置后使用该功能</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundTitle">无法获取OCR服务</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundMessage">当前未配置或者启用OCR服务，请先前往「设置-服务-文本识别」配置后使用该功能</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundTitle">无法获取图片翻译 OCR 服务</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundMessage">当前未配置图片翻译 OCR 服务且无可用 OCR 服务，请先前往「设置-服务-文本识别」进行配置</sys:String>
     <sys:String x:Key="NavigateFailed">已经到头了</sys:String>
     <sys:String x:Key="NoValidPluginFile">无SPKG文件</sys:String>
 

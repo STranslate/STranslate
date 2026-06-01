@@ -749,6 +749,13 @@
     <sys:String x:Key="TtsServiceNotFound">No TTS service configured, please go to "Settings-Services-TTS" to configure</sys:String>
     <sys:String x:Key="ImtransFailed">Image translation failed</sys:String>
     <sys:String x:Key="NoTranslateService">No available translation service found</sys:String>
+    <sys:String x:Key="GoToSettings">Go to settings</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundTitle">Unable to get image translation service</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundMessage">Image translation service is not configured or enabled. Go to "Settings-Services-Text Translation" to configure it before using this feature.</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundTitle">Unable to get OCR service</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundMessage">OCR service is not configured or enabled. Go to "Settings-Services-Text Recognition" to configure it before using this feature.</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundTitle">Unable to get image translation OCR service</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundMessage">Image translation OCR service is not configured and no OCR service is available. Go to "Settings-Services-Text Recognition" to configure one.</sys:String>
     <sys:String x:Key="NavigateFailed">Already at the end</sys:String>
     <sys:String x:Key="NoValidPluginFile">No SPKG File</sys:String>
 

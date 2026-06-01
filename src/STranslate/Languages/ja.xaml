@@ -729,6 +729,13 @@
     <sys:String x:Key="TtsServiceNotFound">音声合成サービスが設定されていません。「設定-サービス-音声合成」で設定してください</sys:String>
     <sys:String x:Key="ImtransFailed">画像翻訳に失敗しました</sys:String>
     <sys:String x:Key="NoTranslateService">利用可能な翻訳サービスが見つかりません</sys:String>
+    <sys:String x:Key="GoToSettings">設定へ移動</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundTitle">画像翻訳サービスを取得できません</sys:String>
+    <sys:String x:Key="ImageTranslateServiceNotFoundMessage">画像翻訳サービスが設定または有効化されていません。「設定-サービス-テキスト翻訳」で設定してからこの機能を使用してください。</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundTitle">OCRサービスを取得できません</sys:String>
+    <sys:String x:Key="OcrServiceNotFoundMessage">OCRサービスが設定または有効化されていません。「設定-サービス-文字認識」で設定してからこの機能を使用してください。</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundTitle">画像翻訳 OCR サービスを取得できません</sys:String>
+    <sys:String x:Key="ImageTranslateOcrServiceNotFoundMessage">画像翻訳 OCR サービスが設定されておらず、利用可能な OCR サービスもありません。「設定-サービス-文字認識」で設定してください。</sys:String>
     <sys:String x:Key="NavigateFailed">これ以上ありません</sys:String>
     <sys:String x:Key="NoValidPluginFile">SPKGファイルがありません</sys:String>
 

@@ -864,8 +864,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (TranslateService.ImageTranslateService == null)
         {
             _notification.ShowWithButton(
-                 "无法获取图片翻译服务",
-                 "点击前往",
+                 _i18n.GetTranslation("ImageTranslateServiceNotFoundTitle"),
+                 _i18n.GetTranslation("GoToSettings"),
                  () =>
                  {
                      Application.Current.Dispatcher.Invoke(() =>
@@ -880,7 +880,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                                  .Navigate(nameof(TranslatePage));
                      });
                  },
-                 "当前未配置启用图片翻译服务，请先前往「设置-服务-文本翻译」配置后使用该功能");
+                 _i18n.GetTranslation("ImageTranslateServiceNotFoundMessage"));
             return;
         }
 
@@ -984,8 +984,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (svc == null)
         {
             _notification.ShowWithButton(
-                "无法获取OCR服务",
-                "点击前往",
+                _i18n.GetTranslation("OcrServiceNotFoundTitle"),
+                _i18n.GetTranslation("GoToSettings"),
                 () =>
                 {
                     Application.Current.Dispatcher.Invoke(() =>
@@ -1000,7 +1000,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                                 .Navigate(nameof(OcrPage));
                     });
                 },
-                "当前未配置或者启用OCR服务，请先前往「设置-服务-文本识别」配置后使用该功能");
+                _i18n.GetTranslation("OcrServiceNotFoundMessage"));
             return default;
         }
 
@@ -1013,8 +1013,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (svc == null)
         {
             _notification.ShowWithButton(
-                "无法获取图片翻译 OCR 服务",
-                "点击前往",
+                _i18n.GetTranslation("ImageTranslateOcrServiceNotFoundTitle"),
+                _i18n.GetTranslation("GoToSettings"),
                 () =>
                 {
                     Application.Current.Dispatcher.Invoke(() =>
@@ -1029,7 +1029,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                                 .Navigate(nameof(OcrPage));
                     });
                 },
-                "当前未配置图片翻译 OCR 服务且无可用 OCR 服务，请先前往「设置-服务-文本识别」进行配置");
+                _i18n.GetTranslation("ImageTranslateOcrServiceNotFoundMessage"));
             return default;
         }
 
