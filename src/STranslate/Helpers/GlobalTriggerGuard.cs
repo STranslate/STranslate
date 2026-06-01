@@ -5,6 +5,9 @@ namespace STranslate.Helpers;
 
 public static class GlobalTriggerGuard
 {
+    private static readonly Lock _cacheLock = new();
+    private static HashSet<string>? _excludedProcessCache;
+
     public static bool ShouldSkipGlobalTrigger()
     {
         try
@@ -31,19 +34,32 @@ public static class GlobalTriggerGuard
 
     public static void InvalidateCache()
     {
+        lock (_cacheLock)
+        {
+            _excludedProcessCache = null;
+        }
     }
 
     private static bool IsForegroundProcessExcluded(Settings settings)
     {
-        if (settings.ExcludedGlobalTriggerProcesses.Count == 0)
+        var excludedProcesses = GetExcludedProcesses(settings);
+        if (excludedProcesses.Count == 0)
             return false;
 
         var processName = Win32Helper.GetForegroundProcessName();
         return !string.IsNullOrWhiteSpace(processName) &&
-            settings.ExcludedGlobalTriggerProcesses
+            excludedProcesses.Contains(NormalizeProcessName(processName));
+    }
+
+    private static HashSet<string> GetExcludedProcesses(Settings settings)
+    {
+        lock (_cacheLock)
+        {
+            return _excludedProcessCache ??= settings.ExcludedGlobalTriggerProcesses
                 .Select(NormalizeProcessName)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Contains(NormalizeProcessName(processName), StringComparer.OrdinalIgnoreCase);
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
     }
 
     private static string NormalizeProcessName(string processName)

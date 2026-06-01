@@ -23,21 +23,26 @@ public static class GlobalInputEngine
     private sealed class HoldState
     {
         public required GlobalTriggerBinding Binding { get; init; }
-        public DateTimeOffset PressedAt { get; init; }
-        public DateTimeOffset LastEventAt { get; set; }
         public int ReleaseVersion { get; set; }
         public bool IsPendingRelease { get; set; }
+    }
+
+    private sealed class ModifierTapState
+    {
+        public required ModifierDoubleTapKey ModifierKey { get; init; }
+        public bool IsCleanTap { get; set; }
     }
 
     private static readonly ILogger<HotkeyMapper> _logger = Ioc.Default.GetRequiredService<ILogger<HotkeyMapper>>();
     private static readonly Lock _stateLock = new();
     private static readonly TimeSpan HoldReleaseConfirmationDelay = TimeSpan.FromMilliseconds(80);
     private static readonly TimeSpan HoldPhysicalStateCheckDelay = TimeSpan.FromMilliseconds(20);
-    private static readonly TimeSpan HoldSyntheticReleaseThreshold = TimeSpan.FromMilliseconds(80);
     private static readonly Dictionary<string, GlobalTriggerBinding> _bindings = [];
     private static readonly Dictionary<string, SequenceState> _sequenceStates = [];
     private static readonly HashSet<Key> _pressedKeys = [];
+    private static readonly HashSet<Key> _suppressedChordKeys = [];
     private static readonly Dictionary<string, HoldState> _activeHoldStates = [];
+    private static readonly Dictionary<Key, ModifierTapState> _activeModifierTapStates = [];
     private static readonly Dictionary<ModifierDoubleTapKey, DateTimeOffset> _lastModifierTapAt = [];
     private static UnhookWindowsHookExSafeHandle? _hookHandle;
     private static HOOKPROC? _hookProc;
@@ -59,6 +64,9 @@ public static class GlobalInputEngine
             }
             else
             {
+                if (_bindings.TryGetValue(binding.Id, out var oldBinding))
+                    ClearModifierDoubleTapStateCore(oldBinding);
+
                 _activeHoldStates.Remove(binding.Id);
                 _bindings[binding.Id] = binding;
                 _sequenceStates.Remove(binding.Id);
@@ -94,7 +102,6 @@ public static class GlobalInputEngine
             _bindings.Clear();
             _sequenceStates.Clear();
             _activeHoldStates.Clear();
-            _lastModifierTapAt.Clear();
             ClearPressedKeysCore();
         }
 
@@ -253,17 +260,15 @@ public static class GlobalInputEngine
         var shouldSkip = GlobalTriggerGuard.ShouldSkipGlobalTrigger();
         var shouldSuppress = false;
         var actions = new List<Action>();
-        var immediateActions = new List<Action>();
 
         lock (_stateLock)
         {
             if (isKeyDown)
-                shouldSuppress = HandleKeyDown(key, shouldSkip, actions, immediateActions);
+                shouldSuppress = HandleKeyDown(key, shouldSkip, actions);
             else
                 shouldSuppress = HandleKeyUp(key, shouldSkip, actions);
         }
 
-        DispatchImmediate(immediateActions);
         Dispatch(actions);
 
         return shouldSuppress
@@ -271,17 +276,20 @@ public static class GlobalInputEngine
             : PInvoke.CallNextHookEx(HHOOK.Null, nCode, wParam, lParam);
     }
 
-    private static bool HandleKeyDown(Key key, bool shouldSkip, List<Action> actions, List<Action> immediateActions)
+    private static bool HandleKeyDown(Key key, bool shouldSkip, List<Action> actions)
     {
         var isRepeated = !_pressedKeys.Add(key);
         if (isRepeated)
-            return !shouldSkip && ShouldSuppressRepeatedKey(key);
+            return _suppressedChordKeys.Contains(key) || ShouldSuppressRepeatedKey(key);
 
         if (shouldSkip)
         {
             ResetSequenceStates();
+            ResetModifierTapStates();
             return false;
         }
+
+        TrackModifierTapKeyDown(key);
 
         var shouldSuppress = false;
         var bindings = _bindings.Values.ToList();
@@ -290,14 +298,18 @@ public static class GlobalInputEngine
             switch (binding.Kind)
             {
                 case TriggerKind.Hold:
-                    if (MatchesHold(binding, key, immediateActions))
+                    if (MatchesHold(binding, key, actions))
                         shouldSuppress |= binding.SuppressionMode == SuppressionMode.SuppressWhileHolding;
                     break;
                 case TriggerKind.Chord:
                     if (MatchesChord(binding.Hotkey, key))
                     {
                         QueueAction(binding.OnTriggered, actions);
-                        shouldSuppress |= binding.SuppressionMode == SuppressionMode.SuppressOnMatch;
+                        if (binding.SuppressionMode == SuppressionMode.SuppressOnMatch)
+                        {
+                            _suppressedChordKeys.Add(key);
+                            shouldSuppress = true;
+                        }
                     }
                     break;
                 case TriggerKind.Sequence:
@@ -314,7 +326,7 @@ public static class GlobalInputEngine
     {
         var wasPressed = _pressedKeys.Remove(key);
 
-        var shouldSuppress = false;
+        var shouldSuppress = _suppressedChordKeys.Remove(key);
         var bindings = _bindings.Values.ToList();
 
         foreach (var binding in bindings)
@@ -327,7 +339,9 @@ public static class GlobalInputEngine
             }
         }
 
-        if (!shouldSkip && wasPressed && TryGetModifierDoubleTapKey(key, out var modifierKey))
+        if (!shouldSkip &&
+            wasPressed &&
+            TryGetCleanModifierTap(key, out var modifierKey))
         {
             var modifierBindings = bindings
                 .Where(x => x.Kind == TriggerKind.ModifierDoubleTap && x.ModifierKey == modifierKey)
@@ -401,6 +415,59 @@ public static class GlobalInputEngine
         return true;
     }
 
+    private static void TrackModifierTapKeyDown(Key key)
+    {
+        if (!TryGetModifierDoubleTapKey(key, out var modifierKey))
+        {
+            MarkActiveModifierTapsDirty();
+            _lastModifierTapAt.Clear();
+            return;
+        }
+
+        var hasOtherPressedKey = _pressedKeys.Any(x => x != key);
+        if (hasOtherPressedKey)
+        {
+            MarkActiveModifierTapsDirty();
+            _lastModifierTapAt.Clear();
+        }
+
+        _activeModifierTapStates[key] = new ModifierTapState
+        {
+            ModifierKey = modifierKey,
+            IsCleanTap = !hasOtherPressedKey
+        };
+    }
+
+    private static bool TryGetCleanModifierTap(Key key, out ModifierDoubleTapKey modifierKey)
+    {
+        modifierKey = ModifierDoubleTapKey.None;
+        if (!_activeModifierTapStates.Remove(key, out var state))
+            return false;
+
+        if (!state.IsCleanTap)
+        {
+            _lastModifierTapAt.Remove(state.ModifierKey);
+            return false;
+        }
+
+        modifierKey = state.ModifierKey;
+        return true;
+    }
+
+    private static void MarkActiveModifierTapsDirty()
+    {
+        foreach (var state in _activeModifierTapStates.Values)
+        {
+            state.IsCleanTap = false;
+        }
+    }
+
+    private static void ResetModifierTapStates()
+    {
+        _activeModifierTapStates.Clear();
+        _lastModifierTapAt.Clear();
+    }
+
     private static bool MatchesChord(HotkeyModel hotkey, Key eventKey)
     {
         if (hotkey.CharKey != eventKey)
@@ -432,10 +499,8 @@ public static class GlobalInputEngine
             return false;
         }
 
-        var now = DateTimeOffset.UtcNow;
         if (_activeHoldStates.TryGetValue(binding.Id, out var state))
         {
-            state.LastEventAt = now;
             state.IsPendingRelease = false;
             state.ReleaseVersion++;
             return true;
@@ -443,9 +508,7 @@ public static class GlobalInputEngine
 
         _activeHoldStates[binding.Id] = new HoldState
         {
-            Binding = binding,
-            PressedAt = now,
-            LastEventAt = now
+            Binding = binding
         };
         QueueAction(binding.OnPressed, actions);
         return true;
@@ -490,16 +553,6 @@ public static class GlobalInputEngine
         if (!_activeHoldStates.TryGetValue(binding.Id, out var state))
             return false;
 
-        var now = DateTimeOffset.UtcNow;
-        state.LastEventAt = now;
-
-        if (now - state.PressedAt <= HoldSyntheticReleaseThreshold)
-        {
-            state.IsPendingRelease = false;
-            state.ReleaseVersion++;
-            return true;
-        }
-
         state.IsPendingRelease = true;
         var releaseVersion = ++state.ReleaseVersion;
 
@@ -528,7 +581,6 @@ public static class GlobalInputEngine
                 {
                     state.IsPendingRelease = false;
                     state.ReleaseVersion++;
-                    state.LastEventAt = DateTimeOffset.UtcNow;
                     return;
                 }
 
@@ -548,32 +600,6 @@ public static class GlobalInputEngine
     {
         var virtualKey = KeyInterop.VirtualKeyFromKey(binding.Hotkey.CharKey);
         return virtualKey != 0 && (PInvoke.GetAsyncKeyState(virtualKey) & 0x8000) != 0;
-    }
-
-    private static void DispatchImmediate(List<Action> actions)
-    {
-        if (actions.Count == 0)
-            return;
-
-        var dispatcher = Application.Current?.Dispatcher;
-        foreach (var action in actions)
-        {
-            try
-            {
-                if (dispatcher == null || dispatcher.CheckAccess())
-                {
-                    action();
-                }
-                else
-                {
-                    dispatcher.Invoke(action);
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error executing immediate global trigger action");
-            }
-        }
     }
 
     private static void Dispatch(List<Action> actions)
@@ -655,7 +681,12 @@ public static class GlobalInputEngine
     private static bool IsModifierKey(Key key)
         => key is Key.LeftCtrl or Key.RightCtrl or Key.LeftAlt or Key.RightAlt or Key.LeftShift or Key.RightShift or Key.LWin or Key.RWin;
 
-    private static void ClearPressedKeysCore() => _pressedKeys.Clear();
+    private static void ClearPressedKeysCore()
+    {
+        _pressedKeys.Clear();
+        _suppressedChordKeys.Clear();
+        ResetModifierTapStates();
+    }
 
     private static void RemoveBindingCore(string id)
     {

@@ -11,7 +11,8 @@
   - `LazyInitialize()`：启动时应用 Ctrl+CC、增量翻译键、全局热键注册。
   - `HandleGlobalLogic()`：热键到命令的映射中心。
 - `STranslate/Helpers/HotkeyMapper.cs`
-  - `SetHotkey()`：将常规全局热键注册到自研输入引擎。
+  - `SetGlobalTrigger()`：按 `GlobalHotkey.Kind` 将全局热键注册为常规组合键或修饰键双击。
+  - `SetHotkey()`：将常规全局组合键注册到自研输入引擎。
   - `RegisterHoldKey()`：注册按住键增量翻译。
   - `RegisterSequence()`：注册 `Ctrl+C+C` 等序列触发。
   - `RegisterModifierDoubleTap()`：注册修饰键双击触发。
@@ -33,7 +34,7 @@
 ## 核心流程
 ### 从入口到结果：全局热键触发命令
 1. `HotkeySettings.RegisterHotkeys()` 对每个全局热键调用 `HandleGlobalLogic(propertyName)`。
-2. `HandleGlobalLogic()` 通过 `HotkeyMapper.SetHotkey()` 注册到 `GlobalInputEngine` 并绑定命令回调。
+2. `HandleGlobalLogic()` 通过 `HotkeyMapper.SetGlobalTrigger()` 注册到 `GlobalInputEngine` 并绑定命令回调。
 3. 低级钩子命中规则后先经过 `GlobalTriggerGuard`：
    - `DisableGlobalHotkeys == true` 时禁用。
    - `IgnoreHotkeysOnFullscreen == true` 且前台全屏时跳过。
@@ -95,6 +96,7 @@
 - `HotkeySettings.RegisteredHotkeys`：统一热键定义清单与适用窗口类型。
 - `HotkeyType`：`Global/MainWindow/SettingsWindow/OcrWindow/ImageTransWindow`。
 - `GlobalHotkey.IsConflict`：应用内部规则冲突/不可用状态，不再表示系统注册失败。
+- `GlobalHotkey.Kind` / `GlobalHotkey.ModifierKey`：每个全局热键自己的触发方式，支持常规组合键与修饰键双击。
 - `GlobalTriggerBinding`：自研全局触发规则，支持 `Chord/Sequence/ModifierDoubleTap/Hold`。
 - `SuppressionMode`：命中规则后的吞键策略。
 - 触发策略配置：
@@ -103,7 +105,7 @@
   - `ExcludedGlobalTriggerProcesses`
   - `CrosswordTranslateByCtrlSameC`
   - `IncrementalTranslateKey`
-  - `ModifierDoubleTapKey`、`ModifierDoubleTapAction`
+  - `GlobalHotkey.Kind`、`GlobalHotkey.ModifierKey`
   - `SelectedTextFetchTimeoutMs`
   - `TextSeparatorHandleType`
   - `TextSeparatorHandleScopes`

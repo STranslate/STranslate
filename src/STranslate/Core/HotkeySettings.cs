@@ -418,7 +418,7 @@ public partial class HotkeySettings : ObservableObject
             if (!isGlobalHotkeyChange && !isSoftwareHotkeyChange)
                 return;
             if (!string.IsNullOrEmpty(propertyName))
-                HandleGlobalLogic(propertyName);
+                RegisterHotkeys();
             Save();
         };
     }
