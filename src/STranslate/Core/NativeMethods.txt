@@ -1,6 +1,7 @@
 SetWindowsHookEx
 UnhookWindowsHookEx
 GetKeyState
+GetAsyncKeyState
 CallNextHookEx
 GetModuleHandle
 VIRTUAL_KEY

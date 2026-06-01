@@ -20,12 +20,24 @@ public static class GlobalInputEngine
         public DateTimeOffset Deadline { get; set; }
     }
 
+    private sealed class HoldState
+    {
+        public required GlobalTriggerBinding Binding { get; init; }
+        public DateTimeOffset PressedAt { get; init; }
+        public DateTimeOffset LastEventAt { get; set; }
+        public int ReleaseVersion { get; set; }
+        public bool IsPendingRelease { get; set; }
+    }
+
     private static readonly ILogger<HotkeyMapper> _logger = Ioc.Default.GetRequiredService<ILogger<HotkeyMapper>>();
     private static readonly Lock _stateLock = new();
+    private static readonly TimeSpan HoldReleaseConfirmationDelay = TimeSpan.FromMilliseconds(80);
+    private static readonly TimeSpan HoldPhysicalStateCheckDelay = TimeSpan.FromMilliseconds(20);
+    private static readonly TimeSpan HoldSyntheticReleaseThreshold = TimeSpan.FromMilliseconds(80);
     private static readonly Dictionary<string, GlobalTriggerBinding> _bindings = [];
     private static readonly Dictionary<string, SequenceState> _sequenceStates = [];
     private static readonly HashSet<Key> _pressedKeys = [];
-    private static readonly HashSet<string> _activeHoldBindings = [];
+    private static readonly Dictionary<string, HoldState> _activeHoldStates = [];
     private static readonly Dictionary<ModifierDoubleTapKey, DateTimeOffset> _lastModifierTapAt = [];
     private static UnhookWindowsHookExSafeHandle? _hookHandle;
     private static HOOKPROC? _hookProc;
@@ -47,6 +59,7 @@ public static class GlobalInputEngine
             }
             else
             {
+                _activeHoldStates.Remove(binding.Id);
                 _bindings[binding.Id] = binding;
                 _sequenceStates.Remove(binding.Id);
                 added = true;
@@ -79,7 +92,7 @@ public static class GlobalInputEngine
         {
             _bindings.Clear();
             _sequenceStates.Clear();
-            _activeHoldBindings.Clear();
+            _activeHoldStates.Clear();
             ClearPressedKeysCore();
         }
 
@@ -136,8 +149,14 @@ public static class GlobalInputEngine
         if (left.Kind == TriggerKind.Chord && right.Kind == TriggerKind.Chord)
             return left.Hotkey.Equals(right.Hotkey);
 
-        if (left.Kind == TriggerKind.Hold || right.Kind == TriggerKind.Hold)
+        if (left.Kind == TriggerKind.Hold && right.Kind == TriggerKind.Hold)
             return left.PrimaryKey == right.PrimaryKey;
+
+        if (left.Kind == TriggerKind.Hold && right.Kind == TriggerKind.Chord)
+            return left.PrimaryKey == right.PrimaryKey && HasNoModifiers(right.Hotkey);
+
+        if (left.Kind == TriggerKind.Chord && right.Kind == TriggerKind.Hold)
+            return left.PrimaryKey == right.PrimaryKey && HasNoModifiers(left.Hotkey);
 
         if (left.Kind == TriggerKind.ModifierDoubleTap && right.Kind == TriggerKind.ModifierDoubleTap)
             return left.ModifierKey == right.ModifierKey;
@@ -232,15 +251,17 @@ public static class GlobalInputEngine
         var shouldSkip = GlobalTriggerGuard.ShouldSkipGlobalTrigger();
         var shouldSuppress = false;
         var actions = new List<Action>();
+        var immediateActions = new List<Action>();
 
         lock (_stateLock)
         {
             if (isKeyDown)
-                shouldSuppress = HandleKeyDown(key, shouldSkip, actions);
+                shouldSuppress = HandleKeyDown(key, shouldSkip, actions, immediateActions);
             else
                 shouldSuppress = HandleKeyUp(key, shouldSkip, actions);
         }
 
+        DispatchImmediate(immediateActions);
         Dispatch(actions);
 
         return shouldSuppress
@@ -248,7 +269,7 @@ public static class GlobalInputEngine
             : PInvoke.CallNextHookEx(HHOOK.Null, nCode, wParam, lParam);
     }
 
-    private static bool HandleKeyDown(Key key, bool shouldSkip, List<Action> actions)
+    private static bool HandleKeyDown(Key key, bool shouldSkip, List<Action> actions, List<Action> immediateActions)
     {
         var isRepeated = !_pressedKeys.Add(key);
         if (isRepeated)
@@ -267,12 +288,8 @@ public static class GlobalInputEngine
             switch (binding.Kind)
             {
                 case TriggerKind.Hold:
-                    if (binding.Hotkey.CharKey == key)
-                    {
-                        _activeHoldBindings.Add(binding.Id);
-                        QueueAction(binding.OnPressed, actions);
+                    if (MatchesHold(binding, key, immediateActions))
                         shouldSuppress |= binding.SuppressionMode == SuppressionMode.SuppressWhileHolding;
-                    }
                     break;
                 case TriggerKind.Chord:
                     if (MatchesChord(binding.Hotkey, key))
@@ -301,10 +318,9 @@ public static class GlobalInputEngine
         foreach (var binding in bindings)
         {
             if (binding.Kind == TriggerKind.Hold &&
-                binding.Hotkey.CharKey == key &&
-                _activeHoldBindings.Remove(binding.Id))
+                MatchesHoldKey(binding, key) &&
+                StartHoldReleaseConfirmation(binding))
             {
-                QueueAction(binding.OnReleased, actions);
                 shouldSuppress |= binding.SuppressionMode == SuppressionMode.SuppressWhileHolding;
             }
         }
@@ -396,13 +412,49 @@ public static class GlobalInputEngine
                hotkey.Win == modifiers.Win;
     }
 
+    private static bool MatchesHold(GlobalTriggerBinding binding, Key eventKey, List<Action> actions)
+    {
+        if (!MatchesHoldKey(binding, eventKey))
+            return false;
+
+        var modifiers = ReadModifiers();
+        if (binding.Hotkey.Ctrl != modifiers.Ctrl ||
+            binding.Hotkey.Alt != modifiers.Alt ||
+            binding.Hotkey.Shift != modifiers.Shift ||
+            binding.Hotkey.Win != modifiers.Win)
+        {
+            return false;
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        if (_activeHoldStates.TryGetValue(binding.Id, out var state))
+        {
+            state.LastEventAt = now;
+            state.IsPendingRelease = false;
+            state.ReleaseVersion++;
+            return true;
+        }
+
+        _activeHoldStates[binding.Id] = new HoldState
+        {
+            Binding = binding,
+            PressedAt = now,
+            LastEventAt = now
+        };
+        QueueAction(binding.OnPressed, actions);
+        return true;
+    }
+
+    private static bool MatchesHoldKey(GlobalTriggerBinding binding, Key eventKey)
+        => binding.Hotkey.CharKey == eventKey;
+
     private static bool ShouldSuppressRepeatedKey(Key key)
     {
-        foreach (var binding in _bindings.Values)
+        foreach (var state in _activeHoldStates.Values)
         {
+            var binding = state.Binding;
             if (binding.Kind == TriggerKind.Hold &&
-                binding.Hotkey.CharKey == key &&
-                _activeHoldBindings.Contains(binding.Id) &&
+                MatchesHoldKey(binding, key) &&
                 binding.SuppressionMode == SuppressionMode.SuppressWhileHolding)
             {
                 return true;
@@ -425,6 +477,97 @@ public static class GlobalInputEngine
     {
         if (action != null)
             actions.Add(action);
+    }
+
+    private static bool StartHoldReleaseConfirmation(GlobalTriggerBinding binding)
+    {
+        if (!_activeHoldStates.TryGetValue(binding.Id, out var state))
+            return false;
+
+        var now = DateTimeOffset.UtcNow;
+        state.LastEventAt = now;
+
+        if (now - state.PressedAt <= HoldSyntheticReleaseThreshold)
+        {
+            state.IsPendingRelease = false;
+            state.ReleaseVersion++;
+            return true;
+        }
+
+        state.IsPendingRelease = true;
+        var releaseVersion = ++state.ReleaseVersion;
+
+        _ = ConfirmHoldReleaseAsync(binding.Id, releaseVersion);
+        return true;
+    }
+
+    private static async Task ConfirmHoldReleaseAsync(string id, int releaseVersion)
+    {
+        try
+        {
+            await Task.Delay(HoldReleaseConfirmationDelay);
+            await Task.Delay(HoldPhysicalStateCheckDelay);
+
+            var actions = new List<Action>();
+            lock (_stateLock)
+            {
+                if (!_activeHoldStates.TryGetValue(id, out var state) ||
+                    !state.IsPendingRelease ||
+                    state.ReleaseVersion != releaseVersion)
+                {
+                    return;
+                }
+
+                if (IsHoldPhysicallyDown(state.Binding))
+                {
+                    state.IsPendingRelease = false;
+                    state.ReleaseVersion++;
+                    state.LastEventAt = DateTimeOffset.UtcNow;
+                    return;
+                }
+
+                _activeHoldStates.Remove(id);
+                QueueAction(state.Binding.OnReleased, actions);
+            }
+
+            Dispatch(actions);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error confirming hold trigger release");
+        }
+    }
+
+    private static bool IsHoldPhysicallyDown(GlobalTriggerBinding binding)
+    {
+        var virtualKey = KeyInterop.VirtualKeyFromKey(binding.Hotkey.CharKey);
+        return virtualKey != 0 && (PInvoke.GetAsyncKeyState(virtualKey) & 0x8000) != 0;
+    }
+
+    private static void DispatchImmediate(List<Action> actions)
+    {
+        if (actions.Count == 0)
+            return;
+
+        var dispatcher = Application.Current?.Dispatcher;
+        foreach (var action in actions)
+        {
+            try
+            {
+                if (dispatcher == null || dispatcher.CheckAccess())
+                {
+                    action();
+                }
+                else
+                {
+                    dispatcher.Invoke(action);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error executing immediate global trigger action");
+            }
+        }
     }
 
     private static void Dispatch(List<Action> actions)
@@ -486,6 +629,9 @@ public static class GlobalInputEngine
         };
     }
 
+    private static bool HasNoModifiers(HotkeyModel hotkey)
+        => !hotkey.Ctrl && !hotkey.Alt && !hotkey.Shift && !hotkey.Win;
+
     private static bool MatchesModifier(ModifierDoubleTapKey modifier, Key key) => modifier switch
     {
         ModifierDoubleTapKey.Ctrl => key is Key.LeftCtrl or Key.RightCtrl,
@@ -504,7 +650,7 @@ public static class GlobalInputEngine
     {
         _bindings.Remove(id);
         _sequenceStates.Remove(id);
-        _activeHoldBindings.Remove(id);
+        _activeHoldStates.Remove(id);
 
         if (_bindings.Count == 0)
             ClearPressedKeysCore();

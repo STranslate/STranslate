@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using STranslate.Helpers;
 using STranslate.Resources;
 using STranslate.ViewModels;
@@ -248,11 +249,18 @@ public partial class HotkeySettings : ObservableObject
         }
         else
         {
-            HotkeyMapper.RegisterHoldKey(
+            var registered = HotkeyMapper.RegisterHoldKey(
                 IncrementalTranslateTriggerId,
                 IncrementalTranslateKey,
                 MainWindowViewModel.OnIncKeyPressed,
                 MainWindowViewModel.OnIncKeyReleased);
+
+            if (!registered)
+            {
+                HotkeyMapper.RemoveGlobalTrigger(IncrementalTranslateTriggerId);
+                Ioc.Default.GetRequiredService<ILogger<HotkeySettings>>()
+                    .LogWarning("Failed to register incremental translate hold key: {Key}", IncrementalTranslateKey);
+            }
         }
     }
 
