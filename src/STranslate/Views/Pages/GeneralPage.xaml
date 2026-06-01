@@ -389,6 +389,21 @@
                             OffContent="{DynamicResource Disable}"
                             OnContent="{DynamicResource Enable}" />
                     </ui:SettingsCard>
+
+                    <ui:SettingsCard
+                        Description="{DynamicResource General_ExcludedGlobalTriggerProcessesDescription}"
+                        Header="{DynamicResource General_ExcludedGlobalTriggerProcesses}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Apps_20_Regular}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <TextBox
+                            MinWidth="260"
+                            MaxWidth="420"
+                            MinHeight="72"
+                            AcceptsReturn="True"
+                            Text="{Binding ExcludedGlobalTriggerProcessesText, UpdateSourceTrigger=LostFocus}"
+                            TextWrapping="Wrap" />
+                    </ui:SettingsCard>
                 </control:CardGroup>
 
                 <ui:SettingsExpander Description="{DynamicResource General_AutoTranslateDescription}" Header="{DynamicResource General_AutoTranslate}">

@@ -144,6 +144,26 @@
                             OnContent="{DynamicResource On}" />
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Description="{DynamicResource Hotkey_ModifierDoubleTapDescription}" Header="{DynamicResource Hotkey_ModifierDoubleTap}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Keyboard_20_Regular}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox
+                                MinWidth="120"
+                                DisplayMemberPath="Display"
+                                ItemsSource="{Binding DataProvider.ModifierDoubleTapKeys}"
+                                SelectedValue="{Binding HotkeySettings.ModifierDoubleTapKey}"
+                                SelectedValuePath="Value" />
+                            <ComboBox
+                                MinWidth="170"
+                                DisplayMemberPath="Display"
+                                ItemsSource="{Binding DataProvider.ModifierDoubleTapActions}"
+                                SelectedValue="{Binding HotkeySettings.ModifierDoubleTapAction}"
+                                SelectedValuePath="Value" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
                     <ui:SettingsCard Description="{DynamicResource Hotkey_ReplaceTranslateDescription}" Header="{DynamicResource Hotkey_ReplaceTranslate}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Replay_20_Regular}" />

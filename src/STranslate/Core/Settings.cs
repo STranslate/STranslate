@@ -40,6 +40,8 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial bool IgnoreHotkeysOnFullscreen { get; set; } = false;
 
+    [ObservableProperty] public partial List<string> ExcludedGlobalTriggerProcesses { get; set; } = [];
+
     [ObservableProperty] public partial bool HideNotifyIcon { get; set; } = false;
 
     /// <summary>
@@ -561,6 +563,9 @@ public partial class Settings : ObservableObject
                 break;
             case nameof(IgnoreHotkeysOnFullscreen):
                 Ioc.Default.GetRequiredService<HotkeySettings>().ApplyIgnoreOnFullScreen();
+                break;
+            case nameof(ExcludedGlobalTriggerProcesses):
+                GlobalTriggerGuard.InvalidateCache();
                 break;
             case nameof(LocalDetectorRate):
                 LocalDetectorRate = Math.Round(LocalDetectorRate, 2);

@@ -100,6 +100,25 @@ public partial class GeneralViewModel : SearchViewModelBase
 
     public List<I18nPair> Languages { get; }
 
+    public string ExcludedGlobalTriggerProcessesText
+    {
+        get => string.Join(Environment.NewLine, Settings.ExcludedGlobalTriggerProcesses);
+        set
+        {
+            var processes = value
+                .Split(['\r', '\n', ',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (Settings.ExcludedGlobalTriggerProcesses.SequenceEqual(processes, StringComparer.OrdinalIgnoreCase))
+                return;
+
+            Settings.ExcludedGlobalTriggerProcesses = processes;
+            OnPropertyChanged();
+        }
+    }
+
     public bool IsTextSeparatorMouseHookScopeEnabled
     {
         get => IsTextSeparatorScopeEnabled(TextSeparatorHandleScope.MouseHook);
@@ -154,6 +173,10 @@ public partial class GeneralViewModel : SearchViewModelBase
         if (e.PropertyName == nameof(Settings.TextSeparatorHandleScopes))
         {
             OnTextSeparatorScopePropertiesChanged();
+        }
+        else if (e.PropertyName == nameof(Settings.ExcludedGlobalTriggerProcesses))
+        {
+            OnPropertyChanged(nameof(ExcludedGlobalTriggerProcessesText));
         }
     }
 

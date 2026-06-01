@@ -3,7 +3,6 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="ChefKeys" Version="0.1.2" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageVersion Include="Costura.Fody" Version="6.0.0" />
     <PackageVersion Include="Dapper.Contrib" Version="2.0.78" />
@@ -24,7 +23,6 @@
     <PackageVersion Include="MouseKeyHook" Version="5.7.1" />
     <PackageVersion Include="NAudio" Version="2.2.1" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="NHotkey.Wpf" Version="3.0.0" />
     <PackageVersion Include="ObservableCollections" Version="3.3.4" />
     <PackageVersion Include="PracticalToolkit.WPF" Version="1.0.4" />
     <PackageVersion Include="ScreenGrab" Version="1.0.14" />

@@ -11,12 +11,15 @@
   - `LazyInitialize()`：启动时应用 Ctrl+CC、增量翻译键、全局热键注册。
   - `HandleGlobalLogic()`：热键到命令的映射中心。
 - `STranslate/Helpers/HotkeyMapper.cs`
-  - `SetHotkey()`：NHotkey/ChefKeys 注册。
-  - `StartGlobalKeyboardMonitoring()`：低级键盘钩子（WH_KEYBOARD_LL）。
-  - `RegisterHoldKey()`：按住键增量翻译。
+  - `SetHotkey()`：将常规全局热键注册到自研输入引擎。
+  - `RegisterHoldKey()`：注册按住键增量翻译。
+  - `RegisterSequence()`：注册 `Ctrl+C+C` 等序列触发。
+  - `RegisterModifierDoubleTap()`：注册修饰键双击触发。
   - `IsReservedGlobalHotkey()`：阻止把系统复制热键注册为全局热键。
-- `STranslate/Helpers/CtrlSameCHelper.cs`
-  - 监听 Ctrl+C 双击（500ms 窗口）。
+- `STranslate/Helpers/GlobalInputEngine.cs`
+  - 使用 `WH_KEYBOARD_LL` 统一处理常规全局热键、按住键、序列键与修饰键双击。
+- `STranslate/Helpers/GlobalTriggerGuard.cs`
+  - 统一处理全局禁用、全屏忽略、排除应用进程等过滤策略。
 - `STranslate/Helpers/MouseKeyHelper.cs`
   - 鼠标拖拽结束后读取选中文本并触发事件。
 - `STranslate/Helpers/ClipboardMonitor.cs`
@@ -30,11 +33,13 @@
 ## 核心流程
 ### 从入口到结果：全局热键触发命令
 1. `HotkeySettings.RegisterHotkeys()` 对每个全局热键调用 `HandleGlobalLogic(propertyName)`。
-2. `HandleGlobalLogic()` 通过 `HotkeyMapper.SetHotkey()` 注册系统热键并绑定命令回调。
-3. 回调执行前经 `WithFullscreenCheck()`：
+2. `HandleGlobalLogic()` 通过 `HotkeyMapper.SetHotkey()` 注册到 `GlobalInputEngine` 并绑定命令回调。
+3. 低级钩子命中规则后先经过 `GlobalTriggerGuard`：
    - `DisableGlobalHotkeys == true` 时禁用。
    - `IgnoreHotkeysOnFullscreen == true` 且前台全屏时跳过。
-4. 命令进入 `MainWindowViewModel`（例如截图翻译、图片翻译、静默 OCR、替换翻译、剪贴板监听切换）。
+   - 前台进程在 `ExcludedGlobalTriggerProcesses` 中时跳过。
+4. guard 跳过时直接放行原始输入；允许触发时按规则的 `SuppressionMode` 决定是否吞键。
+5. 命令进入 `MainWindowViewModel`（例如截图翻译、图片翻译、静默 OCR、替换翻译、剪贴板监听切换）。
 
 ### 从入口到结果：输入翻译
 1. 输入翻译全局热键、外部调用 `translate_input`、托盘双击输入翻译、划词失败回退到输入翻译都会进入 `MainWindowViewModel.InputClear()`。
@@ -45,12 +50,12 @@
 
 ### 从入口到结果：增量翻译（按住键）
 1. `IncrementalTranslateKey` 变化触发 `ApplyIncrementalTranslate()`。
-2. 注册 `HotkeyMapper.RegisterHoldKey(key, OnIncKeyPressed, OnIncKeyReleased)` 并开启低级键盘钩子。
+2. 注册 `HotkeyMapper.RegisterHoldKey(id, key, OnIncKeyPressed, OnIncKeyReleased)`。
 3. 按下时 `OnIncKeyPressed()`：置顶窗口 + 开启鼠标划词监听 + 缓存旧文本。
 4. 松开时 `OnIncKeyReleased()`：关闭划词监听，若文本有变化则执行翻译。
 
 ### 从入口到结果：Ctrl+CC、鼠标划词、剪贴板监听
-- Ctrl+CC：`CtrlSameCHelper` 监听全局按键，500ms 内双击 `Ctrl+C` 触发 `CrosswordTranslateByCtrlSameCHandler()`。
+- Ctrl+CC：`GlobalInputEngine` 监听 `Ctrl+C, Ctrl+C` 序列，500ms 内完成时触发 `CrosswordTranslateByCtrlSameCHandler()`，不吞掉复制按键。
 - 鼠标划词：`MouseKeyHelper` 在拖拽完成后读选中文本，触发 `ExecuteTranslate()`。
 - 剪贴板监听：`ClipboardMonitor` 收到 `WM_CLIPBOARDUPDATE` 后读取文本，触发 `OnClipboardTextChanged -> ExecuteTranslate()`。
 
@@ -89,12 +94,16 @@
 ## 关键数据结构/配置
 - `HotkeySettings.RegisteredHotkeys`：统一热键定义清单与适用窗口类型。
 - `HotkeyType`：`Global/MainWindow/SettingsWindow/OcrWindow/ImageTransWindow`。
-- `GlobalHotkey.IsConflict`：注册冲突状态。
+- `GlobalHotkey.IsConflict`：应用内部规则冲突/不可用状态，不再表示系统注册失败。
+- `GlobalTriggerBinding`：自研全局触发规则，支持 `Chord/Sequence/ModifierDoubleTap/Hold`。
+- `SuppressionMode`：命中规则后的吞键策略。
 - 触发策略配置：
   - `DisableGlobalHotkeys`
   - `IgnoreHotkeysOnFullscreen`
+  - `ExcludedGlobalTriggerProcesses`
   - `CrosswordTranslateByCtrlSameC`
   - `IncrementalTranslateKey`
+  - `ModifierDoubleTapKey`、`ModifierDoubleTapAction`
   - `SelectedTextFetchTimeoutMs`
   - `TextSeparatorHandleType`
   - `TextSeparatorHandleScopes`
@@ -107,8 +116,10 @@
 
 ## 关键文件
 - `STranslate/Core/HotkeySettings.cs`
+- `STranslate/Core/GlobalTrigger.cs`
+- `STranslate/Helpers/GlobalInputEngine.cs`
+- `STranslate/Helpers/GlobalTriggerGuard.cs`
 - `STranslate/Helpers/HotkeyMapper.cs`
-- `STranslate/Helpers/CtrlSameCHelper.cs`
 - `STranslate/Helpers/MouseKeyHelper.cs`
 - `STranslate/Helpers/ClipboardMonitor.cs`
 - `STranslate/ViewModels/MainWindowViewModel.cs`
@@ -117,7 +128,7 @@
 ## 常见改动任务
 - 新增全局热键：在 `HotkeySettings` 增加字段、`RegisteredHotkeys` 声明、`HandleGlobalLogic` 映射。
 - 新增软件内热键：在对应窗口 XAML `InputBindings` 绑定 `HotkeySettings` 键值。
-- 解决热键冲突：优先查看 `GlobalHotkey.IsConflict` 与 `HotkeyMapper.SetHotkey` 异常日志。
-- 调整全屏忽略策略：统一改 `HotkeyMapper.ShouldSkipHotkey()` 与 `HotkeySettings.WithFullscreenCheck()`。
+- 解决热键冲突：优先查看 `GlobalHotkey.IsConflict` 与 `GlobalInputEngine.HasConflict()`。
+- 调整全局跳过策略：统一改 `GlobalTriggerGuard.ShouldSkipGlobalTrigger()`。
 - 新增模拟复制类取词入口：必须接入 `SelectedTextFetchTimeoutMs` 并明确 `TextSeparatorHandleScope`，避免新增入口与现有入口处理不一致。
 - 新增输入翻译入口：优先复用 `InputClear()`，确保隐藏输入框时仍会临时显示输入区并正确聚焦。

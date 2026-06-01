@@ -82,6 +82,12 @@ public class ClipboardMonitor(Window window) : IDisposable
     {
         if (msg == PInvoke.WM_CLIPBOARDUPDATE)
         {
+            if (GlobalTriggerGuard.ShouldSkipGlobalTrigger())
+            {
+                handled = true;
+                return nint.Zero;
+            }
+
             _ = Task.Run(async () =>
             {
                 // 延迟确保剪贴板数据已完全写入

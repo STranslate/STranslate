@@ -42,6 +42,8 @@ public class DataProvider
         DropdownDataGeneric<BackupType>.UpdateLabels(BackupTypes);
         DropdownDataGeneric<ImageQuality>.UpdateLabels(ImageQualities);
         DropdownDataGeneric<DoubleClickTrayFunction>.UpdateLabels(DoubleClickTrayFunctions);
+        DropdownDataGeneric<ModifierDoubleTapKey>.UpdateLabels(ModifierDoubleTapKeys);
+        DropdownDataGeneric<ModifierDoubleTapAction>.UpdateLabels(ModifierDoubleTapActions);
         DropdownDataGeneric<PluginMarketCdnSourceType>.UpdateLabels(PluginMarketCdnSources);
         DropdownDataGeneric<PluginDownloadProxyType>.UpdateLabels(PluginDownloadProxies);
     }
@@ -203,6 +205,18 @@ public class DataProvider
     public class DoubleClickTrayFunctionData : DropdownDataGeneric<DoubleClickTrayFunction> { }
     public List<DoubleClickTrayFunctionData> DoubleClickTrayFunctions { get; } =
         DropdownDataGeneric<DoubleClickTrayFunction>.GetValues<DoubleClickTrayFunctionData>("DoubleClickTrayFunction");
+
+    #endregion
+
+    #region ModifierDoubleTap
+
+    public class ModifierDoubleTapKeyData : DropdownDataGeneric<ModifierDoubleTapKey> { }
+    public List<ModifierDoubleTapKeyData> ModifierDoubleTapKeys { get; } =
+        DropdownDataGeneric<ModifierDoubleTapKey>.GetValues<ModifierDoubleTapKeyData>("ModifierDoubleTapKey");
+
+    public class ModifierDoubleTapActionData : DropdownDataGeneric<ModifierDoubleTapAction> { }
+    public List<ModifierDoubleTapActionData> ModifierDoubleTapActions { get; } =
+        DropdownDataGeneric<ModifierDoubleTapAction>.GetValues<ModifierDoubleTapActionData>("ModifierDoubleTapAction");
 
     #endregion
 

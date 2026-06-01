@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using NHotkey.Wpf;
 using STranslate.Helpers;
 using STranslate.Resources;
 using STranslate.ViewModels;
@@ -18,6 +17,14 @@ public partial class HotkeySettings : ObservableObject
     [ObservableProperty] public partial bool CrosswordTranslateByCtrlSameC { get; set; } = false;
 
     [ObservableProperty] public partial Key IncrementalTranslateKey { get; set; } = Key.None;
+
+    [ObservableProperty] public partial ModifierDoubleTapKey ModifierDoubleTapKey { get; set; } = ModifierDoubleTapKey.None;
+
+    [ObservableProperty] public partial ModifierDoubleTapAction ModifierDoubleTapAction { get; set; } = ModifierDoubleTapAction.OpenWindow;
+
+    private const string CtrlSameCTriggerId = "__ctrl_same_c_sequence";
+    private const string IncrementalTranslateTriggerId = "__incremental_translate_hold";
+    private const string ModifierDoubleTapTriggerId = "__modifier_double_tap";
 
     #region Setting Items
 
@@ -152,6 +159,12 @@ public partial class HotkeySettings : ObservableObject
                 ApplyCtrlCc();
                 Save();
             }
+            else if (e.PropertyName == nameof(ModifierDoubleTapKey) ||
+                     e.PropertyName == nameof(ModifierDoubleTapAction))
+            {
+                ApplyModifierDoubleTap();
+                Save();
+            }
         };
 
         // 自动监听所有 GlobalHotkey 类型的属性
@@ -218,11 +231,11 @@ public partial class HotkeySettings : ObservableObject
     {
         MainWindowViewModel = Ioc.Default.GetRequiredService<MainWindowViewModel>();
 
-        ApplyCtrlCc(isInitial: true);
+        ApplyCtrlCc();
         ApplyIncrementalTranslate();
+        ApplyModifierDoubleTap();
 
-        if (!Ioc.Default.GetRequiredService<Settings>().DisableGlobalHotkeys)
-            RegisterHotkeys();
+        RegisterHotkeys();
 
         UpdateTrayIconWithPriority();
     }
@@ -231,41 +244,57 @@ public partial class HotkeySettings : ObservableObject
     {
         if (IncrementalTranslateKey == Key.None)
         {
-            HotkeyMapper.StopGlobalKeyboardMonitoring();
+            HotkeyMapper.RemoveGlobalTrigger(IncrementalTranslateTriggerId);
         }
         else
         {
             HotkeyMapper.RegisterHoldKey(
+                IncrementalTranslateTriggerId,
                 IncrementalTranslateKey,
                 MainWindowViewModel.OnIncKeyPressed,
                 MainWindowViewModel.OnIncKeyReleased);
-            HotkeyMapper.StartGlobalKeyboardMonitoring();
         }
     }
 
-    private void ApplyCtrlCc(bool isInitial = false)
+    private void ApplyCtrlCc()
     {
-        if (isInitial)
-            CtrlSameCHelper.OnCtrlSameC +=
-                MainWindowViewModel.CrosswordTranslateByCtrlSameCHandler;
-
         if (CrosswordTranslateByCtrlSameC)
-            CtrlSameCHelper.Start();
+            HotkeyMapper.RegisterSequence(
+                CtrlSameCTriggerId,
+                [new HotkeyModel("Ctrl + C"), new HotkeyModel("Ctrl + C")],
+                TimeSpan.FromMilliseconds(500),
+                MainWindowViewModel.CrosswordTranslateByCtrlSameCHandler);
         else
-            CtrlSameCHelper.Stop();
+            HotkeyMapper.RemoveGlobalTrigger(CtrlSameCTriggerId);
     }
+
+    private void ApplyModifierDoubleTap()
+    {
+        if (ModifierDoubleTapKey == ModifierDoubleTapKey.None)
+        {
+            HotkeyMapper.RemoveGlobalTrigger(ModifierDoubleTapTriggerId);
+            return;
+        }
+
+        HotkeyMapper.RegisterModifierDoubleTap(
+            ModifierDoubleTapTriggerId,
+            ModifierDoubleTapKey,
+            TimeSpan.FromMilliseconds(350),
+            GetModifierDoubleTapAction());
+    }
+
+    private Action GetModifierDoubleTapAction() => ModifierDoubleTapAction switch
+    {
+        ModifierDoubleTapAction.InputTranslate => () => MainWindowViewModel.InputClearCommand.Execute(WindowActivationMode.Normal),
+        ModifierDoubleTapAction.CrosswordTranslate => () => MainWindowViewModel.CrosswordTranslateCommand.Execute(null),
+        ModifierDoubleTapAction.ScreenshotTranslate => () => MainWindowViewModel.ScreenshotTranslateCommand.Execute(null),
+        ModifierDoubleTapAction.Ocr => () => MainWindowViewModel.OcrCommand.Execute(null),
+        ModifierDoubleTapAction.ClipboardMonitor => () => MainWindowViewModel.ToggleClipboardMonitorCommand.Execute(null),
+        _ => () => MainWindowViewModel.ToggleAppCommand.Execute(null)
+    };
 
     public void ApplyGlobalHotkeys()
     {
-        if (Ioc.Default.GetRequiredService<Settings>().DisableGlobalHotkeys)
-        {
-            UnregisterHotkeys();
-        }
-        else
-        {
-            RegisterHotkeys();
-        }
-
         UpdateTrayIconWithPriority();
     }
 
@@ -328,17 +357,17 @@ public partial class HotkeySettings : ObservableObject
 
     private void UnregisterHotkeys()
     {
-        HotkeyManager.Current.Remove(OpenWindowHotkey.Key);
-        HotkeyManager.Current.Remove(InputTranslateHotkey.Key);
-        HotkeyManager.Current.Remove(CrosswordTranslateHotkey.Key);
-        HotkeyManager.Current.Remove(MouseHookTranslateHotkey.Key);
-        HotkeyManager.Current.Remove(ReplaceTranslateHotkey.Key);
-        HotkeyManager.Current.Remove(ScreenshotTranslateHotkey.Key);
-        HotkeyManager.Current.Remove(ImageTranslateHotkey.Key);
-        HotkeyManager.Current.Remove(SilentOcrHotkey.Key);
-        HotkeyManager.Current.Remove(SilentTtsHotkey.Key);
-        HotkeyManager.Current.Remove(OcrHotkey.Key);
-        HotkeyManager.Current.Remove(ClipboardMonitorHotkey.Key);
+        HotkeyMapper.RemoveGlobalTrigger(nameof(OpenWindowHotkey));
+        HotkeyMapper.RemoveGlobalTrigger(nameof(InputTranslateHotkey));
+        HotkeyMapper.RemoveGlobalTrigger(nameof(CrosswordTranslateHotkey));
+        HotkeyMapper.RemoveGlobalTrigger(nameof(MouseHookTranslateHotkey));
+        HotkeyMapper.RemoveGlobalTrigger(nameof(ReplaceTranslateHotkey));
+        HotkeyMapper.RemoveGlobalTrigger(nameof(ScreenshotTranslateHotkey));
+        HotkeyMapper.RemoveGlobalTrigger(nameof(ImageTranslateHotkey));
+        HotkeyMapper.RemoveGlobalTrigger(nameof(SilentOcrHotkey));
+        HotkeyMapper.RemoveGlobalTrigger(nameof(SilentTtsHotkey));
+        HotkeyMapper.RemoveGlobalTrigger(nameof(OcrHotkey));
+        HotkeyMapper.RemoveGlobalTrigger(nameof(ClipboardMonitorHotkey));
     }
 
     private void HandleGlobalLogic(string? propertyName)
@@ -346,30 +375,30 @@ public partial class HotkeySettings : ObservableObject
         switch (propertyName)
         {
             case nameof(OpenWindowHotkey):
-                OpenWindowHotkey.IsConflict = !HotkeyMapper.SetHotkey(OpenWindowHotkey.Key, WithFullscreenCheck(() => MainWindowViewModel.ToggleAppCommand.Execute(null)));
+                OpenWindowHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(OpenWindowHotkey), OpenWindowHotkey.Key, () => MainWindowViewModel.ToggleAppCommand.Execute(null));
                 break;
             case nameof(InputTranslateHotkey):
-                InputTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(InputTranslateHotkey.Key, WithFullscreenCheck(() => MainWindowViewModel.InputClearCommand.Execute(WindowActivationMode.Normal)));
+                InputTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(InputTranslateHotkey), InputTranslateHotkey.Key, () => MainWindowViewModel.InputClearCommand.Execute(WindowActivationMode.Normal));
                 break;
             case nameof(CrosswordTranslateHotkey):
-                CrosswordTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(CrosswordTranslateHotkey.Key, WithFullscreenCheck(() => MainWindowViewModel.CrosswordTranslateCommand.Execute(null)));
+                CrosswordTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(CrosswordTranslateHotkey), CrosswordTranslateHotkey.Key, () => MainWindowViewModel.CrosswordTranslateCommand.Execute(null));
                 break;
             case nameof(MouseHookTranslateHotkey):
-                MouseHookTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(MouseHookTranslateHotkey.Key, WithFullscreenCheck(() => MainWindowViewModel.ToggleMouseHookTranslateCommand.Execute(null)));
+                MouseHookTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(MouseHookTranslateHotkey), MouseHookTranslateHotkey.Key, () => MainWindowViewModel.ToggleMouseHookTranslateCommand.Execute(null));
                 break;
             case nameof(ScreenshotTranslateHotkey):
-                ScreenshotTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(ScreenshotTranslateHotkey.Key, WithFullscreenCheck(() => MainWindowViewModel.ScreenshotTranslateCommand.Execute(null)));
+                ScreenshotTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(ScreenshotTranslateHotkey), ScreenshotTranslateHotkey.Key, () => MainWindowViewModel.ScreenshotTranslateCommand.Execute(null));
                 break;
             case nameof(ImageTranslateHotkey):
-                ImageTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(ImageTranslateHotkey.Key, WithFullscreenCheck(() => MainWindowViewModel.ImageTranslateCommand.Execute(null)));
+                ImageTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(ImageTranslateHotkey), ImageTranslateHotkey.Key, () => MainWindowViewModel.ImageTranslateCommand.Execute(null));
                 break;
             case nameof(OcrHotkey):
-                OcrHotkey.IsConflict = !HotkeyMapper.SetHotkey(OcrHotkey.Key, WithFullscreenCheck(() => MainWindowViewModel.OcrCommand.Execute(null)));
+                OcrHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(OcrHotkey), OcrHotkey.Key, () => MainWindowViewModel.OcrCommand.Execute(null));
                 break;
 
             // 静默操作
             case nameof(ReplaceTranslateHotkey):
-                ReplaceTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(ReplaceTranslateHotkey.Key, WithFullscreenCheck(() =>
+                ReplaceTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(ReplaceTranslateHotkey), ReplaceTranslateHotkey.Key, () =>
                 {
                     if (MainWindowViewModel.ReplaceTranslateCommand.IsRunning)
                     {
@@ -378,10 +407,10 @@ public partial class HotkeySettings : ObservableObject
                     }
 
                     MainWindowViewModel.ReplaceTranslateCommand.Execute(null);
-                }));
+                });
                 break;
             case nameof(SilentOcrHotkey):
-                SilentOcrHotkey.IsConflict = !HotkeyMapper.SetHotkey(SilentOcrHotkey.Key, WithFullscreenCheck(() =>
+                SilentOcrHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(SilentOcrHotkey), SilentOcrHotkey.Key, () =>
                 {
                     if (MainWindowViewModel.SilentOcrCommand.IsRunning)
                     {
@@ -390,10 +419,10 @@ public partial class HotkeySettings : ObservableObject
                     }
 
                     MainWindowViewModel.SilentOcrCommand.Execute(null);
-                }));
+                });
                 break;
             case nameof(SilentTtsHotkey):
-                SilentTtsHotkey.IsConflict = !HotkeyMapper.SetHotkey(SilentTtsHotkey.Key, WithFullscreenCheck(() =>
+                SilentTtsHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(SilentTtsHotkey), SilentTtsHotkey.Key, () =>
                 {
                     if (MainWindowViewModel.SilentTtsCommand.IsRunning)
                     {
@@ -402,10 +431,10 @@ public partial class HotkeySettings : ObservableObject
                     }
 
                     MainWindowViewModel.SilentTtsCommand.Execute(null);
-                }));
+                });
                 break;
             case nameof(ClipboardMonitorHotkey):
-                ClipboardMonitorHotkey.IsConflict = !HotkeyMapper.SetHotkey(ClipboardMonitorHotkey.Key, WithFullscreenCheck(() => MainWindowViewModel.ToggleClipboardMonitorCommand.Execute(null)));
+                ClipboardMonitorHotkey.IsConflict = !HotkeyMapper.SetHotkey(nameof(ClipboardMonitorHotkey), ClipboardMonitorHotkey.Key, () => MainWindowViewModel.ToggleClipboardMonitorCommand.Execute(null));
                 break;
 
         }
@@ -425,21 +454,6 @@ public partial class HotkeySettings : ObservableObject
             if (!string.IsNullOrEmpty(propertyName))
                 HandleGlobalLogic(propertyName);
             Save();
-        };
-    }
-
-    /// <summary>
-    /// 包装快捷键操作，添加全屏检查
-    /// </summary>
-    private Action WithFullscreenCheck(Action action)
-    {
-        return () =>
-        {
-            if (Ioc.Default.GetRequiredService<Settings>().IgnoreHotkeysOnFullscreen &&
-                Win32Helper.IsForegroundWindowFullscreen())
-                return;
-
-            action();
         };
     }
 

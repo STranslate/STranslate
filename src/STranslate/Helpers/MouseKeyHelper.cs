@@ -78,11 +78,16 @@ public class MouseKeyHelper
     public static bool IsMouseTextSelectionListening => _isMouseListening;
 
     private static void OnDragStarted(object? sender, System.Windows.Forms.MouseEventArgs e)
-        => _oldText = ClipboardHelper.GetText() ?? string.Empty;
+    {
+        if (GlobalTriggerGuard.ShouldSkipGlobalTrigger())
+            return;
+
+        _oldText = ClipboardHelper.GetText() ?? string.Empty;
+    }
 
     private static void OnDragFinished(object? sender, System.Windows.Forms.MouseEventArgs e)
     {
-        if (e.Button == System.Windows.Forms.MouseButtons.Left)
+        if (e.Button == System.Windows.Forms.MouseButtons.Left && !GlobalTriggerGuard.ShouldSkipGlobalTrigger())
         {
             // 异步处理文本获取和事件触发
             _ = Task.Run(async () =>

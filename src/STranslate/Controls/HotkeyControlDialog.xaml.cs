@@ -1,4 +1,3 @@
-using ChefKeys;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using iNKORE.UI.WPF.Modern.Controls;
 using STranslate.Core;
@@ -48,9 +47,6 @@ public partial class HotkeyControlDialog : ContentDialog
         SetKeysToDisplay(_cacheHotkey);
 
         InitializeComponent();
-
-        ChefKeysManager.StartMenuEnableBlocking = true;
-        ChefKeysManager.Start();
     }
 
     private void OnOverwriteClick(object sender, RoutedEventArgs e)
@@ -61,9 +57,6 @@ public partial class HotkeyControlDialog : ContentDialog
 
     private void OnSaveClick(object sender, RoutedEventArgs e)
     {
-        ChefKeysManager.StartMenuEnableBlocking = false;
-        ChefKeysManager.Stop();
-
         // 空热键状态，重定向到删除结果
         if (KeysToDisplay.Count == 1 && KeysToDisplay[0] == EmptyHotkey)
         {
@@ -88,9 +81,6 @@ public partial class HotkeyControlDialog : ContentDialog
 
     private void OnCancelClick(object sender, RoutedEventArgs e)
     {
-        ChefKeysManager.StartMenuEnableBlocking = false;
-        ChefKeysManager.Stop();
-
         ReturnType = HkReturnType.Cancel;
         Hide();
     }
@@ -101,9 +91,6 @@ public partial class HotkeyControlDialog : ContentDialog
 
         //when alt is pressed, the real key should be e.SystemKey
         Key key = e.Key == Key.System ? e.SystemKey : e.Key;
-
-        if (ChefKeysManager.StartMenuBlocked && key.ToString() == ChefKeysManager.StartMenuSimulatedKey)
-            return;
 
         // 单键模式处理
         if (SingleKeyMode)

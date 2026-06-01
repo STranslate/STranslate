@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -141,6 +142,29 @@ public static class Win32Helper
     public static bool IsForegroundWindow(nint handle) => IsForegroundWindow(new HWND(handle));
 
     internal static bool IsForegroundWindow(HWND handle) => handle.Equals(PInvoke.GetForegroundWindow());
+
+    public static string? GetForegroundProcessName()
+    {
+        try
+        {
+            var hwnd = PInvoke.GetForegroundWindow();
+            if (hwnd == HWND.Null)
+                return null;
+
+            PInvoke.GetWindowThreadProcessId(hwnd, out var processId);
+            if (processId == 0)
+                return null;
+
+            using var process = Process.GetProcessById((int)processId);
+            return process.ProcessName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
+                ? process.ProcessName
+                : process.ProcessName + ".exe";
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     #endregion
 
