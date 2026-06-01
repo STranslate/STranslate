@@ -363,7 +363,7 @@ public static class GlobalInputEngine
 
     private static bool HandleSequence(GlobalTriggerBinding binding, Key key, List<Action> actions)
     {
-        if (IsModifierKey(key))
+        if (key.IsModifierDoubleTapKey())
             return false;
 
         var now = DateTimeOffset.UtcNow;
@@ -417,7 +417,7 @@ public static class GlobalInputEngine
 
     private static void TrackModifierTapKeyDown(Key key)
     {
-        if (!TryGetModifierDoubleTapKey(key, out var modifierKey))
+        if (!key.TryGetModifierDoubleTapKey(out var modifierKey))
         {
             MarkActiveModifierTapsDirty();
             _lastModifierTapAt.Clear();
@@ -474,7 +474,7 @@ public static class GlobalInputEngine
             return false;
 
         var modifiers = ReadModifiers();
-        if (IsModifierKey(hotkey.CharKey))
+        if (hotkey.CharKey.IsModifierDoubleTapKey())
         {
             return !HasAdditionalModifier(hotkey.CharKey, modifiers);
         }
@@ -663,23 +663,6 @@ public static class GlobalInputEngine
 
     private static bool HasNoModifiers(HotkeyModel hotkey)
         => !hotkey.Ctrl && !hotkey.Alt && !hotkey.Shift && !hotkey.Win;
-
-    private static bool TryGetModifierDoubleTapKey(Key key, out ModifierDoubleTapKey modifierKey)
-    {
-        modifierKey = key switch
-        {
-            Key.LeftCtrl or Key.RightCtrl => ModifierDoubleTapKey.Ctrl,
-            Key.LeftAlt or Key.RightAlt => ModifierDoubleTapKey.Alt,
-            Key.LeftShift or Key.RightShift => ModifierDoubleTapKey.Shift,
-            Key.LWin or Key.RWin => ModifierDoubleTapKey.Win,
-            _ => ModifierDoubleTapKey.None
-        };
-
-        return modifierKey != ModifierDoubleTapKey.None;
-    }
-
-    private static bool IsModifierKey(Key key)
-        => key is Key.LeftCtrl or Key.RightCtrl or Key.LeftAlt or Key.RightAlt or Key.LeftShift or Key.RightShift or Key.LWin or Key.RWin;
 
     private static void ClearPressedKeysCore()
     {

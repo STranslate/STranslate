@@ -58,6 +58,23 @@ public sealed class GlobalTriggerBinding
 
 public static class ModifierDoubleTapKeyExtensions
 {
+    public static bool TryGetModifierDoubleTapKey(this Key key, out ModifierDoubleTapKey modifierKey)
+    {
+        modifierKey = key switch
+        {
+            Key.LeftCtrl or Key.RightCtrl => ModifierDoubleTapKey.Ctrl,
+            Key.LeftAlt or Key.RightAlt => ModifierDoubleTapKey.Alt,
+            Key.LeftShift or Key.RightShift => ModifierDoubleTapKey.Shift,
+            Key.LWin or Key.RWin => ModifierDoubleTapKey.Win,
+            _ => ModifierDoubleTapKey.None
+        };
+
+        return modifierKey != ModifierDoubleTapKey.None;
+    }
+
+    public static bool IsModifierDoubleTapKey(this Key key)
+        => key.TryGetModifierDoubleTapKey(out _);
+
     public static Key ToRepresentativeKey(this ModifierDoubleTapKey key) => key switch
     {
         ModifierDoubleTapKey.Ctrl => Key.LeftCtrl,

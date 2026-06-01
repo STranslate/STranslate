@@ -29,9 +29,10 @@ public partial class HotkeyControlDialog : ContentDialog
     private TriggerKind _currentKind;
     private HotkeyModel _currentHotkey;
     private ModifierDoubleTapKey _currentModifierKey;
+    private ModifierDoubleTapKey _activeModifierTapKey = ModifierDoubleTapKey.None;
     private ModifierDoubleTapKey _lastModifierTapKey = ModifierDoubleTapKey.None;
     private DateTimeOffset _lastModifierTapAt = DateTimeOffset.MinValue;
-    private bool _nonModifierPressedSinceModifierDown;
+    private bool _isActiveModifierTapClean;
 
     private string DefaultHotkey { get; }
     public string WindowTitle { get; }
@@ -132,20 +133,20 @@ public partial class HotkeyControlDialog : ContentDialog
 
         if (SingleKeyMode)
         {
-            if (IsModifierKey(key))
+            if (key.IsModifierDoubleTapKey())
                 return;
 
             SetChordToDisplay(new HotkeyModel(false, false, false, false, key));
             return;
         }
 
-        if (IsGlobalHotkeyType && IsModifierKey(key))
+        if (IsGlobalHotkeyType && key.TryGetModifierDoubleTapKey(out var modifierKey))
         {
-            _nonModifierPressedSinceModifierDown = false;
+            TrackModifierTapKeyDown(modifierKey);
             return;
         }
 
-        _nonModifierPressedSinceModifierDown = true;
+        InvalidateModifierTapState();
         SetChordToDisplay(BuildChordHotkey(key));
     }
 
@@ -157,16 +158,11 @@ public partial class HotkeyControlDialog : ContentDialog
         e.Handled = true;
 
         var key = NormalizeKey(e);
-        if (!TryGetModifierDoubleTapKey(key, out var modifierKey))
+        if (!key.TryGetModifierDoubleTapKey(out var modifierKey))
             return;
 
-        if (_nonModifierPressedSinceModifierDown)
-        {
-            _lastModifierTapKey = ModifierDoubleTapKey.None;
-            _lastModifierTapAt = DateTimeOffset.MinValue;
-            _nonModifierPressedSinceModifierDown = false;
+        if (!TryConsumeModifierTap(modifierKey))
             return;
-        }
 
         var now = DateTimeOffset.UtcNow;
         if (_lastModifierTapKey == modifierKey && now - _lastModifierTapAt <= ModifierDoubleTapTimeout)
@@ -179,6 +175,44 @@ public partial class HotkeyControlDialog : ContentDialog
 
         _lastModifierTapKey = modifierKey;
         _lastModifierTapAt = now;
+    }
+
+    private void TrackModifierTapKeyDown(ModifierDoubleTapKey modifierKey)
+    {
+        if (_activeModifierTapKey == ModifierDoubleTapKey.None)
+        {
+            _activeModifierTapKey = modifierKey;
+            _isActiveModifierTapClean = !HasAdditionalModifier(modifierKey);
+            if (!_isActiveModifierTapClean)
+            {
+                _lastModifierTapKey = ModifierDoubleTapKey.None;
+                _lastModifierTapAt = DateTimeOffset.MinValue;
+            }
+            return;
+        }
+
+        if (_activeModifierTapKey != modifierKey || HasAdditionalModifier(modifierKey))
+            InvalidateModifierTapState();
+    }
+
+    private bool TryConsumeModifierTap(ModifierDoubleTapKey modifierKey)
+    {
+        var isCleanTap = _activeModifierTapKey == modifierKey && _isActiveModifierTapClean;
+        ResetActiveModifierTapState();
+        return isCleanTap;
+    }
+
+    private void InvalidateModifierTapState()
+    {
+        ResetActiveModifierTapState();
+        _lastModifierTapKey = ModifierDoubleTapKey.None;
+        _lastModifierTapAt = DateTimeOffset.MinValue;
+    }
+
+    private void ResetActiveModifierTapState()
+    {
+        _activeModifierTapKey = ModifierDoubleTapKey.None;
+        _isActiveModifierTapClean = false;
     }
 
     private void SetChordToDisplay(HotkeyModel hotkey)
@@ -323,22 +357,18 @@ public partial class HotkeyControlDialog : ContentDialog
         return e.Key;
     }
 
-    private static bool TryGetModifierDoubleTapKey(Key key, out ModifierDoubleTapKey modifierKey)
+    private static bool HasAdditionalModifier(ModifierDoubleTapKey modifierKey)
     {
-        modifierKey = key switch
+        var modifiers = Keyboard.Modifiers;
+        return modifierKey switch
         {
-            Key.LeftCtrl or Key.RightCtrl => ModifierDoubleTapKey.Ctrl,
-            Key.LeftAlt or Key.RightAlt => ModifierDoubleTapKey.Alt,
-            Key.LeftShift or Key.RightShift => ModifierDoubleTapKey.Shift,
-            Key.LWin or Key.RWin => ModifierDoubleTapKey.Win,
-            _ => ModifierDoubleTapKey.None
+            ModifierDoubleTapKey.Ctrl => (modifiers & ~ModifierKeys.Control) != ModifierKeys.None,
+            ModifierDoubleTapKey.Alt => (modifiers & ~ModifierKeys.Alt) != ModifierKeys.None,
+            ModifierDoubleTapKey.Shift => (modifiers & ~ModifierKeys.Shift) != ModifierKeys.None,
+            ModifierDoubleTapKey.Win => (modifiers & ~ModifierKeys.Windows) != ModifierKeys.None,
+            _ => modifiers != ModifierKeys.None
         };
-
-        return modifierKey != ModifierDoubleTapKey.None;
     }
-
-    private static bool IsModifierKey(Key key)
-        => TryGetModifierDoubleTapKey(key, out _);
 
     private bool IsGlobalHotkeyType => _type == HotkeyType.Global;
 }
