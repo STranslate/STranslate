@@ -96,6 +96,30 @@ public class HotkeyControl : Button
         new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnHotkeyChanged)
     );
 
+    public TriggerKind Kind
+    {
+        get => (TriggerKind)GetValue(KindProperty);
+        set => SetValue(KindProperty, value);
+    }
+    public static readonly DependencyProperty KindProperty = DependencyProperty.Register(
+        nameof(Kind),
+        typeof(TriggerKind),
+        typeof(HotkeyControl),
+        new FrameworkPropertyMetadata(TriggerKind.Chord, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnHotkeyChanged)
+    );
+
+    public ModifierDoubleTapKey ModifierKey
+    {
+        get => (ModifierDoubleTapKey)GetValue(ModifierKeyProperty);
+        set => SetValue(ModifierKeyProperty, value);
+    }
+    public static readonly DependencyProperty ModifierKeyProperty = DependencyProperty.Register(
+        nameof(ModifierKey),
+        typeof(ModifierDoubleTapKey),
+        typeof(HotkeyControl),
+        new FrameworkPropertyMetadata(ModifierDoubleTapKey.None, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnHotkeyChanged)
+    );
+
     public HotkeyType Type
     {
         get => (HotkeyType)GetValue(TypeProperty);
@@ -122,6 +146,13 @@ public class HotkeyControl : Button
 
     private void RefreshHotkeyInterface(string hotkey)
     {
+        if (IsGlobalTriggerControl && Kind == TriggerKind.ModifierDoubleTap)
+        {
+            SetModifierDoubleTapToDisplay(ModifierKey);
+            CurrentHotkey = new HotkeyModel(false, false, false, false, ModifierKey.ToRepresentativeKey());
+            return;
+        }
+
         SetKeysToDisplay(new HotkeyModel(hotkey));
         CurrentHotkey = new HotkeyModel(hotkey);
     }
@@ -141,20 +172,18 @@ public class HotkeyControl : Button
 
     private async Task OpenHotkeyDialogAsync()
     {
-        if (Type == HotkeyType.Global &&
-            !string.IsNullOrEmpty(Hotkey) &&
-            !HotkeyMapper.RemoveHotkey(Hotkey))
-            return;
-
-        var dialog = new HotkeyControlDialog(Type, Hotkey, DefaultHotkey, WindowTitle);
+        var dialog = new HotkeyControlDialog(Type, Kind, Hotkey, ModifierKey, DefaultHotkey, WindowTitle);
         await dialog.ShowAsync();
         switch (dialog.ReturnType)
         {
             case HotkeyControlDialog.HkReturnType.Save:
-                SetHotkey(dialog.ResultValue);
+                if (IsGlobalTriggerControl)
+                    SetGlobalTrigger(dialog.ResultKind, dialog.ResultValue, dialog.ResultModifierKey);
+                else
+                    SetHotkey(dialog.ResultValue);
                 break;
             case HotkeyControlDialog.HkReturnType.Cancel:
-                SetHotkey(Hotkey);
+                RefreshHotkeyInterface(Hotkey);
                 break;
             case HotkeyControlDialog.HkReturnType.Delete:
                 Delete();
@@ -192,10 +221,30 @@ public class HotkeyControl : Button
 
     private void Delete()
     {
-        if (!string.IsNullOrEmpty(Hotkey) && !HotkeyMapper.RemoveHotkey(Hotkey))
-            return;
+        if (IsGlobalTriggerControl)
+        {
+            ModifierKey = ModifierDoubleTapKey.None;
+            Kind = TriggerKind.Chord;
+        }
+
         Hotkey = Constant.EmptyHotkey;
         SetKeysToDisplay(new HotkeyModel(false, false, false, false, Key.None));
+    }
+
+    private void SetGlobalTrigger(TriggerKind kind, string keyStr, ModifierDoubleTapKey modifierKey)
+    {
+        if (kind == TriggerKind.ModifierDoubleTap)
+        {
+            Hotkey = Constant.EmptyHotkey;
+            ModifierKey = modifierKey;
+            Kind = TriggerKind.ModifierDoubleTap;
+            SetModifierDoubleTapToDisplay(modifierKey);
+            return;
+        }
+
+        ModifierKey = ModifierDoubleTapKey.None;
+        Kind = TriggerKind.Chord;
+        SetHotkey(keyStr);
     }
 
     private void SetKeysToDisplay(HotkeyModel? hotkey)
@@ -213,6 +262,22 @@ public class HotkeyControl : Button
             KeysToDisplay.Add(key);
         }
     }
+
+    private void SetModifierDoubleTapToDisplay(ModifierDoubleTapKey modifierKey)
+    {
+        KeysToDisplay.Clear();
+
+        if (modifierKey == ModifierDoubleTapKey.None)
+        {
+            KeysToDisplay.Add(EmptyHotkey);
+            return;
+        }
+
+        KeysToDisplay.Add(_i18n.GetTranslation("Hotkey_DoubleTap"));
+        KeysToDisplay.Add(modifierKey.ToString());
+    }
+
+    private bool IsGlobalTriggerControl => Type == HotkeyType.Global;
 
     public override void OnApplyTemplate()
     {

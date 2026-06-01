@@ -61,6 +61,20 @@ public class HotkeyMapper
         });
     }
 
+    internal static bool SetGlobalTrigger(string id, GlobalHotkey hotkey, Action action)
+    {
+        return hotkey.Kind switch
+        {
+            TriggerKind.ModifierDoubleTap => RegisterModifierDoubleTap(
+                id,
+                hotkey.ModifierKey,
+                TimeSpan.FromMilliseconds(350),
+                action),
+            TriggerKind.Chord => SetHotkey(id, hotkey.Key, action),
+            _ => RemoveGlobalTriggerAndReturnSuccess(id)
+        };
+    }
+
     internal static bool RemoveHotkey(string hotkeyStr)
     {
         try
@@ -76,6 +90,12 @@ public class HotkeyMapper
     }
 
     internal static void RemoveGlobalTrigger(string id) => GlobalInputEngine.Remove(id);
+
+    private static bool RemoveGlobalTriggerAndReturnSuccess(string id)
+    {
+        GlobalInputEngine.Remove(id);
+        return true;
+    }
 
     public static void RegisterHoldKey(Key key, Action onPress, Action onRelease)
         => RegisterHoldKey(IncrementalTranslateTriggerId, key, onPress, onRelease);

@@ -108,6 +108,8 @@
                             DefaultHotkey="{Binding HotkeySettings.OpenWindowHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.OpenWindowHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.OpenWindowHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.OpenWindowHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.OpenWindowHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_OpenSTranslate}" />
                     </ui:SettingsCard>
 
@@ -119,6 +121,8 @@
                             DefaultHotkey="{Binding HotkeySettings.InputTranslateHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.InputTranslateHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.InputTranslateHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.InputTranslateHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.InputTranslateHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_InputTranslate}" />
                     </ui:SettingsCard>
 
@@ -130,6 +134,8 @@
                             DefaultHotkey="{Binding HotkeySettings.CrosswordTranslateHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.CrosswordTranslateHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.CrosswordTranslateHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.CrosswordTranslateHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.CrosswordTranslateHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_CrosswordTranslate}" />
                     </ui:SettingsCard>
 
@@ -144,26 +150,6 @@
                             OnContent="{DynamicResource On}" />
                     </ui:SettingsCard>
 
-                    <ui:SettingsCard Description="{DynamicResource Hotkey_ModifierDoubleTapDescription}" Header="{DynamicResource Hotkey_ModifierDoubleTap}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Keyboard_20_Regular}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <ComboBox
-                                MinWidth="120"
-                                DisplayMemberPath="Display"
-                                ItemsSource="{Binding DataProvider.ModifierDoubleTapKeys}"
-                                SelectedValue="{Binding HotkeySettings.ModifierDoubleTapKey}"
-                                SelectedValuePath="Value" />
-                            <ComboBox
-                                MinWidth="170"
-                                DisplayMemberPath="Display"
-                                ItemsSource="{Binding DataProvider.ModifierDoubleTapActions}"
-                                SelectedValue="{Binding HotkeySettings.ModifierDoubleTapAction}"
-                                SelectedValuePath="Value" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-
                     <ui:SettingsCard Description="{DynamicResource Hotkey_ReplaceTranslateDescription}" Header="{DynamicResource Hotkey_ReplaceTranslate}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Replay_20_Regular}" />
@@ -172,6 +158,8 @@
                             DefaultHotkey="{Binding HotkeySettings.ReplaceTranslateHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.ReplaceTranslateHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.ReplaceTranslateHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.ReplaceTranslateHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.ReplaceTranslateHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_ReplaceTranslate}" />
                     </ui:SettingsCard>
 
@@ -183,6 +171,8 @@
                             DefaultHotkey="{Binding HotkeySettings.ScreenshotTranslateHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.ScreenshotTranslateHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.ScreenshotTranslateHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.ScreenshotTranslateHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.ScreenshotTranslateHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_ScreenshotTranslate}" />
                     </ui:SettingsCard>
 
@@ -194,6 +184,8 @@
                             DefaultHotkey="{Binding HotkeySettings.ImageTranslateHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.ImageTranslateHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.ImageTranslateHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.ImageTranslateHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.ImageTranslateHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_ImageTranslate}" />
                     </ui:SettingsCard>
 
@@ -205,6 +197,8 @@
                             DefaultHotkey="{Binding HotkeySettings.MouseHookTranslateHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.MouseHookTranslateHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.MouseHookTranslateHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.MouseHookTranslateHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.MouseHookTranslateHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_MouseHookTranslate}" />
                     </ui:SettingsCard>
 
@@ -216,6 +210,8 @@
                             DefaultHotkey="{Binding HotkeySettings.SilentOcrHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.SilentOcrHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.SilentOcrHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.SilentOcrHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.SilentOcrHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_SilentOcr}" />
                     </ui:SettingsCard>
 
@@ -227,6 +223,8 @@
                             DefaultHotkey="{Binding HotkeySettings.SilentTtsHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.SilentTtsHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.SilentTtsHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.SilentTtsHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.SilentTtsHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_SilentTts}" />
                     </ui:SettingsCard>
 
@@ -238,6 +236,8 @@
                             DefaultHotkey="{Binding HotkeySettings.OcrHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.OcrHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.OcrHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.OcrHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.OcrHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_Ocr}" />
                     </ui:SettingsCard>
 
@@ -249,6 +249,8 @@
                             DefaultHotkey="{Binding HotkeySettings.ClipboardMonitorHotkey.Default}"
                             Hotkey="{Binding HotkeySettings.ClipboardMonitorHotkey.Key}"
                             IsRegistered="{Binding HotkeySettings.ClipboardMonitorHotkey.IsConflict}"
+                            Kind="{Binding HotkeySettings.ClipboardMonitorHotkey.Kind}"
+                            ModifierKey="{Binding HotkeySettings.ClipboardMonitorHotkey.ModifierKey}"
                             WindowTitle="{DynamicResource Hotkey_ClipboardMonitor}" />
                     </ui:SettingsCard>
                 </control:CardGroup>

@@ -62,6 +62,7 @@ public static class GlobalInputEngine
                 _activeHoldStates.Remove(binding.Id);
                 _bindings[binding.Id] = binding;
                 _sequenceStates.Remove(binding.Id);
+                ClearModifierDoubleTapStateCore(binding);
                 added = true;
             }
         }
@@ -93,6 +94,7 @@ public static class GlobalInputEngine
             _bindings.Clear();
             _sequenceStates.Clear();
             _activeHoldStates.Clear();
+            _lastModifierTapAt.Clear();
             ClearPressedKeysCore();
         }
 
@@ -310,7 +312,7 @@ public static class GlobalInputEngine
 
     private static bool HandleKeyUp(Key key, bool shouldSkip, List<Action> actions)
     {
-        _pressedKeys.Remove(key);
+        var wasPressed = _pressedKeys.Remove(key);
 
         var shouldSuppress = false;
         var bindings = _bindings.Values.ToList();
@@ -325,13 +327,18 @@ public static class GlobalInputEngine
             }
         }
 
-        if (!shouldSkip)
+        if (!shouldSkip && wasPressed && TryGetModifierDoubleTapKey(key, out var modifierKey))
         {
-            foreach (var binding in bindings.Where(x => x.Kind == TriggerKind.ModifierDoubleTap))
+            var modifierBindings = bindings
+                .Where(x => x.Kind == TriggerKind.ModifierDoubleTap && x.ModifierKey == modifierKey)
+                .ToList();
+
+            if (modifierBindings.Count > 0 &&
+                HandleModifierDoubleTap(modifierKey, modifierBindings[0].Timeout))
             {
-                if (MatchesModifier(binding.ModifierKey, key) &&
-                    HandleModifierDoubleTap(binding, actions))
+                foreach (var binding in modifierBindings)
                 {
+                    QueueAction(binding.OnTriggered, actions);
                     shouldSuppress |= binding.SuppressionMode == SuppressionMode.SuppressOnMatch;
                 }
             }
@@ -381,17 +388,16 @@ public static class GlobalInputEngine
         return false;
     }
 
-    private static bool HandleModifierDoubleTap(GlobalTriggerBinding binding, List<Action> actions)
+    private static bool HandleModifierDoubleTap(ModifierDoubleTapKey modifierKey, TimeSpan timeout)
     {
         var now = DateTimeOffset.UtcNow;
-        _lastModifierTapAt.TryGetValue(binding.ModifierKey, out var lastTapAt);
-        _lastModifierTapAt[binding.ModifierKey] = now;
+        _lastModifierTapAt.TryGetValue(modifierKey, out var lastTapAt);
+        _lastModifierTapAt[modifierKey] = now;
 
-        if (lastTapAt == DateTimeOffset.MinValue || now - lastTapAt > binding.Timeout)
+        if (lastTapAt == DateTimeOffset.MinValue || now - lastTapAt > timeout)
             return false;
 
-        _lastModifierTapAt[binding.ModifierKey] = DateTimeOffset.MinValue;
-        QueueAction(binding.OnTriggered, actions);
+        _lastModifierTapAt[modifierKey] = DateTimeOffset.MinValue;
         return true;
     }
 
@@ -632,14 +638,19 @@ public static class GlobalInputEngine
     private static bool HasNoModifiers(HotkeyModel hotkey)
         => !hotkey.Ctrl && !hotkey.Alt && !hotkey.Shift && !hotkey.Win;
 
-    private static bool MatchesModifier(ModifierDoubleTapKey modifier, Key key) => modifier switch
+    private static bool TryGetModifierDoubleTapKey(Key key, out ModifierDoubleTapKey modifierKey)
     {
-        ModifierDoubleTapKey.Ctrl => key is Key.LeftCtrl or Key.RightCtrl,
-        ModifierDoubleTapKey.Alt => key is Key.LeftAlt or Key.RightAlt,
-        ModifierDoubleTapKey.Shift => key is Key.LeftShift or Key.RightShift,
-        ModifierDoubleTapKey.Win => key is Key.LWin or Key.RWin,
-        _ => false
-    };
+        modifierKey = key switch
+        {
+            Key.LeftCtrl or Key.RightCtrl => ModifierDoubleTapKey.Ctrl,
+            Key.LeftAlt or Key.RightAlt => ModifierDoubleTapKey.Alt,
+            Key.LeftShift or Key.RightShift => ModifierDoubleTapKey.Shift,
+            Key.LWin or Key.RWin => ModifierDoubleTapKey.Win,
+            _ => ModifierDoubleTapKey.None
+        };
+
+        return modifierKey != ModifierDoubleTapKey.None;
+    }
 
     private static bool IsModifierKey(Key key)
         => key is Key.LeftCtrl or Key.RightCtrl or Key.LeftAlt or Key.RightAlt or Key.LeftShift or Key.RightShift or Key.LWin or Key.RWin;
@@ -648,11 +659,19 @@ public static class GlobalInputEngine
 
     private static void RemoveBindingCore(string id)
     {
-        _bindings.Remove(id);
+        if (_bindings.Remove(id, out var removedBinding))
+            ClearModifierDoubleTapStateCore(removedBinding);
+
         _sequenceStates.Remove(id);
         _activeHoldStates.Remove(id);
 
         if (_bindings.Count == 0)
             ClearPressedKeysCore();
+    }
+
+    private static void ClearModifierDoubleTapStateCore(GlobalTriggerBinding binding)
+    {
+        if (binding.Kind == TriggerKind.ModifierDoubleTap)
+            _lastModifierTapAt.Remove(binding.ModifierKey);
     }
 }

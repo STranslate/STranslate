@@ -17,23 +17,53 @@ public partial class HotkeyControlDialog : ContentDialog
         Cancel
     }
 
+    private static readonly TimeSpan ModifierDoubleTapTimeout = TimeSpan.FromMilliseconds(350);
+
     private readonly HotkeyType _type;
     private readonly Internationalization _i18n;
     private readonly HotkeySettings _hotkeySettings;
+    private readonly TriggerKind _cacheKind;
     private readonly HotkeyModel _cacheHotkey;
+    private readonly ModifierDoubleTapKey _cacheModifierKey;
     private Action? _overwriteOtherHotkey;
+    private TriggerKind _currentKind;
+    private HotkeyModel _currentHotkey;
+    private ModifierDoubleTapKey _currentModifierKey;
+    private ModifierDoubleTapKey _lastModifierTapKey = ModifierDoubleTapKey.None;
+    private DateTimeOffset _lastModifierTapAt = DateTimeOffset.MinValue;
+    private bool _nonModifierPressedSinceModifierDown;
 
     private string DefaultHotkey { get; }
     public string WindowTitle { get; }
     public bool SingleKeyMode { get; }
     public ObservableCollection<string> KeysToDisplay { get; } = [];
     public HkReturnType ReturnType { get; private set; } = HkReturnType.Cancel;
+    public TriggerKind ResultKind { get; private set; } = TriggerKind.Chord;
     public string ResultValue { get; private set; } = string.Empty;
+    public ModifierDoubleTapKey ResultModifierKey { get; private set; } = ModifierDoubleTapKey.None;
     public string EmptyHotkey => _i18n.GetTranslation("None");
 
     public HotkeyControlDialog(HotkeyType type, string hotkey, string defaultHotkey, string windowTitle = "", bool singleKeyMode = false)
+        : this(type, TriggerKind.Chord, hotkey, ModifierDoubleTapKey.None, defaultHotkey, windowTitle, singleKeyMode)
+    {
+    }
+
+    public HotkeyControlDialog(
+        HotkeyType type,
+        TriggerKind kind,
+        string hotkey,
+        ModifierDoubleTapKey modifierKey,
+        string defaultHotkey,
+        string windowTitle = "",
+        bool singleKeyMode = false)
     {
         _type = type;
+        _cacheKind = kind;
+        _cacheHotkey = new HotkeyModel(hotkey);
+        _cacheModifierKey = modifierKey;
+        _currentKind = kind;
+        _currentHotkey = _cacheHotkey;
+        _currentModifierKey = modifierKey;
         SingleKeyMode = singleKeyMode;
         _i18n = Ioc.Default.GetRequiredService<Internationalization>();
         _hotkeySettings = Ioc.Default.GetRequiredService<HotkeySettings>();
@@ -43,8 +73,8 @@ public partial class HotkeyControlDialog : ContentDialog
             _ => windowTitle
         };
         DefaultHotkey = defaultHotkey;
-        _cacheHotkey = new HotkeyModel(hotkey);
-        SetKeysToDisplay(_cacheHotkey);
+
+        SetKeysToDisplay(kind, _cacheHotkey, modifierKey);
 
         InitializeComponent();
     }
@@ -57,23 +87,32 @@ public partial class HotkeyControlDialog : ContentDialog
 
     private void OnSaveClick(object sender, RoutedEventArgs e)
     {
-        // 空热键状态，重定向到删除结果
         if (KeysToDisplay.Count == 1 && KeysToDisplay[0] == EmptyHotkey)
         {
             ReturnType = HkReturnType.Delete;
             Hide();
             return;
         }
+
         ReturnType = HkReturnType.Save;
-        ResultValue = string.Join("+", KeysToDisplay);
+        ResultKind = _currentKind;
+        ResultModifierKey = _currentKind == TriggerKind.ModifierDoubleTap
+            ? _currentModifierKey
+            : ModifierDoubleTapKey.None;
+        ResultValue = _currentKind == TriggerKind.ModifierDoubleTap
+            ? Constant.EmptyHotkey
+            : _currentHotkey.ToString();
         Hide();
     }
 
     private void OnResetClick(object sender, RoutedEventArgs e)
-        => SetKeysToDisplay(new HotkeyModel(DefaultHotkey));
+        => SetChordToDisplay(new HotkeyModel(DefaultHotkey));
 
     private void OnDeleteClick(object sender, RoutedEventArgs e)
     {
+        _currentKind = TriggerKind.Chord;
+        _currentHotkey = new HotkeyModel(Constant.EmptyHotkey);
+        _currentModifierKey = ModifierDoubleTapKey.None;
         KeysToDisplay.Clear();
         KeysToDisplay.Add(EmptyHotkey);
         ResetUI();
@@ -89,70 +128,132 @@ public partial class HotkeyControlDialog : ContentDialog
     {
         e.Handled = true;
 
-        //when alt is pressed, the real key should be e.SystemKey
-        Key key = e.Key == Key.System ? e.SystemKey : e.Key;
+        var key = NormalizeKey(e);
 
-        // 单键模式处理
         if (SingleKeyMode)
         {
-            // 忽略修饰键本身
-            if (key == Key.LeftCtrl || key == Key.RightCtrl ||
-                key == Key.LeftAlt || key == Key.RightAlt ||
-                key == Key.LeftShift || key == Key.RightShift ||
-                key == Key.LWin || key == Key.RWin)
+            if (IsModifierKey(key))
+                return;
+
+            SetChordToDisplay(new HotkeyModel(false, false, false, false, key));
+            return;
+        }
+
+        if (IsGlobalHotkeyType && IsModifierKey(key))
+        {
+            _nonModifierPressedSinceModifierDown = false;
+            return;
+        }
+
+        _nonModifierPressedSinceModifierDown = true;
+        SetChordToDisplay(BuildChordHotkey(key));
+    }
+
+    private void OnPreviewKeyUp(object sender, KeyEventArgs e)
+    {
+        if (!IsGlobalHotkeyType || SingleKeyMode)
+            return;
+
+        e.Handled = true;
+
+        var key = NormalizeKey(e);
+        if (!TryGetModifierDoubleTapKey(key, out var modifierKey))
+            return;
+
+        if (_nonModifierPressedSinceModifierDown)
+        {
+            _lastModifierTapKey = ModifierDoubleTapKey.None;
+            _lastModifierTapAt = DateTimeOffset.MinValue;
+            _nonModifierPressedSinceModifierDown = false;
+            return;
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        if (_lastModifierTapKey == modifierKey && now - _lastModifierTapAt <= ModifierDoubleTapTimeout)
+        {
+            _lastModifierTapKey = ModifierDoubleTapKey.None;
+            _lastModifierTapAt = DateTimeOffset.MinValue;
+            SetModifierDoubleTapToDisplay(modifierKey);
+            return;
+        }
+
+        _lastModifierTapKey = modifierKey;
+        _lastModifierTapAt = now;
+    }
+
+    private void SetChordToDisplay(HotkeyModel hotkey)
+        => SetKeysToDisplay(TriggerKind.Chord, hotkey, ModifierDoubleTapKey.None);
+
+    private void SetModifierDoubleTapToDisplay(ModifierDoubleTapKey modifierKey)
+        => SetKeysToDisplay(TriggerKind.ModifierDoubleTap, default, modifierKey);
+
+    private void SetKeysToDisplay(TriggerKind kind, HotkeyModel hotkey, ModifierDoubleTapKey modifierKey)
+    {
+        _overwriteOtherHotkey = null;
+        _currentKind = kind;
+        _currentHotkey = hotkey;
+        _currentModifierKey = modifierKey;
+        KeysToDisplay.Clear();
+        if (PART_InfoBar != null)
+            ResetUI();
+
+        if (kind == TriggerKind.ModifierDoubleTap)
+        {
+            if (modifierKey == ModifierDoubleTapKey.None)
             {
+                KeysToDisplay.Add(EmptyHotkey);
                 return;
             }
 
-            // 创建不带修饰键的单键模型
-            var singleHotkeyModel = new HotkeyModel(false, false, false, false, key);
-            SetKeysToDisplay(singleHotkeyModel);
-            return;
+            KeysToDisplay.Add(_i18n.GetTranslation("Hotkey_DoubleTap"));
+            KeysToDisplay.Add(modifierKey.ToString());
         }
-
-        // 原有的组合键处理逻辑
-        SpecialKeyState specialKeyState = HotkeyMapper.CheckModifiers();
-
-        var hotkeyModel = new HotkeyModel(
-            specialKeyState.AltPressed,
-            specialKeyState.ShiftPressed,
-            specialKeyState.WinPressed,
-            specialKeyState.CtrlPressed,
-            key);
-
-        SetKeysToDisplay(hotkeyModel);
-    }
-
-    private void SetKeysToDisplay(HotkeyModel? hotkey)
-    {
-        _overwriteOtherHotkey = null;
-        KeysToDisplay.Clear();
-
-        if (hotkey == null || hotkey == default(HotkeyModel) || hotkey.Value.ToString() == Constant.EmptyHotkey)
+        else
         {
-            KeysToDisplay.Add(EmptyHotkey);
-            return;
-        }
+            if (hotkey == default(HotkeyModel) || hotkey.ToString() == Constant.EmptyHotkey)
+            {
+                KeysToDisplay.Add(EmptyHotkey);
+                return;
+            }
 
-        foreach (var key in hotkey.Value.EnumerateDisplayKeys()!)
-        {
-            KeysToDisplay.Add(key);
+            foreach (var key in hotkey.EnumerateDisplayKeys())
+            {
+                KeysToDisplay.Add(key);
+            }
         }
 
         if (PART_InfoBar == null)
             return;
 
-        UpdateUI(hotkey.Value);
+        UpdateUI();
     }
 
-    private void UpdateUI(HotkeyModel hotkey)
+    private void UpdateUI()
     {
         ResetUI();
 
-        if (_type.HasFlag(HotkeyType.Global) &&
-            HotkeyMapper.TryGetReservedGlobalHotkeyMessageKey(hotkey, out var resourceKey))
+        if (_currentKind == TriggerKind.Chord)
         {
-            PART_InfoBar.Message = _i18n.GetTranslation(resourceKey);
+            if (_type.HasFlag(HotkeyType.Global) &&
+                HotkeyMapper.TryGetReservedGlobalHotkeyMessageKey(_currentHotkey, out var resourceKey))
+            {
+                PART_InfoBar.Message = _i18n.GetTranslation(resourceKey);
+                PART_InfoBar.Visibility = Visibility.Visible;
+                SaveBtn.IsEnabled = false;
+                return;
+            }
+
+            if (!CheckHotkeyAvailability(_currentHotkey, !SingleKeyMode))
+            {
+                PART_InfoBar.Message = _i18n.GetTranslation("HotkeyUnavailable");
+                PART_InfoBar.Visibility = Visibility.Visible;
+                SaveBtn.IsEnabled = false;
+                return;
+            }
+        }
+        else if (_currentModifierKey == ModifierDoubleTapKey.None)
+        {
+            PART_InfoBar.Message = _i18n.GetTranslation("HotkeyUnavailable");
             PART_InfoBar.Visibility = Visibility.Visible;
             SaveBtn.IsEnabled = false;
             return;
@@ -160,32 +261,26 @@ public partial class HotkeyControlDialog : ContentDialog
 
         var registeredHotkey = _hotkeySettings.RegisteredHotkeys
             .Where(x => x.Type.HasFlag(_type) || _type.HasFlag(x.Type))
-            .Where(x => x.Hotkey != _cacheHotkey.ToString())
-            .FirstOrDefault(x => x.Hotkey == hotkey.ToString());
-        if (registeredHotkey != null)
+            .Where(x => !x.Matches(_cacheKind, _cacheHotkey.ToString(), _cacheModifierKey))
+            .FirstOrDefault(x => x.Matches(_currentKind, _currentHotkey.ToString(), _currentModifierKey));
+        if (registeredHotkey == null)
+            return;
+
+        PART_InfoBar.Visibility = Visibility.Visible;
+        if (registeredHotkey.OnRemovedHotkey != null)
         {
-            PART_InfoBar.Visibility = Visibility.Visible;
-            if (registeredHotkey.OnRemovedHotkey != null)
-            {
-                PART_InfoBar.Message = string.Format(_i18n.GetTranslation("HotkeyUnavailableEditable"), _i18n.GetTranslation(registeredHotkey.ResourceKey));
-                SaveBtn.IsEnabled = false;
-                SaveBtn.Visibility = Visibility.Collapsed;
-                OverwriteBtn.Visibility = Visibility.Visible;
-                _overwriteOtherHotkey = registeredHotkey.OnRemovedHotkey;
-            }
-            else
-            {
-                PART_InfoBar.Message = string.Format(_i18n.GetTranslation("HotkeyUnavailableUneditable"), _i18n.GetTranslation(registeredHotkey.ResourceKey));
-                SaveBtn.IsEnabled = false;
-                SaveBtn.Visibility = Visibility.Visible;
-                OverwriteBtn.Visibility = Visibility.Collapsed;
-            }
-        }
-        else if (!CheckHotkeyAvailability(hotkey, !SingleKeyMode)) // 单键模式下不验证 KeyGesture
-        {
-            PART_InfoBar.Message = _i18n.GetTranslation("HotkeyUnavailable");
-            PART_InfoBar.Visibility = Visibility.Visible;
+            PART_InfoBar.Message = string.Format(_i18n.GetTranslation("HotkeyUnavailableEditable"), _i18n.GetTranslation(registeredHotkey.ResourceKey));
             SaveBtn.IsEnabled = false;
+            SaveBtn.Visibility = Visibility.Collapsed;
+            OverwriteBtn.Visibility = Visibility.Visible;
+            _overwriteOtherHotkey = registeredHotkey.OnRemovedHotkey;
+        }
+        else
+        {
+            PART_InfoBar.Message = string.Format(_i18n.GetTranslation("HotkeyUnavailableUneditable"), _i18n.GetTranslation(registeredHotkey.ResourceKey));
+            SaveBtn.IsEnabled = false;
+            SaveBtn.Visibility = Visibility.Visible;
+            OverwriteBtn.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -205,4 +300,45 @@ public partial class HotkeyControlDialog : ContentDialog
         return hotkey.ToString() is "LWin" or "RWin" ||
                (hotkey.Validate(validateKeyGesture) && HotkeyMapper.CheckAvailability(hotkey));
     }
+
+    private static HotkeyModel BuildChordHotkey(Key key)
+    {
+        var specialKeyState = HotkeyMapper.CheckModifiers();
+        return new HotkeyModel(
+            specialKeyState.AltPressed,
+            specialKeyState.ShiftPressed,
+            specialKeyState.WinPressed,
+            specialKeyState.CtrlPressed,
+            key);
+    }
+
+    private static Key NormalizeKey(KeyEventArgs e)
+    {
+        if (e.Key == Key.System && e.SystemKey != Key.None)
+            return e.SystemKey;
+
+        if (e.Key == Key.ImeProcessed && e.ImeProcessedKey != Key.None)
+            return e.ImeProcessedKey;
+
+        return e.Key;
+    }
+
+    private static bool TryGetModifierDoubleTapKey(Key key, out ModifierDoubleTapKey modifierKey)
+    {
+        modifierKey = key switch
+        {
+            Key.LeftCtrl or Key.RightCtrl => ModifierDoubleTapKey.Ctrl,
+            Key.LeftAlt or Key.RightAlt => ModifierDoubleTapKey.Alt,
+            Key.LeftShift or Key.RightShift => ModifierDoubleTapKey.Shift,
+            Key.LWin or Key.RWin => ModifierDoubleTapKey.Win,
+            _ => ModifierDoubleTapKey.None
+        };
+
+        return modifierKey != ModifierDoubleTapKey.None;
+    }
+
+    private static bool IsModifierKey(Key key)
+        => TryGetModifierDoubleTapKey(key, out _);
+
+    private bool IsGlobalHotkeyType => _type == HotkeyType.Global;
 }

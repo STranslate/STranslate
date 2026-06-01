@@ -17,6 +17,7 @@
     DataContext="{Binding RelativeSource={RelativeSource Self}}"
     InputMethod.IsInputMethodEnabled="False"
     PreviewKeyDown="OnPreviewKeyDown"
+    PreviewKeyUp="OnPreviewKeyUp"
     Style="{DynamicResource DefaultContentDialogStyle}"
     mc:Ignorable="d">
 

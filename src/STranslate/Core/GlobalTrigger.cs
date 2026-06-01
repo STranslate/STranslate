@@ -26,16 +26,6 @@ public enum ModifierDoubleTapKey
     Win
 }
 
-public enum ModifierDoubleTapAction
-{
-    OpenWindow,
-    InputTranslate,
-    CrosswordTranslate,
-    ScreenshotTranslate,
-    Ocr,
-    ClipboardMonitor
-}
-
 public sealed class GlobalTriggerBinding
 {
     public string Id { get; init; } = string.Empty;
