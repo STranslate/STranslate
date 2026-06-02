@@ -133,9 +133,6 @@ public partial class HotkeyControlDialog : ContentDialog
 
         if (SingleKeyMode)
         {
-            if (key.IsModifierDoubleTapKey())
-                return;
-
             SetChordToDisplay(new HotkeyModel(false, false, false, false, key));
             return;
         }
@@ -143,6 +140,7 @@ public partial class HotkeyControlDialog : ContentDialog
         if (IsGlobalHotkeyType && key.TryGetModifierDoubleTapKey(out var modifierKey))
         {
             TrackModifierTapKeyDown(modifierKey);
+            SetChordToDisplay(new HotkeyModel(false, false, false, false, key));
             return;
         }
 
