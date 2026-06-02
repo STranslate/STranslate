@@ -61,7 +61,12 @@ public class HotkeyMapper
         });
     }
 
-    internal static bool SetGlobalTrigger(string id, GlobalHotkey hotkey, Action action)
+    internal static bool SetGlobalTrigger(
+        string id,
+        GlobalHotkey hotkey,
+        Action action,
+        Action? onPressed = null,
+        Action? onReleased = null)
     {
         return hotkey.Kind switch
         {
@@ -70,6 +75,16 @@ public class HotkeyMapper
                 hotkey.ModifierKey,
                 TimeSpan.FromMilliseconds(350),
                 action),
+            TriggerKind.Sequence => RegisterSequence(
+                id,
+                hotkey.Sequence.Select(x => new HotkeyModel(x)).ToList(),
+                TimeSpan.FromMilliseconds(500),
+                action),
+            TriggerKind.Hold => RegisterHoldKey(
+                id,
+                hotkey.Key,
+                onPressed ?? action,
+                onReleased),
             TriggerKind.Chord => SetHotkey(id, hotkey.Key, action),
             _ => RemoveGlobalTriggerAndReturnSuccess(id)
         };
@@ -100,19 +115,25 @@ public class HotkeyMapper
     public static void RegisterHoldKey(Key key, Action onPress, Action onRelease)
         => RegisterHoldKey(IncrementalTranslateTriggerId, key, onPress, onRelease);
 
-    public static bool RegisterHoldKey(string id, Key key, Action onPress, Action onRelease)
+    public static bool RegisterHoldKey(string id, Key key, Action? onPress, Action? onRelease)
+        => RegisterHoldKey(id, new HotkeyModel(false, false, false, false, key), onPress, onRelease);
+
+    public static bool RegisterHoldKey(string id, string hotkeyStr, Action? onPress, Action? onRelease)
+        => RegisterHoldKey(id, new HotkeyModel(hotkeyStr), onPress, onRelease);
+
+    private static bool RegisterHoldKey(string id, HotkeyModel hotkey, Action? onPress, Action? onRelease)
     {
-        if (key == Key.None)
+        if (!CheckHoldAvailability(hotkey))
         {
             GlobalInputEngine.Remove(id);
-            return true;
+            return hotkey.CharKey == Key.None;
         }
 
         return GlobalInputEngine.AddOrReplace(new GlobalTriggerBinding
         {
             Id = id,
             Kind = TriggerKind.Hold,
-            Hotkey = new HotkeyModel(false, false, false, false, key),
+            Hotkey = hotkey,
             SuppressionMode = SuppressionMode.SuppressWhileHolding,
             OnPressed = onPress,
             OnReleased = onRelease
@@ -130,6 +151,12 @@ public class HotkeyMapper
         {
             GlobalInputEngine.Remove(id);
             return true;
+        }
+
+        if (sequence.Any(x => !x.Validate(false)))
+        {
+            GlobalInputEngine.Remove(id);
+            return false;
         }
 
         return GlobalInputEngine.AddOrReplace(new GlobalTriggerBinding
@@ -176,6 +203,16 @@ public class HotkeyMapper
 
     internal static bool CheckAvailability(HotkeyModel currentHotkey)
         => !IsReservedGlobalHotkey(currentHotkey);
+
+    internal static bool CheckHoldAvailability(HotkeyModel hotkey)
+    {
+        return hotkey.CharKey is not (Key.None or
+                                      Key.LeftAlt or Key.RightAlt or
+                                      Key.LeftCtrl or Key.RightCtrl or
+                                      Key.LeftShift or Key.RightShift or
+                                      Key.LWin or Key.RWin) &&
+               hotkey.ModifierKeys == ModifierKeys.None;
+    }
 
     internal static SpecialKeyState CheckModifiers()
     {

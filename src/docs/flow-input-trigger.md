@@ -11,7 +11,7 @@
   - `LazyInitialize()`：启动时应用 Ctrl+CC、增量翻译键、全局热键注册。
   - `HandleGlobalLogic()`：热键到命令的映射中心。
 - `STranslate/Helpers/HotkeyMapper.cs`
-  - `SetGlobalTrigger()`：按 `GlobalHotkey.Kind` 将全局热键注册为常规组合键或修饰键双击。
+  - `SetGlobalTrigger()`：按 `GlobalHotkey.Kind` 将全局热键注册为组合键、序列键、修饰键双击或按住键。
   - `SetHotkey()`：将常规全局组合键注册到自研输入引擎。
   - `RegisterHoldKey()`：注册按住键增量翻译。
   - `RegisterSequence()`：注册 `Ctrl+C+C` 等序列触发。
@@ -50,8 +50,8 @@
 5. `Settings.HideInputWithLangSelectControl` 仍作为普通显示偏好生效；输入翻译临时显示输入框时，语言选择控件也会同步显示。
 
 ### 从入口到结果：增量翻译（按住键）
-1. `IncrementalTranslateKey` 变化触发 `ApplyIncrementalTranslate()`。
-2. 注册 `HotkeyMapper.RegisterHoldKey(id, key, OnIncKeyPressed, OnIncKeyReleased)`。
+1. `IncrementalTranslateHotkey` 变化触发 `ApplyIncrementalTranslate()`。
+2. `IncrementalTranslateHotkey.Kind` 必须为 `Hold`，注册 `HotkeyMapper.SetGlobalTrigger(id, hotkey, OnIncKeyPressed, OnIncKeyPressed, OnIncKeyReleased)`。
 3. 按下时 `OnIncKeyPressed()`：置顶窗口 + 开启鼠标划词监听 + 缓存旧文本。
 4. 松开时 `OnIncKeyReleased()`：关闭划词监听，若文本有变化则执行翻译。
 
@@ -96,7 +96,7 @@
 - `HotkeySettings.RegisteredHotkeys`：统一热键定义清单与适用窗口类型。
 - `HotkeyType`：`Global/MainWindow/SettingsWindow/OcrWindow/ImageTransWindow`。
 - `GlobalHotkey.IsConflict`：应用内部规则冲突/不可用状态，不再表示系统注册失败。
-- `GlobalHotkey.Kind` / `GlobalHotkey.ModifierKey`：每个全局热键自己的触发方式，支持常规组合键与修饰键双击（Ctrl/Alt/Shift，不支持 Win）。
+- `GlobalHotkey.Kind` / `GlobalHotkey.ModifierKey` / `GlobalHotkey.Sequence`：每个全局热键自己的触发方式，支持组合键、序列键、修饰键双击（Ctrl/Alt/Shift，不支持 Win）与按住键。
 - `GlobalTriggerBinding`：自研全局触发规则，支持 `Chord/Sequence/ModifierDoubleTap/Hold`。
 - `SuppressionMode`：命中规则后的吞键策略。
 - 触发策略配置：
@@ -104,8 +104,8 @@
   - `IgnoreHotkeysOnFullscreen`
   - `ExcludedGlobalTriggerProcesses`
   - `CrosswordTranslateByCtrlSameC`
-  - `IncrementalTranslateKey`
-  - `GlobalHotkey.Kind`、`GlobalHotkey.ModifierKey`
+  - `IncrementalTranslateHotkey`
+  - `GlobalHotkey.Kind`、`GlobalHotkey.ModifierKey`、`GlobalHotkey.Sequence`
   - `SelectedTextFetchTimeoutMs`
   - `TextSeparatorHandleType`
   - `TextSeparatorHandleScopes`

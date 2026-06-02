@@ -120,6 +120,30 @@ public class HotkeyControl : Button
         new FrameworkPropertyMetadata(ModifierDoubleTapKey.None, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnHotkeyChanged)
     );
 
+    public ObservableCollection<string> Sequence
+    {
+        get => (ObservableCollection<string>)GetValue(SequenceProperty);
+        set => SetValue(SequenceProperty, value);
+    }
+    public static readonly DependencyProperty SequenceProperty = DependencyProperty.Register(
+        nameof(Sequence),
+        typeof(ObservableCollection<string>),
+        typeof(HotkeyControl),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnHotkeyChanged)
+    );
+
+    public bool HoldOnly
+    {
+        get => (bool)GetValue(HoldOnlyProperty);
+        set => SetValue(HoldOnlyProperty, value);
+    }
+    public static readonly DependencyProperty HoldOnlyProperty = DependencyProperty.Register(
+        nameof(HoldOnly),
+        typeof(bool),
+        typeof(HotkeyControl),
+        new PropertyMetadata(false)
+    );
+
     public HotkeyType Type
     {
         get => (HotkeyType)GetValue(TypeProperty);
@@ -153,6 +177,15 @@ public class HotkeyControl : Button
             return;
         }
 
+        if (IsGlobalTriggerControl && Kind == TriggerKind.Sequence)
+        {
+            SetSequenceToDisplay(Sequence);
+            CurrentHotkey = Sequence?.Count > 0
+                ? new HotkeyModel(Sequence[0])
+                : new HotkeyModel(false, false, false, false, Key.None);
+            return;
+        }
+
         SetKeysToDisplay(new HotkeyModel(hotkey));
         CurrentHotkey = new HotkeyModel(hotkey);
     }
@@ -172,13 +205,13 @@ public class HotkeyControl : Button
 
     private async Task OpenHotkeyDialogAsync()
     {
-        var dialog = new HotkeyControlDialog(Type, Kind, Hotkey, ModifierKey, DefaultHotkey, WindowTitle);
+        var dialog = new HotkeyControlDialog(Type, Kind, Hotkey, ModifierKey, Sequence, DefaultHotkey, WindowTitle, holdOnly: HoldOnly);
         await dialog.ShowAsync();
         switch (dialog.ReturnType)
         {
             case HotkeyControlDialog.HkReturnType.Save:
                 if (IsGlobalTriggerControl)
-                    SetGlobalTrigger(dialog.ResultKind, dialog.ResultValue, dialog.ResultModifierKey);
+                    SetGlobalTrigger(dialog.ResultKind, dialog.ResultValue, dialog.ResultModifierKey, dialog.ResultSequence);
                 else
                     SetHotkey(dialog.ResultValue);
                 break;
@@ -224,6 +257,7 @@ public class HotkeyControl : Button
         if (IsGlobalTriggerControl)
         {
             ModifierKey = ModifierDoubleTapKey.None;
+            Sequence = [];
             Kind = TriggerKind.Chord;
         }
 
@@ -231,19 +265,31 @@ public class HotkeyControl : Button
         SetKeysToDisplay(new HotkeyModel(false, false, false, false, Key.None));
     }
 
-    private void SetGlobalTrigger(TriggerKind kind, string keyStr, ModifierDoubleTapKey modifierKey)
+    private void SetGlobalTrigger(TriggerKind kind, string keyStr, ModifierDoubleTapKey modifierKey, IReadOnlyList<string> sequence)
     {
         if (kind == TriggerKind.ModifierDoubleTap)
         {
             Hotkey = Constant.EmptyHotkey;
             ModifierKey = modifierKey;
+            Sequence = [];
             Kind = TriggerKind.ModifierDoubleTap;
             SetModifierDoubleTapToDisplay(modifierKey);
             return;
         }
 
+        if (kind == TriggerKind.Sequence)
+        {
+            Hotkey = Constant.EmptyHotkey;
+            ModifierKey = ModifierDoubleTapKey.None;
+            Sequence = [.. sequence];
+            Kind = TriggerKind.Sequence;
+            SetSequenceToDisplay(Sequence);
+            return;
+        }
+
         ModifierKey = ModifierDoubleTapKey.None;
-        Kind = TriggerKind.Chord;
+        Sequence = [];
+        Kind = kind == TriggerKind.Hold ? TriggerKind.Hold : TriggerKind.Chord;
         SetHotkey(keyStr);
     }
 
@@ -275,6 +321,27 @@ public class HotkeyControl : Button
 
         KeysToDisplay.Add(_i18n.GetTranslation("Hotkey_DoubleTap"));
         KeysToDisplay.Add(modifierKey.ToString());
+    }
+
+    private void SetSequenceToDisplay(IReadOnlyList<string>? sequence)
+    {
+        KeysToDisplay.Clear();
+        if (sequence == null || sequence.Count == 0)
+        {
+            KeysToDisplay.Add(EmptyHotkey);
+            return;
+        }
+
+        for (var index = 0; index < sequence.Count; index++)
+        {
+            if (index > 0)
+                KeysToDisplay.Add(",");
+
+            foreach (var key in new HotkeyModel(sequence[index]).EnumerateDisplayKeys())
+            {
+                KeysToDisplay.Add(key);
+            }
+        }
     }
 
     private bool IsGlobalTriggerControl => Type == HotkeyType.Global;

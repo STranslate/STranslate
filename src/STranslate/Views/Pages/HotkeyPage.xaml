@@ -75,28 +75,15 @@
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.TextIndentIncrease_20_Regular}" />
                     </ui:SettingsCard.HeaderIcon>
 
-                    <Button Command="{Binding IncrementalTranslateKeyCommand}" Content="{Binding HotkeySettings.IncrementalTranslateKey, Converter={cnvt:StringConverter}}">
-                        <Button.ContentTemplate>
-                            <DataTemplate>
-                                <Border
-                                    x:Name="PART_InnerBorder"
-                                    Padding="10,5"
-                                    Background="{DynamicResource {x:Static ui:ThemeKeys.SystemControlBackgroundAccentBrushKey}}"
-                                    BorderThickness="1"
-                                    CornerRadius="5">
-                                    <TextBlock Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorInverseBrushKey}}" Text="{Binding}" />
-                                </Border>
-                                <DataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}}, Path=IsMouseOver}" Value="True">
-                                        <Setter TargetName="PART_InnerBorder" Property="Background" Value="{DynamicResource SystemAccentColorLight1Brush}" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}}, Path=IsPressed}" Value="True">
-                                        <Setter TargetName="PART_InnerBorder" Property="Background" Value="{DynamicResource SystemAccentColorDark1Brush}" />
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
-                            </DataTemplate>
-                        </Button.ContentTemplate>
-                    </Button>
+                    <control:HotkeyControl
+                        DefaultHotkey="{Binding HotkeySettings.IncrementalTranslateHotkey.Default}"
+                        HoldOnly="True"
+                        Hotkey="{Binding HotkeySettings.IncrementalTranslateHotkey.Key}"
+                        IsRegistered="{Binding HotkeySettings.IncrementalTranslateHotkey.IsConflict}"
+                        Kind="{Binding HotkeySettings.IncrementalTranslateHotkey.Kind}"
+                        ModifierKey="{Binding HotkeySettings.IncrementalTranslateHotkey.ModifierKey}"
+                        Sequence="{Binding HotkeySettings.IncrementalTranslateHotkey.Sequence}"
+                        WindowTitle="{DynamicResource Hotkey_IncrementalTranslate}" />
                 </ui:SettingsCard>
 
                 <control:CardGroup>
@@ -110,6 +97,7 @@
                             IsRegistered="{Binding HotkeySettings.OpenWindowHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.OpenWindowHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.OpenWindowHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.OpenWindowHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_OpenSTranslate}" />
                     </ui:SettingsCard>
 
@@ -123,6 +111,7 @@
                             IsRegistered="{Binding HotkeySettings.InputTranslateHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.InputTranslateHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.InputTranslateHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.InputTranslateHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_InputTranslate}" />
                     </ui:SettingsCard>
 
@@ -136,6 +125,7 @@
                             IsRegistered="{Binding HotkeySettings.CrosswordTranslateHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.CrosswordTranslateHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.CrosswordTranslateHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.CrosswordTranslateHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_CrosswordTranslate}" />
                     </ui:SettingsCard>
 
@@ -160,6 +150,7 @@
                             IsRegistered="{Binding HotkeySettings.ReplaceTranslateHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.ReplaceTranslateHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.ReplaceTranslateHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.ReplaceTranslateHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_ReplaceTranslate}" />
                     </ui:SettingsCard>
 
@@ -173,6 +164,7 @@
                             IsRegistered="{Binding HotkeySettings.ScreenshotTranslateHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.ScreenshotTranslateHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.ScreenshotTranslateHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.ScreenshotTranslateHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_ScreenshotTranslate}" />
                     </ui:SettingsCard>
 
@@ -186,6 +178,7 @@
                             IsRegistered="{Binding HotkeySettings.ImageTranslateHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.ImageTranslateHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.ImageTranslateHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.ImageTranslateHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_ImageTranslate}" />
                     </ui:SettingsCard>
 
@@ -199,6 +192,7 @@
                             IsRegistered="{Binding HotkeySettings.MouseHookTranslateHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.MouseHookTranslateHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.MouseHookTranslateHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.MouseHookTranslateHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_MouseHookTranslate}" />
                     </ui:SettingsCard>
 
@@ -212,6 +206,7 @@
                             IsRegistered="{Binding HotkeySettings.SilentOcrHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.SilentOcrHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.SilentOcrHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.SilentOcrHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_SilentOcr}" />
                     </ui:SettingsCard>
 
@@ -225,6 +220,7 @@
                             IsRegistered="{Binding HotkeySettings.SilentTtsHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.SilentTtsHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.SilentTtsHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.SilentTtsHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_SilentTts}" />
                     </ui:SettingsCard>
 
@@ -238,6 +234,7 @@
                             IsRegistered="{Binding HotkeySettings.OcrHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.OcrHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.OcrHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.OcrHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_Ocr}" />
                     </ui:SettingsCard>
 
@@ -251,6 +248,7 @@
                             IsRegistered="{Binding HotkeySettings.ClipboardMonitorHotkey.IsConflict}"
                             Kind="{Binding HotkeySettings.ClipboardMonitorHotkey.Kind}"
                             ModifierKey="{Binding HotkeySettings.ClipboardMonitorHotkey.ModifierKey}"
+                            Sequence="{Binding HotkeySettings.ClipboardMonitorHotkey.Sequence}"
                             WindowTitle="{DynamicResource Hotkey_ClipboardMonitor}" />
                     </ui:SettingsCard>
                 </control:CardGroup>

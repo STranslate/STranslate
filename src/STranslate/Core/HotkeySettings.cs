@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using STranslate.Helpers;
 using STranslate.Resources;
 using STranslate.ViewModels;
+using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 using System.Windows.Input;
 
@@ -24,6 +25,7 @@ public partial class HotkeySettings : ObservableObject
     #region Setting Items
 
     public GlobalHotkey OpenWindowHotkey { get; set; } = new("Alt + G");
+    public GlobalHotkey IncrementalTranslateHotkey { get; set; } = new(Constant.EmptyHotkey) { Kind = TriggerKind.Hold };
     public GlobalHotkey InputTranslateHotkey { get; set; } = new(Constant.EmptyHotkey);
     public GlobalHotkey CrosswordTranslateHotkey { get; set; } = new("Alt + D");
     public GlobalHotkey ScreenshotTranslateHotkey { get; set; } = new("Alt + S");
@@ -73,6 +75,7 @@ public partial class HotkeySettings : ObservableObject
         ..FixedHotkeys(),
 
         CreateGlobalHotkeyData(OpenWindowHotkey, "Hotkey_OpenSTranslate"),
+        CreateGlobalHotkeyData(IncrementalTranslateHotkey, "Hotkey_IncrementalTranslate"),
         CreateGlobalHotkeyData(InputTranslateHotkey, "Hotkey_InputTranslate"),
         CreateGlobalHotkeyData(CrosswordTranslateHotkey, "Hotkey_CrosswordTranslate"),
         CreateGlobalHotkeyData(MouseHookTranslateHotkey, "Hotkey_MouseHookTranslate"),
@@ -138,7 +141,7 @@ public partial class HotkeySettings : ObservableObject
         {
             if (e.PropertyName == nameof(IncrementalTranslateKey))
             {
-                ApplyIncrementalTranslate();
+                RegisterHotkeys();
                 Save();
             }
             else if (e.PropertyName == nameof(CrosswordTranslateByCtrlSameC))
@@ -173,6 +176,7 @@ public partial class HotkeySettings : ObservableObject
         {
             // Global Hotkeys
             [nameof(OpenWindowHotkey)] = "Alt + G",
+            [nameof(IncrementalTranslateHotkey)] = Constant.EmptyHotkey,
             [nameof(InputTranslateHotkey)] = "Alt + A",
             [nameof(CrosswordTranslateHotkey)] = "Alt + D",
             [nameof(ScreenshotTranslateHotkey)] = "Alt + S",
@@ -213,8 +217,6 @@ public partial class HotkeySettings : ObservableObject
         MainWindowViewModel = Ioc.Default.GetRequiredService<MainWindowViewModel>();
 
         ApplyCtrlCc();
-        ApplyIncrementalTranslate();
-
         RegisterHotkeys();
 
         UpdateTrayIconWithPriority();
@@ -222,23 +224,43 @@ public partial class HotkeySettings : ObservableObject
 
     private void ApplyIncrementalTranslate()
     {
-        if (IncrementalTranslateKey == Key.None)
+        if (IncrementalTranslateHotkey.Key == Constant.EmptyHotkey &&
+            IncrementalTranslateKey != Key.None)
+        {
+            var migratedHotkey = new HotkeyModel(false, false, false, false, IncrementalTranslateKey).ToString();
+            if (IncrementalTranslateHotkey.Kind != TriggerKind.Hold)
+                IncrementalTranslateHotkey.Kind = TriggerKind.Hold;
+            if (IncrementalTranslateHotkey.Key != migratedHotkey)
+                IncrementalTranslateHotkey.Key = migratedHotkey;
+            IncrementalTranslateKey = Key.None;
+        }
+
+        if (IncrementalTranslateHotkey.Kind != TriggerKind.Hold)
         {
             HotkeyMapper.RemoveGlobalTrigger(IncrementalTranslateTriggerId);
+            IncrementalTranslateHotkey.IsConflict = true;
+            return;
+        }
+
+        if (IncrementalTranslateHotkey.Key == Constant.EmptyHotkey)
+        {
+            HotkeyMapper.RemoveGlobalTrigger(IncrementalTranslateTriggerId);
+            IncrementalTranslateHotkey.IsConflict = false;
         }
         else
         {
-            var registered = HotkeyMapper.RegisterHoldKey(
+            IncrementalTranslateHotkey.IsConflict = !HotkeyMapper.SetGlobalTrigger(
                 IncrementalTranslateTriggerId,
-                IncrementalTranslateKey,
+                IncrementalTranslateHotkey,
+                MainWindowViewModel.OnIncKeyPressed,
                 MainWindowViewModel.OnIncKeyPressed,
                 MainWindowViewModel.OnIncKeyReleased);
 
-            if (!registered)
+            if (IncrementalTranslateHotkey.IsConflict)
             {
                 HotkeyMapper.RemoveGlobalTrigger(IncrementalTranslateTriggerId);
                 Ioc.Default.GetRequiredService<ILogger<HotkeySettings>>()
-                    .LogWarning("Failed to register incremental translate hold key: {Key}", IncrementalTranslateKey);
+                    .LogWarning("Failed to register incremental translate hold key: {Key}", IncrementalTranslateHotkey.Key);
             }
         }
     }
@@ -304,6 +326,7 @@ public partial class HotkeySettings : ObservableObject
 
     private void RegisterHotkeys()
     {
+        ApplyIncrementalTranslate();
         HandleGlobalLogic(nameof(OpenWindowHotkey));
         HandleGlobalLogic(nameof(InputTranslateHotkey));
         HandleGlobalLogic(nameof(CrosswordTranslateHotkey));
@@ -319,6 +342,7 @@ public partial class HotkeySettings : ObservableObject
 
     private void UnregisterHotkeys()
     {
+        HotkeyMapper.RemoveGlobalTrigger(IncrementalTranslateTriggerId);
         HotkeyMapper.RemoveGlobalTrigger(nameof(OpenWindowHotkey));
         HotkeyMapper.RemoveGlobalTrigger(nameof(InputTranslateHotkey));
         HotkeyMapper.RemoveGlobalTrigger(nameof(CrosswordTranslateHotkey));
@@ -412,7 +436,7 @@ public partial class HotkeySettings : ObservableObject
         hotkey.PropertyChanged += (s, e) =>
         {
             var isGlobalHotkeyChange = hotkey is GlobalHotkey &&
-                e.PropertyName is nameof(Hotkey.Key) or nameof(GlobalHotkey.Kind) or nameof(GlobalHotkey.ModifierKey);
+                e.PropertyName is nameof(Hotkey.Key) or nameof(GlobalHotkey.Kind) or nameof(GlobalHotkey.ModifierKey) or nameof(GlobalHotkey.Sequence);
             var isSoftwareHotkeyChange = hotkey is not GlobalHotkey && e.PropertyName == nameof(Hotkey.Key);
 
             if (!isGlobalHotkeyChange && !isSoftwareHotkeyChange)
@@ -501,10 +525,13 @@ public partial class GlobalHotkey : Hotkey
 
     public ModifierDoubleTapKey ModifierKey { get => field; set { field = value; OnPropertyChanged(); } } = ModifierDoubleTapKey.None;
 
+    public ObservableCollection<string> Sequence { get => field; set { field = value ?? []; OnPropertyChanged(); } } = [];
+
     public void Clear()
     {
         Kind = TriggerKind.Chord;
         ModifierKey = ModifierDoubleTapKey.None;
+        Sequence = [];
         Key = Constant.EmptyHotkey;
     }
 }
@@ -524,6 +551,7 @@ public class RegisteredHotkeyData
         Hotkey = hotkey.Key;
         Kind = hotkey.Kind;
         ModifierKey = hotkey.ModifierKey;
+        Sequence = [.. hotkey.Sequence];
         ResourceKey = resourceKey;
         Type = type;
         OnRemovedHotkey = action;
@@ -532,11 +560,15 @@ public class RegisteredHotkeyData
     public string Hotkey { get; }
     public TriggerKind Kind { get; } = TriggerKind.Chord;
     public ModifierDoubleTapKey ModifierKey { get; } = ModifierDoubleTapKey.None;
+    public IReadOnlyList<string> Sequence { get; } = [];
     public string ResourceKey { get; }
     public HotkeyType Type { get; }
     public Action? OnRemovedHotkey { get; }
 
     public bool Matches(TriggerKind kind, string hotkey, ModifierDoubleTapKey modifierKey)
+        => Matches(kind, hotkey, modifierKey, []);
+
+    public bool Matches(TriggerKind kind, string hotkey, ModifierDoubleTapKey modifierKey, IReadOnlyList<string> sequence)
     {
         if (Kind != kind)
             return false;
@@ -544,9 +576,35 @@ public class RegisteredHotkeyData
         return Kind switch
         {
             TriggerKind.ModifierDoubleTap => ModifierKey == modifierKey && modifierKey != ModifierDoubleTapKey.None,
+            TriggerKind.Sequence => Sequence.SequenceEqual(sequence, StringComparer.OrdinalIgnoreCase),
             _ => string.Equals(Hotkey, hotkey, StringComparison.OrdinalIgnoreCase)
         };
     }
+
+    /// <summary>
+    /// 判断当前注册项是否会与指定全局触发方式抢占同一输入路径。
+    /// </summary>
+    public bool ConflictsWith(TriggerKind kind, string hotkey, ModifierDoubleTapKey modifierKey, IReadOnlyList<string> sequence)
+    {
+        if (Matches(kind, hotkey, modifierKey, sequence))
+            return true;
+
+        var currentHotkey = new HotkeyModel(Hotkey);
+        var candidateHotkey = new HotkeyModel(hotkey);
+        if (currentHotkey.CharKey == Key.None || candidateHotkey.CharKey == Key.None)
+            return false;
+
+        if (Kind == TriggerKind.Hold && kind == TriggerKind.Chord)
+            return currentHotkey.CharKey == candidateHotkey.CharKey && HasNoModifiers(candidateHotkey);
+
+        if (Kind == TriggerKind.Chord && kind == TriggerKind.Hold)
+            return currentHotkey.CharKey == candidateHotkey.CharKey && HasNoModifiers(currentHotkey);
+
+        return false;
+    }
+
+    private static bool HasNoModifiers(HotkeyModel hotkey)
+        => !hotkey.Ctrl && !hotkey.Alt && !hotkey.Shift && !hotkey.Win;
 }
 
 [Flags]
