@@ -65,7 +65,6 @@ public static class ModifierDoubleTapKeyExtensions
             Key.LeftCtrl or Key.RightCtrl => ModifierDoubleTapKey.Ctrl,
             Key.LeftAlt or Key.RightAlt => ModifierDoubleTapKey.Alt,
             Key.LeftShift or Key.RightShift => ModifierDoubleTapKey.Shift,
-            Key.LWin or Key.RWin => ModifierDoubleTapKey.Win,
             _ => ModifierDoubleTapKey.None
         };
 

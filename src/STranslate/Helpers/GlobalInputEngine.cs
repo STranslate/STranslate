@@ -182,7 +182,7 @@ public static class GlobalInputEngine
         {
             TriggerKind.Chord => binding.Hotkey.CharKey != Key.None,
             TriggerKind.Sequence => binding.Sequence.Count > 0 && binding.Sequence.All(x => x.CharKey != Key.None),
-            TriggerKind.ModifierDoubleTap => binding.ModifierKey != ModifierDoubleTapKey.None,
+            TriggerKind.ModifierDoubleTap => binding.ModifierKey is not (ModifierDoubleTapKey.None or ModifierDoubleTapKey.Win),
             TriggerKind.Hold => binding.Hotkey.CharKey != Key.None,
             _ => false
         };

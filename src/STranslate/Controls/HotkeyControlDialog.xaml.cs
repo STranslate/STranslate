@@ -79,6 +79,9 @@ public partial class HotkeyControlDialog : ContentDialog
         SetKeysToDisplay(kind, _cacheHotkey, modifierKey);
 
         InitializeComponent();
+        if (kind == TriggerKind.ModifierDoubleTap && modifierKey == ModifierDoubleTapKey.Win)
+            UpdateUI();
+
         Loaded += OnLoaded;
         Closed += OnClosed;
     }
@@ -321,7 +324,7 @@ public partial class HotkeyControlDialog : ContentDialog
                 return;
             }
         }
-        else if (_currentModifierKey == ModifierDoubleTapKey.None)
+        else if (_currentModifierKey is ModifierDoubleTapKey.None or ModifierDoubleTapKey.Win)
         {
             PART_InfoBar.Message = _i18n.GetTranslation("HotkeyUnavailable");
             PART_InfoBar.Visibility = Visibility.Visible;

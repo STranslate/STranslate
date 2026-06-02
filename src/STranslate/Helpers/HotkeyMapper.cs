@@ -150,10 +150,10 @@ public class HotkeyMapper
         Action action,
         SuppressionMode suppressionMode = SuppressionMode.NeverSuppress)
     {
-        if (modifierKey == ModifierDoubleTapKey.None)
+        if (modifierKey is ModifierDoubleTapKey.None or ModifierDoubleTapKey.Win)
         {
             GlobalInputEngine.Remove(id);
-            return true;
+            return modifierKey == ModifierDoubleTapKey.None;
         }
 
         return GlobalInputEngine.AddOrReplace(new GlobalTriggerBinding

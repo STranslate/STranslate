@@ -96,7 +96,7 @@
 - `HotkeySettings.RegisteredHotkeys`：统一热键定义清单与适用窗口类型。
 - `HotkeyType`：`Global/MainWindow/SettingsWindow/OcrWindow/ImageTransWindow`。
 - `GlobalHotkey.IsConflict`：应用内部规则冲突/不可用状态，不再表示系统注册失败。
-- `GlobalHotkey.Kind` / `GlobalHotkey.ModifierKey`：每个全局热键自己的触发方式，支持常规组合键与修饰键双击。
+- `GlobalHotkey.Kind` / `GlobalHotkey.ModifierKey`：每个全局热键自己的触发方式，支持常规组合键与修饰键双击（Ctrl/Alt/Shift，不支持 Win）。
 - `GlobalTriggerBinding`：自研全局触发规则，支持 `Chord/Sequence/ModifierDoubleTap/Hold`。
 - `SuppressionMode`：命中规则后的吞键策略。
 - 触发策略配置：
