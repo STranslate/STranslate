@@ -33,6 +33,12 @@ public static class GlobalInputEngine
         public bool IsCleanTap { get; set; }
     }
 
+    private sealed class HotkeyCaptureState
+    {
+        public required int Id { get; init; }
+        public Action<Key, bool>? OnCapturedKey { get; init; }
+    }
+
     private static readonly ILogger<HotkeyMapper> _logger = Ioc.Default.GetRequiredService<ILogger<HotkeyMapper>>();
     private static readonly Lock _stateLock = new();
     private static readonly TimeSpan HoldReleaseConfirmationDelay = TimeSpan.FromMilliseconds(80);
@@ -44,8 +50,11 @@ public static class GlobalInputEngine
     private static readonly Dictionary<string, HoldState> _activeHoldStates = [];
     private static readonly Dictionary<Key, ModifierTapState> _activeModifierTapStates = [];
     private static readonly Dictionary<ModifierDoubleTapKey, DateTimeOffset> _lastModifierTapAt = [];
+    private static readonly List<HotkeyCaptureState> _hotkeyCaptureStates = [];
+    private static readonly HashSet<Key> _hotkeyCaptureWinKeys = [];
     private static UnhookWindowsHookExSafeHandle? _hookHandle;
     private static HOOKPROC? _hookProc;
+    private static int _nextHotkeyCaptureId;
 
     public static bool AddOrReplace(GlobalTriggerBinding binding)
     {
@@ -105,7 +114,7 @@ public static class GlobalInputEngine
             ClearPressedKeysCore();
         }
 
-        StopHook();
+        StopHookIfUnused();
     }
 
     public static bool HasConflict(GlobalTriggerBinding binding, string? excludingId = null)
@@ -113,6 +122,46 @@ public static class GlobalInputEngine
         lock (_stateLock)
         {
             return HasConflictCore(binding, excludingId);
+        }
+    }
+
+    internal static int BeginHotkeyCapture(Action<Key, bool>? onCapturedKey = null)
+    {
+        int captureId;
+        lock (_stateLock)
+        {
+            captureId = ++_nextHotkeyCaptureId;
+            _hotkeyCaptureStates.Add(new HotkeyCaptureState
+            {
+                Id = captureId,
+                OnCapturedKey = onCapturedKey
+            });
+        }
+
+        EnsureHook();
+        return captureId;
+    }
+
+    internal static void EndHotkeyCapture(int captureId)
+    {
+        lock (_stateLock)
+        {
+            _hotkeyCaptureStates.RemoveAll(x => x.Id == captureId);
+            if (_hotkeyCaptureStates.Count == 0)
+                _hotkeyCaptureWinKeys.Clear();
+        }
+
+        StopHookIfUnused();
+    }
+
+    internal static bool IsHotkeyCaptureWinPressed
+    {
+        get
+        {
+            lock (_stateLock)
+            {
+                return _hotkeyCaptureWinKeys.Count > 0;
+            }
         }
     }
 
@@ -217,7 +266,7 @@ public static class GlobalInputEngine
 
     private static void StopHookIfUnused()
     {
-        if (HasBindings)
+        if (HasHookConsumers)
             return;
 
         StopHook();
@@ -256,6 +305,12 @@ public static class GlobalInputEngine
 
         if (!isKeyDown && !isKeyUp)
             return PInvoke.CallNextHookEx(HHOOK.Null, nCode, wParam, lParam);
+
+        if (TryHandleHotkeyCapture(key, isKeyDown, out var onCapturedKey))
+        {
+            DispatchHotkeyCapture(onCapturedKey, key, isKeyDown);
+            return new LRESULT(1);
+        }
 
         var shouldSkip = GlobalTriggerGuard.ShouldSkipGlobalTrigger();
         var shouldSuppress = false;
@@ -630,6 +685,33 @@ public static class GlobalInputEngine
         }
     }
 
+    private static void DispatchHotkeyCapture(Action<Key, bool>? onCapturedKey, Key key, bool isKeyDown)
+    {
+        if (onCapturedKey == null)
+            return;
+
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher == null)
+        {
+            Task.Run(() => InvokeHotkeyCapture(onCapturedKey, key, isKeyDown));
+            return;
+        }
+
+        dispatcher.BeginInvoke(new Action(() => InvokeHotkeyCapture(onCapturedKey, key, isKeyDown)));
+    }
+
+    private static void InvokeHotkeyCapture(Action<Key, bool> onCapturedKey, Key key, bool isKeyDown)
+    {
+        try
+        {
+            onCapturedKey(key, isKeyDown);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error handling captured hotkey key");
+        }
+    }
+
     private static (bool Ctrl, bool Alt, bool Shift, bool Win) ReadModifiers()
     {
         return (
@@ -663,6 +745,41 @@ public static class GlobalInputEngine
 
     private static bool HasNoModifiers(HotkeyModel hotkey)
         => !hotkey.Ctrl && !hotkey.Alt && !hotkey.Shift && !hotkey.Win;
+
+    private static bool TryHandleHotkeyCapture(Key key, bool isKeyDown, out Action<Key, bool>? onCapturedKey)
+    {
+        onCapturedKey = null;
+        if (!IsWindowsKey(key))
+            return false;
+
+        lock (_stateLock)
+        {
+            if (_hotkeyCaptureStates.Count == 0)
+                return false;
+
+            if (isKeyDown)
+                _hotkeyCaptureWinKeys.Add(key);
+            else
+                _hotkeyCaptureWinKeys.Remove(key);
+
+            onCapturedKey = _hotkeyCaptureStates[^1].OnCapturedKey;
+            return true;
+        }
+    }
+
+    private static bool HasHookConsumers
+    {
+        get
+        {
+            lock (_stateLock)
+            {
+                return _bindings.Count > 0 || _hotkeyCaptureStates.Count > 0;
+            }
+        }
+    }
+
+    private static bool IsWindowsKey(Key key)
+        => key is Key.LWin or Key.RWin;
 
     private static void ClearPressedKeysCore()
     {

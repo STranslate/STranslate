@@ -32,6 +32,7 @@ public partial class HotkeyControlDialog : ContentDialog
     private ModifierDoubleTapKey _activeModifierTapKey = ModifierDoubleTapKey.None;
     private ModifierDoubleTapKey _lastModifierTapKey = ModifierDoubleTapKey.None;
     private DateTimeOffset _lastModifierTapAt = DateTimeOffset.MinValue;
+    private int _hotkeyCaptureId;
     private bool _isActiveModifierTapClean;
 
     private string DefaultHotkey { get; }
@@ -78,6 +79,25 @@ public partial class HotkeyControlDialog : ContentDialog
         SetKeysToDisplay(kind, _cacheHotkey, modifierKey);
 
         InitializeComponent();
+        Loaded += OnLoaded;
+        Closed += OnClosed;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        if (_hotkeyCaptureId != 0)
+            return;
+
+        _hotkeyCaptureId = GlobalInputEngine.BeginHotkeyCapture(OnCapturedSystemKey);
+    }
+
+    private void OnClosed(ContentDialog sender, ContentDialogClosedEventArgs args)
+    {
+        if (_hotkeyCaptureId == 0)
+            return;
+
+        GlobalInputEngine.EndHotkeyCapture(_hotkeyCaptureId);
+        _hotkeyCaptureId = 0;
     }
 
     private void OnOverwriteClick(object sender, RoutedEventArgs e)
@@ -129,8 +149,11 @@ public partial class HotkeyControlDialog : ContentDialog
     {
         e.Handled = true;
 
-        var key = NormalizeKey(e);
+        HandleKeyDown(NormalizeKey(e));
+    }
 
+    private void HandleKeyDown(Key key)
+    {
         if (SingleKeyMode)
         {
             SetChordToDisplay(new HotkeyModel(false, false, false, false, key));
@@ -150,12 +173,19 @@ public partial class HotkeyControlDialog : ContentDialog
 
     private void OnPreviewKeyUp(object sender, KeyEventArgs e)
     {
-        if (!IsGlobalHotkeyType || SingleKeyMode)
+        if (!CanTrackModifierDoubleTap)
             return;
 
         e.Handled = true;
 
-        var key = NormalizeKey(e);
+        HandleKeyUp(NormalizeKey(e));
+    }
+
+    private void HandleKeyUp(Key key)
+    {
+        if (!CanTrackModifierDoubleTap)
+            return;
+
         if (!key.TryGetModifierDoubleTapKey(out var modifierKey))
             return;
 
@@ -173,6 +203,14 @@ public partial class HotkeyControlDialog : ContentDialog
 
         _lastModifierTapKey = modifierKey;
         _lastModifierTapAt = now;
+    }
+
+    private void OnCapturedSystemKey(Key key, bool isKeyDown)
+    {
+        if (isKeyDown)
+            HandleKeyDown(key);
+        else
+            HandleKeyUp(key);
     }
 
     private void TrackModifierTapKeyDown(ModifierDoubleTapKey modifierKey)
@@ -329,8 +367,7 @@ public partial class HotkeyControlDialog : ContentDialog
         if (_type.HasFlag(HotkeyType.Global) && HotkeyMapper.IsReservedGlobalHotkey(hotkey))
             return false;
 
-        return hotkey.ToString() is "LWin" or "RWin" ||
-               (hotkey.Validate(validateKeyGesture) && HotkeyMapper.CheckAvailability(hotkey));
+        return hotkey.Validate(validateKeyGesture) && HotkeyMapper.CheckAvailability(hotkey);
     }
 
     private static HotkeyModel BuildChordHotkey(Key key)
@@ -339,7 +376,7 @@ public partial class HotkeyControlDialog : ContentDialog
         return new HotkeyModel(
             specialKeyState.AltPressed,
             specialKeyState.ShiftPressed,
-            specialKeyState.WinPressed,
+            specialKeyState.WinPressed || GlobalInputEngine.IsHotkeyCaptureWinPressed,
             specialKeyState.CtrlPressed,
             key);
     }
@@ -369,4 +406,6 @@ public partial class HotkeyControlDialog : ContentDialog
     }
 
     private bool IsGlobalHotkeyType => _type == HotkeyType.Global;
+
+    private bool CanTrackModifierDoubleTap => IsGlobalHotkeyType && !SingleKeyMode;
 }
