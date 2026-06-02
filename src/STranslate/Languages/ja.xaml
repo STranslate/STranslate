@@ -727,6 +727,7 @@
     <sys:String x:Key="TtsFailed">音声合成に失敗しました</sys:String>
     <sys:String x:Key="TtsCancelled">読み上げをキャンセルしました</sys:String>
     <sys:String x:Key="TtsServiceNotFound">音声合成サービスが設定されていません。「設定-サービス-音声合成」で設定してください</sys:String>
+    <sys:String x:Key="VocabularyServiceNotFound">単語帳サービスが設定されていません。「設定-サービス-単語帳」で設定してください</sys:String>
     <sys:String x:Key="ImtransFailed">画像翻訳に失敗しました</sys:String>
     <sys:String x:Key="NoTranslateService">利用可能な翻訳サービスが見つかりません</sys:String>
     <sys:String x:Key="GoToSettings">設定へ移動</sys:String>
@@ -736,6 +737,11 @@
     <sys:String x:Key="OcrServiceNotFoundMessage">OCRサービスが設定または有効化されていません。「設定-サービス-文字認識」で設定してからこの機能を使用してください。</sys:String>
     <sys:String x:Key="ImageTranslateOcrServiceNotFoundTitle">画像翻訳 OCR サービスを取得できません</sys:String>
     <sys:String x:Key="ImageTranslateOcrServiceNotFoundMessage">画像翻訳 OCR サービスが設定されておらず、利用可能な OCR サービスもありません。「設定-サービス-文字認識」で設定してください。</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundTitle">置換翻訳サービスを取得できません</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundMessage">置換翻訳サービスが設定または有効化されていません。「設定-サービス-翻訳」で設定してからこの機能を使用してください。</sys:String>
+    <sys:String x:Key="LanguageDetectionFailed">言語検出に失敗しました</sys:String>
+    <sys:String x:Key="NoTextRecognized">テキストが認識されませんでした</sys:String>
+    <sys:String x:Key="NoTextRecognizedMessage" xml:space="preserve">翻訳するテキストを選択してください。&#10;問題が続く場合は、管理者権限でソフトウェアを再起動してみてください。</sys:String>
     <sys:String x:Key="NavigateFailed">これ以上ありません</sys:String>
     <sys:String x:Key="NoValidPluginFile">SPKGファイルがありません</sys:String>
 

@@ -1,7 +1,11 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using STranslate.Helpers;
 using STranslate.Plugin;
+using STranslate.Views;
+using STranslate.Views.Pages;
 using System.IO;
+using System.Windows;
 
 namespace STranslate.Core;
 
@@ -11,6 +15,27 @@ public static class Helper
 
     public static bool ShouldDeleteDirectory(string directory)
         => File.Exists(Path.Combine(directory, Constant.NeedDelete));
+
+    public static void PromptConfigureService(string title, string message, string pageName)
+    {
+        var result = AppMessageBox.Show(
+            message,
+            title,
+            MessageBoxButton.OKCancel,
+            MessageBoxImage.Information);
+
+        if (result == MessageBoxResult.OK)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                SingletonWindowOpener.Open<SettingsWindow>().Activate();
+                Application.Current.Windows
+                    .OfType<SettingsWindow>()
+                    .First()
+                    .Navigate(pageName);
+            });
+        }
+    }
 
     public static bool TryDeleteDirectory(string directory)
     {

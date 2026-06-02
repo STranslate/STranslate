@@ -74,6 +74,27 @@
 - 自动复制：`Settings.CopyAfterTranslation` 支持第 N 个自动服务或最后一个自动服务。
 - 历史持久化：`Settings.HistoryLimit > 0` 时使用 SQLite；否则仅使用内存 `_recentTexts` 缓存最近输入。
 
+## 错误处理与通知策略
+
+### 服务未配置（阻断性错误）
+当替换翻译 / TTS / 生词本等核心服务未配置或全部禁用时，使用 `Helper.PromptConfigureService` 弹出 MessageBox（OK/Cancel）。弹窗底层统一走 `AppMessageBox`：优先挂到当前活动窗口，没有活动窗口时才通过主屏中心的临时透明 owner 显示：
+- 用户点击 **确定** → 自动打开设置窗口并定位到对应配置页。
+- 用户点击 **取消** → 仅关闭弹窗，不跳转。
+
+具体映射：
+| 功能 | 未配置服务 | 跳转页面 | 涉及 ViewModel 方法 |
+|---|---|---|---|
+| 替换翻译 | 替换翻译服务 | `TranslatePage` | `ReplaceTranslateAsync` |
+| 朗读 | TTS | `TtsPage` | `PlayAudioAsync` / `SilentTtsHandlerAsync` |
+| 保存生词本 | 生词本服务 | `VocabularyPage` | `SaveToVocabularyAsync` / `SaveToVocabularyWithNoteAsync` |
+
+### 运行时失败
+执行过程中抛出异常或识别失败时，使用当前窗口内的 **Snackbar** 提示：
+- 替换翻译语言检测失败：`_snackbar.ShowWarning("LanguageDetectionFailed")`。
+- 取词后未识别到文本（如截图翻译无结果）：`_snackbar.ShowWarning("NoTextRecognizedMessage")`。
+- TTS 播放失败 / 取消：`_snackbar.ShowError("TtsFailed")` / `_snackbar.ShowInfo("TtsCancelled")`。
+- 生词本保存失败：`_snackbar.ShowError("OperationFailed")` 或显示服务端返回的错误信息。
+
 ## 关键数据结构/配置
 - `Service.Options`
   - `ExecMode`：自动/手动执行。

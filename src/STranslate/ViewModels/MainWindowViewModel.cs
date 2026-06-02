@@ -191,7 +191,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         set
         {
             if (IsMouseHook && !value)
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show("监听鼠标划词时窗口必须置顶", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                AppMessageBox.Show("监听鼠标划词时窗口必须置顶", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
             else
                 SetProperty(ref field, value);
         }
@@ -845,7 +845,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _notification.Show(_i18n.GetTranslation("Prompt"), $"{_i18n.GetTranslation("OcrFailed")}\n{ex.Message}");
+            Show();
+            _snackbar.ShowError($"{_i18n.GetTranslation("OcrFailed")}\n{ex.Message}");
             _logger.LogError(ex, "OCR execution failed");
         }
         finally
@@ -863,24 +864,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
         if (TranslateService.ImageTranslateService == null)
         {
-            _notification.ShowWithButton(
-                 _i18n.GetTranslation("ImageTranslateServiceNotFoundTitle"),
-                 _i18n.GetTranslation("GoToSettings"),
-                 () =>
-                 {
-                     Application.Current.Dispatcher.Invoke(() =>
-                     {
-                         SingletonWindowOpener
-                             .Open<SettingsWindow>()
-                             .Activate();
-
-                         Application.Current.Windows
-                                 .OfType<SettingsWindow>()
-                                 .First()
-                                 .Navigate(nameof(TranslatePage));
-                     });
-                 },
-                 _i18n.GetTranslation("ImageTranslateServiceNotFoundMessage"));
+            Helper.PromptConfigureService(
+                _i18n.GetTranslation("ImageTranslateServiceNotFoundTitle"),
+                _i18n.GetTranslation("ImageTranslateServiceNotFoundMessage"),
+                nameof(TranslatePage));
             return;
         }
 
@@ -969,7 +956,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _notification.Show(_i18n.GetTranslation("Prompt"), $"{_i18n.GetTranslation("OcrFailed")}\n{ex.Message}");
+            Show();
+            _snackbar.ShowError($"{_i18n.GetTranslation("OcrFailed")}\n{ex.Message}");
             _logger.LogError(ex, "OCR execution failed");
         }
         finally
@@ -983,24 +971,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         var svc = OcrService.GetActiveSvc<IOcrPlugin>();
         if (svc == null)
         {
-            _notification.ShowWithButton(
+            Helper.PromptConfigureService(
                 _i18n.GetTranslation("OcrServiceNotFoundTitle"),
-                _i18n.GetTranslation("GoToSettings"),
-                () =>
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        SingletonWindowOpener
-                            .Open<SettingsWindow>()
-                            .Activate();
-
-                        Application.Current.Windows
-                                .OfType<SettingsWindow>()
-                                .First()
-                                .Navigate(nameof(OcrPage));
-                    });
-                },
-                _i18n.GetTranslation("OcrServiceNotFoundMessage"));
+                _i18n.GetTranslation("OcrServiceNotFoundMessage"),
+                nameof(OcrPage));
             return default;
         }
 
@@ -1012,24 +986,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         var svc = OcrService.GetImageTranslateOcrSvcOrDefault();
         if (svc == null)
         {
-            _notification.ShowWithButton(
+            Helper.PromptConfigureService(
                 _i18n.GetTranslation("ImageTranslateOcrServiceNotFoundTitle"),
-                _i18n.GetTranslation("GoToSettings"),
-                () =>
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        SingletonWindowOpener
-                            .Open<SettingsWindow>()
-                            .Activate();
-
-                        Application.Current.Windows
-                                .OfType<SettingsWindow>()
-                                .First()
-                                .Navigate(nameof(OcrPage));
-                    });
-                },
-                _i18n.GetTranslation("ImageTranslateOcrServiceNotFoundMessage"));
+                _i18n.GetTranslation("ImageTranslateOcrServiceNotFoundMessage"),
+                nameof(OcrPage));
             return default;
         }
 
@@ -1046,7 +1006,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         var ttsSvc = TtsService.GetActiveSvc<ITtsPlugin>();
         if (ttsSvc == null)
         {
-            _snackbar.ShowWarning(_i18n.GetTranslation("TtsServiceNotFound"));
+            Helper.PromptConfigureService(
+                _i18n.GetTranslation("Prompt"),
+                _i18n.GetTranslation("TtsServiceNotFound"),
+                nameof(TtsPage));
             return;
         }
 
@@ -1086,21 +1049,23 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [RelayCommand(IncludeCancelCommand = true)]
     private async Task SilentTtsAsync(CancellationToken cancellationToken)
     {
-        var ttsSvc = TtsService.GetActiveSvc<ITtsPlugin>();
-        if (ttsSvc == null)
-            return;
-
         var (success, text) = await GetTextAsync();
         if (!success || string.IsNullOrWhiteSpace(text))
             return;
-        await SilentTtsHandlerAsync(text, ttsSvc, cancellationToken);
+        await SilentTtsHandlerAsync(text, default, cancellationToken);
     }
 
     public async Task SilentTtsHandlerAsync(string text, ITtsPlugin? ttsSvc = default, CancellationToken cancellationToken = default)
     {
         ttsSvc ??= TtsService.GetActiveSvc<ITtsPlugin>();
         if (ttsSvc == null)
+        {
+            Helper.PromptConfigureService(
+                _i18n.GetTranslation("Prompt"),
+                _i18n.GetTranslation("TtsServiceNotFound"),
+                nameof(TtsPage));
             return;
+        }
 
         try
         {
@@ -1126,7 +1091,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         var vocabularySvc = VocabularyService.GetActiveSvc<IVocabularyPlugin>();
         if (vocabularySvc == null)
+        {
+            Helper.PromptConfigureService(
+                _i18n.GetTranslation("Prompt"),
+                _i18n.GetTranslation("VocabularyServiceNotFound"),
+                nameof(VocabularyPage));
             return;
+        }
 
         var result = await vocabularySvc.SaveAsync(text, cancellationToken);
         if (result.IsSuccess)
@@ -1139,7 +1110,14 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private async Task SaveToVocabularyWithNoteAsync(Service service, CancellationToken cancellationToken)
     {
         var vocabularySvc = VocabularyService.GetActiveSvc<IVocabularyPlugin>();
-        if (vocabularySvc == null) return;
+        if (vocabularySvc == null)
+        {
+            Helper.PromptConfigureService(
+                _i18n.GetTranslation("Prompt"),
+                _i18n.GetTranslation("VocabularyServiceNotFound"),
+                nameof(VocabularyPage));
+            return;
+        }
 
         if (service.Plugin is not ITranslatePlugin plugin || plugin.TransResult.IsProcessing)
             return;
@@ -1324,7 +1302,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task CrosswordTranslateAsync()
     {
-        var (success, text) = await GetTextAsync(showFailureNotification: false);
+        var (success, text) = await GetTextAsync();
         if (!success || string.IsNullOrWhiteSpace(text))
         {
             HandleCrosswordFetchFailed();
@@ -1401,25 +1379,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         if (TranslateService.ReplaceService?.Plugin is not ITranslatePlugin transPlugin)
         {
-            _notification.ShowWithButton(
-                "无法获取替换翻译服务",
-                "点击前往",
-                () =>
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        SingletonWindowOpener
-                            .Open<SettingsWindow>()
-                            .Activate();
-
-                        Application.Current.Windows
-                                .OfType<SettingsWindow>()
-                                .First()
-                                .Navigate(nameof(TranslatePage));
-                    });
-                },
-                "当前未配置启用替换翻译服务，请先前往「设置-服务-文本翻译」配置后使用该功能");
-
+            Helper.PromptConfigureService(
+                _i18n.GetTranslation("ReplaceTranslateServiceNotFoundTitle"),
+                _i18n.GetTranslation("ReplaceTranslateServiceNotFoundMessage"),
+                nameof(TranslatePage));
             return;
         }
 
@@ -1433,7 +1396,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             if (!isSuccess)
             {
                 _logger.LogWarning($"Language detection failed for text: {text}");
-                _notification.Show(_i18n.GetTranslation("Prompt"), "语言检测失败");
+                _snackbar.ShowWarning(_i18n.GetTranslation("LanguageDetectionFailed"));
             }
             var result = new TranslateResult();
             await transPlugin.TranslateAsync(new TranslateRequest(text, source, target), result, cancellationToken).ConfigureAwait(false);
@@ -2317,7 +2280,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         SaveToVocabularyCancelCommand.Execute(null);
     }
 
-    private async Task<(bool success, string text)> GetTextAsync(bool showFailureNotification = true)
+    private async Task<(bool success, string text)> GetTextAsync()
     {
         try
         {
@@ -2325,10 +2288,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             if (string.IsNullOrEmpty(text))
             {
                 _logger.LogWarning("取词失败，可能：未选中文本、文本禁止复制、取词间隔过短、文本所属软件权限高于本软件");
-                if (showFailureNotification)
-                {
-                    _notification.Show("未识别到文本", "请确保选中要翻译的文本\n若问题仍然存在请尝试以管理员权限重启软件");
-                }
+                Show();
+                _snackbar.ShowWarning(_i18n.GetTranslation("NoTextRecognizedMessage"));
                 return (false, string.Empty);
             }
             return (true, text);

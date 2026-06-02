@@ -60,7 +60,7 @@ public static class FilesFolders
 #if DEBUG
             throw;
 #else
-                messageBoxExShow ??= MessageBox.Show;
+                messageBoxExShow ??= AppMessageBox.Show;
                 messageBoxExShow(string.Format("Copying path {0} has failed, it will now be deleted for consistency", targetPath));
                 RemoveFolderIfExists(targetPath, messageBoxExShow);
 #endif
@@ -96,7 +96,7 @@ public static class FilesFolders
 #if DEBUG
             throw;
 #else
-                messageBoxExShow ??= MessageBox.Show;
+                messageBoxExShow ??= AppMessageBox.Show;
                 messageBoxExShow(string.Format("Unable to verify folders and files between {0} and {1}", fromPath, toPath));
                 return false;
 #endif
@@ -121,7 +121,7 @@ public static class FilesFolders
 #if DEBUG
             throw;
 #else
-                messageBoxExShow ??= MessageBox.Show;
+                messageBoxExShow ??= AppMessageBox.Show;
                 messageBoxExShow(string.Format("Not able to delete folder {0}, please go to the location and manually delete it", path));
 #endif
         }
@@ -170,7 +170,7 @@ public static class FilesFolders
 #if DEBUG
             throw;
 #else
-                messageBoxExShow ??= MessageBox.Show;
+                messageBoxExShow ??= AppMessageBox.Show;
                 messageBoxExShow(string.Format("Unable to open the path {0}, please check if it exists", fileOrFolderPath));
 #endif
         }
@@ -202,7 +202,7 @@ public static class FilesFolders
 #if DEBUG
             throw;
 #else
-                messageBoxExShow ??= MessageBox.Show;
+                messageBoxExShow ??= AppMessageBox.Show;
                 messageBoxExShow(string.Format("Unable to open the path {0}, please check if it exists", filePath));
 #endif
         }

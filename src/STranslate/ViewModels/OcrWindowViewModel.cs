@@ -147,7 +147,13 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
 
             var ocrSvc = _ocrService.GetActiveSvc<IOcrPlugin>();
             if (ocrSvc == null)
+            {
+                Helper.PromptConfigureService(
+                    _i18n.GetTranslation("OcrServiceNotFoundTitle"),
+                    _i18n.GetTranslation("OcrServiceNotFoundMessage"),
+                    nameof(OcrPage));
                 return;
+            }
 
             var data = Utilities.ToBytes(bitmap, Settings.GetImageFormat());
 
@@ -189,7 +195,7 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _notification.Show(_i18n.GetTranslation("Prompt"), $"{_i18n.GetTranslation("OcrFailed")}\n{ex.Message}");
+            _snackbar.ShowError($"{_i18n.GetTranslation("OcrFailed")}\n{ex.Message}");
             _logger.LogError(ex, "OCR execution failed");
         }
         finally
@@ -260,7 +266,13 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
     {
         var ttsSvc = _ttsService.GetActiveSvc<ITtsPlugin>();
         if (ttsSvc == null)
+        {
+            Helper.PromptConfigureService(
+                _i18n.GetTranslation("Prompt"),
+                _i18n.GetTranslation("TtsServiceNotFound"),
+                nameof(TtsPage));
             return;
+        }
 
         await ttsSvc.PlayAudioAsync(text, cancellationToken);
     }

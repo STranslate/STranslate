@@ -748,6 +748,7 @@
     <sys:String x:Key="TtsFailed">语音合成失败</sys:String>
     <sys:String x:Key="TtsCancelled">朗读已取消</sys:String>
     <sys:String x:Key="TtsServiceNotFound">未配置语音合成服务，请前往「设置-服务-语音合成」配置</sys:String>
+    <sys:String x:Key="VocabularyServiceNotFound">未配置生词本服务，请前往「设置-服务-生词本」配置</sys:String>
     <sys:String x:Key="ImtransFailed">图片翻译失败</sys:String>
     <sys:String x:Key="NoTranslateService">未找到可用的翻译服务</sys:String>
     <sys:String x:Key="GoToSettings">点击前往</sys:String>
@@ -757,6 +758,11 @@
     <sys:String x:Key="OcrServiceNotFoundMessage">当前未配置或者启用OCR服务，请先前往「设置-服务-文本识别」配置后使用该功能</sys:String>
     <sys:String x:Key="ImageTranslateOcrServiceNotFoundTitle">无法获取图片翻译 OCR 服务</sys:String>
     <sys:String x:Key="ImageTranslateOcrServiceNotFoundMessage">当前未配置图片翻译 OCR 服务且无可用 OCR 服务，请先前往「设置-服务-文本识别」进行配置</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundTitle">无法获取替换翻译服务</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundMessage">当前未配置启用替换翻译服务，请先前往「设置-服务-文本翻译」配置后使用该功能</sys:String>
+    <sys:String x:Key="LanguageDetectionFailed">语言检测失败</sys:String>
+    <sys:String x:Key="NoTextRecognized">未识别到文本</sys:String>
+    <sys:String x:Key="NoTextRecognizedMessage" xml:space="preserve">请确保选中要翻译的文本&#10;若问题仍然存在请尝试以管理员权限重启软件</sys:String>
     <sys:String x:Key="NavigateFailed">已经到头了</sys:String>
     <sys:String x:Key="NoValidPluginFile">无SPKG文件</sys:String>
 

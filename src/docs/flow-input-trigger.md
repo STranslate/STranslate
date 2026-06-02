@@ -77,6 +77,11 @@
    - `InputTranslate`：清空输入并显示主窗口，回退到输入翻译；输入框会临时显示，不改写隐藏输入框设置。
    - `ShowWindow`：仅显示主窗口，保留当前输入和结果。
 
+### 触发失败的通知策略
+- 服务未配置（如截图翻译的 OCR 服务、替换翻译服务、TTS 等）：弹出 MessageBox（OK/Cancel），点击确定自动打开设置窗口并定位到对应配置页。业务入口收敛到 `Helper.PromptConfigureService`，弹窗显示收敛到 `AppMessageBox`，活动窗口优先、透明 owner 兜底。
+- 运行时失败（如 OCR 识别异常、语言检测失败）：在当前窗口内通过 **Snackbar** 提示；静默类操作（静默 OCR、截图翻译异常）会先 `Show()` 主窗口再弹 Snackbar，确保用户可见。
+- 剪贴板监听启停：保留系统 **Toast** 通知（唯一保留 Toast 的场景），因其为非关键状态提示。
+
 ### 软件内热键
 - 主窗口、OCR 窗口、图片翻译窗口通过 `InputBindings` 绑定 `HotkeySettings.*Hotkey.Key`。
 - 软件内热键不经过系统级注册，焦点窗口内生效。

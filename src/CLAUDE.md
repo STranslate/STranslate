@@ -7,6 +7,9 @@
 - 代码标识符、接口名、文件名保持原始英文。
 - 错误说明、改动说明与结论统一用中文。
 
+## 全局开发规则
+- 项目内 MessageBox 必须统一走 `AppMessageBox.Show()`，不要直接调用 iNKORE `MessageBox.Show()`。
+
 ## 最小构建与运行
 ```powershell
 # 最常用：直接运行

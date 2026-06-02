@@ -65,7 +65,7 @@ public partial class TranslateService : BaseService
     {
         if (svc.Plugin is IDictionaryPlugin)
         {
-            iNKORE.UI.WPF.Modern.Controls.MessageBox.Show("词典服务不支持替换功能。", Constant.AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
+            AppMessageBox.Show("词典服务不支持替换功能。", Constant.AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -86,7 +86,7 @@ public partial class TranslateService : BaseService
     {
         if (svc.Plugin is IDictionaryPlugin)
         {
-            iNKORE.UI.WPF.Modern.Controls.MessageBox.Show("词典服务不支持替换功能。", Constant.AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
+            AppMessageBox.Show("词典服务不支持替换功能。", Constant.AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

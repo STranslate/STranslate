@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Logging;
 using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Extensions.Logging;
 using STranslate.Controls;
 using STranslate.Helpers;
 using STranslate.Plugin;
@@ -12,7 +12,6 @@ using STranslate.Views;
 using STranslate.Views.Pages;
 using Velopack;
 using Velopack.Sources;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace STranslate.Core;
 
@@ -43,7 +42,7 @@ public class UpdaterService(
 
             if (newUpdateInfo == null)
             {
-                MessageBox.Show(i18n.GetTranslation("NoUpdateInfoFound"), Constant.AppName);
+                AppMessageBox.Show(i18n.GetTranslation("NoUpdateInfoFound"), Constant.AppName);
                 logger.LogInformation("No update info found.");
                 return;
             }
@@ -55,7 +54,7 @@ public class UpdaterService(
 
             if (newReleaseVersion <= currentVersion)
             {
-                MessageBox.Show(i18n.GetTranslation("AlreadyLatestVersion"), Constant.AppName);
+                AppMessageBox.Show(i18n.GetTranslation("AlreadyLatestVersion"), Constant.AppName);
                 logger.LogInformation("You are already on the latest version.");
                 return;
             }
@@ -73,10 +72,10 @@ public class UpdaterService(
 
             if (DataLocation.PortableDataLocationInUse())
             {
-                FilesFolders.CopyAll(DataLocation.PortableDataPath, DataLocation.TmpConfigDirectory, MessageBox.Show);
+                FilesFolders.CopyAll(DataLocation.PortableDataPath, DataLocation.TmpConfigDirectory, AppMessageBox.Show);
 
-                if (!FilesFolders.VerifyBothFolderFilesEqual(DataLocation.PortableDataPath, DataLocation.TmpConfigDirectory, MessageBox.Show))
-                    MessageBox.Show(string.Format(i18n.GetTranslation("PortableDataMoveError"),
+                if (!FilesFolders.VerifyBothFolderFilesEqual(DataLocation.PortableDataPath, DataLocation.TmpConfigDirectory, AppMessageBox.Show))
+                    AppMessageBox.Show(string.Format(i18n.GetTranslation("PortableDataMoveError"),
                         DataLocation.PortableDataPath,
                         DataLocation.TmpConfigDirectory), Constant.AppName);
             }
@@ -86,7 +85,7 @@ public class UpdaterService(
             notification.Show(i18n.GetTranslation("UpdateReady"), newVersionTips);
             logger.LogInformation($"Update success:{newVersionTips}");
 
-            if (MessageBox.Show(newVersionTips, Constant.AppName, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (AppMessageBox.Show(newVersionTips, Constant.AppName, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 updateManager.WaitExitThenApplyUpdates(newUpdateInfo);
                 Application.Current.Shutdown();

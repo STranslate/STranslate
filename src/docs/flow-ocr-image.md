@@ -61,6 +61,33 @@
 - 主窗口托盘菜单可通过 `Settings.ShowImageTranslateItemInNotifyIconMenu` 控制是否显示“图片翻译”入口。
 - 托盘右键触发截图类命令后，需要注意上下文菜单残留；截图入口应在执行前确保菜单状态已收敛。
 
+## 错误处理与通知策略
+
+### 服务未配置（阻断性错误）
+当 OCR / TTS 等核心服务未配置或全部禁用时，使用 `Helper.PromptConfigureService` 弹出 MessageBox（OK/Cancel）。弹窗底层统一走 `AppMessageBox`，活动窗口优先、没有活动窗口时通过主屏中心的临时透明 owner 显示：
+- 用户点击 **确定** → 自动打开设置窗口并定位到对应配置页。
+- 用户点击 **取消** → 仅关闭弹窗，不跳转。
+
+具体映射：
+| 功能 | 未配置服务 | 跳转页面 | 涉及 ViewModel |
+|---|---|---|---|
+| 截图翻译 | OCR | `OcrPage` | `MainWindowViewModel` |
+| 图片翻译窗口 | 图片翻译专用 OCR | `OcrPage` | `ImageTranslateWindowViewModel` |
+| OCR 窗口 | OCR | `OcrPage` | `OcrWindowViewModel` |
+| 朗读（主窗口/OCR窗口/图片翻译窗口） | TTS | `TtsPage` | `MainWindowViewModel` / `OcrWindowViewModel` / `ImageTranslateWindowViewModel` |
+
+### 运行时失败
+OCR / 图片翻译执行过程中抛出异常或返回失败结果时，使用当前窗口内的 **Snackbar** 提示：
+- `MainWindowViewModel.ScreenshotTranslateHandlerAsync` catch：先 `Show()` 主窗口，再 `_snackbar.ShowError`。
+- `MainWindowViewModel.SilentOcrHandlerAsync` catch：先 `Show()` 主窗口，再 `_snackbar.ShowError`（静默场景下没有可见窗口，必须先让窗口出现）。
+- `OcrWindowViewModel.ExecuteAsync` catch：`_snackbar.ShowError`。
+- `ImageTranslateWindowViewModel.ExecuteAsync` catch：`_snackbar.ShowError`。
+- OCR 识别成功但结果为空：`OcrWindowViewModel` / `ImageTranslateWindowViewModel` 使用 `_snackbar.ShowWarning`。
+
+### 其他 Snackbar 提示
+- 图片翻译服务未配置（`ImageTranslateService` 不可用）：`_snackbar.ShowWarning("NoTranslateService")`。
+- 图片翻译语言检测失败：`_snackbar.ShowWarning("LanguageDetectionFailed")`。
+
 ## 关键数据结构/配置
 - `OcrResult` / `OcrContent` / `BoxPoint`：OCR 原始与结构化文本块。
 - 版面分析参数（`Settings`）：

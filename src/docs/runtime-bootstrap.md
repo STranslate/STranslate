@@ -17,6 +17,8 @@
   - `OnLoaded()`、`OnContentRendered()`、`OnDeactivated()`、`Dispose()`。
 - `STranslate/Views/SettingsWindow.xaml.cs`
   - `Navigate()`：设置页导航入口与导航状态同步。
+- `STranslate/Core/AppMessageBox.cs`
+  - 应用级 MessageBox 入口：优先使用当前活动窗口作为 owner，缺省时用主屏中心的临时透明 owner 承载 iNKORE 弹窗。
 - `STranslate/Helpers/UACHelper.cs`
   - `Run()`：通过 Host 进程按普通/提权/计划任务模式拉起应用。
 - `STranslate.Host/src/commands/start.rs`
@@ -63,6 +65,12 @@
 - `SettingsWindow`：
   - `Navigate(tag)` 根据页面类型从 DI 取页实例并注入到 `RootFrame.Content`。
   - `Ctrl+F` 由 `OnKeyDown` 路由到当前页面的搜索框。
+- `AppMessageBox`：
+  - 项目内 MessageBox 必须统一走 `AppMessageBox.Show()`，不要直接调用 iNKORE `MessageBox.Show()`。
+  - 如果存在活动且可见的应用窗口，优先用该窗口作为 owner，保持 UI 点击触发弹窗的窗口上下文。
+  - 如果没有活动窗口，才创建一个 1x1、透明、置顶、不进任务栏的临时 owner，位置固定在主显示器正中心。
+  - 弹窗显示前会切回 UI Dispatcher；临时 owner 会被激活并在弹窗关闭后立即清理。
+  - 该策略兼顾窗口内点击弹窗和后台/热键触发弹窗，避免主窗口隐藏、设置窗口在后台或没有可见应用窗口时，模态弹窗创建成功但不可见。
 
 ## 关键数据结构/配置
 - `Settings`：主行为配置（窗口、主题、热键策略、网络、OCR/图像翻译参数等）。
@@ -76,6 +84,7 @@
 - `STranslate/Core/ISingleInstanceApp.cs`
 - `STranslate/Views/MainWindow.xaml.cs`
 - `STranslate/Views/SettingsWindow.xaml.cs`
+- `STranslate/Core/AppMessageBox.cs`
 - `STranslate/Core/DataLocation.cs`
 - `STranslate/Helpers/UACHelper.cs`
 - `STranslate.Host/src/commands/start.rs`
@@ -85,4 +94,5 @@
 - 增加全局异常策略：优先放到 `RegisterDispatcherUnhandledException` / `RegisterTaskSchedulerUnhandledException`。
 - 调整窗口初始行为：优先改 `MainWindow.OnContentRendered()` 与 `MainWindowViewModel.UpdatePosition()` 配合逻辑。
 - 设置页新增导航项：同步修改 `SettingsWindow.xaml` 菜单与 `SettingsWindow.xaml.cs` 的 `Navigate` 映射。
+- 新增阻断性弹窗：统一调用 `AppMessageBox.Show()`，保持活动窗口优先、透明 owner 兜底的策略。
 - 调整管理员或后台启动：同步修改 `UACHelper.Run()` 与 Host `start` 命令参数，确保主进程和 Host 协议一致。

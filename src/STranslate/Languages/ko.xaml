@@ -727,6 +727,7 @@
     <sys:String x:Key="TtsFailed">음성 합성 실패</sys:String>
     <sys:String x:Key="TtsCancelled">읽기가 취소되었습니다</sys:String>
     <sys:String x:Key="TtsServiceNotFound">음성 합성 서비스가 구성되지 않았습니다. "설정-서비스-TTS"에서 구성하세요</sys:String>
+    <sys:String x:Key="VocabularyServiceNotFound">단어장 서비스가 구성되지 않았습니다. "설정-서비스-단어장"에서 구성하세요</sys:String>
     <sys:String x:Key="ImtransFailed">이미지 번역 실패</sys:String>
     <sys:String x:Key="NoTranslateService">사용 가능한 번역 서비스를 찾을 수 없습니다</sys:String>
     <sys:String x:Key="GoToSettings">설정으로 이동</sys:String>
@@ -736,6 +737,11 @@
     <sys:String x:Key="OcrServiceNotFoundMessage">OCR 서비스가 설정되어 있지 않거나 활성화되어 있지 않습니다. 이 기능을 사용하기 전에 「설정-서비스-텍스트 인식」에서 설정해 주세요.</sys:String>
     <sys:String x:Key="ImageTranslateOcrServiceNotFoundTitle">이미지 번역 OCR 서비스를 가져올 수 없습니다</sys:String>
     <sys:String x:Key="ImageTranslateOcrServiceNotFoundMessage">이미지 번역 OCR 서비스가 설정되어 있지 않고 사용 가능한 OCR 서비스도 없습니다. 「설정-서비스-텍스트 인식」에서 설정해 주세요.</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundTitle">바꾸기 번역 서비스를 가져올 수 없습니다</sys:String>
+    <sys:String x:Key="ReplaceTranslateServiceNotFoundMessage">바꾸기 번역 서비스가 설정되어 있지 않거나 활성화되어 있지 않습니다. 이 기능을 사용하기 전에 「설정-서비스-번역」에서 설정해 주세요.</sys:String>
+    <sys:String x:Key="LanguageDetectionFailed">언어 감지에 실패했습니다</sys:String>
+    <sys:String x:Key="NoTextRecognized">텍스트를 인식하지 못했습니다</sys:String>
+    <sys:String x:Key="NoTextRecognizedMessage" xml:space="preserve">번역할 텍스트를 선택해 주세요.&#10;문제가 지속되면 관리자 권한으로 소프트웨어를 다시 시작해 보세요.</sys:String>
     <sys:String x:Key="NavigateFailed">더 이상 없습니다</sys:String>
     <sys:String x:Key="NoValidPluginFile">SPKG 파일 없음</sys:String>
 
