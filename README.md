@@ -1,3 +1,5 @@
+> 🌐 **Bu uygulamaya Türkçe dil desteği eklenmiştir.** (Turkish language support has been added to this application.)
+
 <div align="center">
 
 <p>
@@ -22,7 +24,7 @@
 
 <h1 align="center">STranslate 2.0</h1>
 
-**English** | [**简体中文**](./README_ZH.md)
+[**English**](./README.md) | **Türkçe** | [**简体中文**](./README_ZH.md)
 
 <p align="center">
   <a href="https://trendshift.io/repositories/15843" target="_blank">
@@ -34,60 +36,59 @@
   </a>
 </p>
 
-<p align="center">A <strong>ready-to-go</strong> translation and OCR tool developed with WPF.</p>
+<p align="center">WPF ile geliştirilmiş, <strong>kullanıma hazır</strong> bir çeviri ogv OCR (Optik Karakter Tanıma) aracı.[cite: 6]</p>
 
 </div>
 
-## Access
+## Erişim[cite: 6]
 
-| Overseas | Domestic |
+| Yurt Dışı | Yurt İçi (Çin) |[cite: 6]
 | :--: | :--: |
-| **[Github](https://github.com/STranslate/STranslate)** | **[Gitee](https://gitee.com/zggsong/STranslate)** |
+| **[Github](https://github.com/STranslate/STranslate)** | **[Gitee](https://gitee.com/zggsong/STranslate)** |[cite: 6]
 
-## Installation
+## Kurulum[cite: 6]
 
-Download the latest [Release](https://github.com/STranslate/STranslate/releases) version and extract it to use.
+En son [Sürüm (Release)](https://github.com/STranslate/STranslate/releases) paketini indirin ve kullanmak için arşivden çıkarın.[cite: 6]
 
-## Usage
+## Kullanım[cite: 6]
 
-[Document](https://stranslate.zggsong.com)
+[Dokümantasyon](https://stranslate.zggsong.com)[cite: 6]
 
-## Discussion
+## Tartışma ogv İletişim[cite: 6]
 
-If you have questions, please go to [Discussions](https://github.com/STranslate/STranslate/discussions) for discussion.
+Sorularınız için lütfen [Tartışmalar (Discussions)](https://github.com/STranslate/STranslate/discussions) bölümünü kullanın.[cite: 6]
 
-> If you want to join the user exchange group, you can scan the QR code below
+> Kullanıcı etkileşim grubuna katılmak isterseniz aşağıdaki QR kodu taratabilirsiniz[cite: 6]
 
-<img src="./images/telegram_group.jpg" Width="160" />
+<img src="./images/telegram_group.jpg" Width="160" />[cite: 6]
 
-## Support the project
+## Projeyi Destekleyin[cite: 6]
 
-<a href="https://jb.gg/OpenSourceSupport"><img src="./images/jb_beam.svg" /></a>
+<a href="https://jb.gg/OpenSourceSupport"><img src="./images/jb_beam.svg" /></a>[cite: 6]
 
-## Donations
+## Bağışlar[cite: 6]
 
-If you like it, you can buy the author a cup of coffee.
+Eğer projeyi beğendiyseniz, yazara bir fincan kahve ısmarlayabilirsiniz.[cite: 6]
 
-> Thank you to those who rewarded me [Sponsor List](Sponsor.md)
+> Bana destekte bulunan herkese teşekkür ederim: [Destekçi Listesi](Sponsor.md)[cite: 6]
 
-| WeChat | Alipay |
+| WeChat | Alipay |[cite: 6]
 | :--: | :--: |
-|![wehcatpay](./images/wechatpay.jpg) | ![alipay](./images/alipay.jpg) |
+|![wehcatpay](./images/wechatpay.jpg) | ![alipay](./images/alipay.jpg) |[cite: 6]
 
-## Author & Maintainer
+## Yazar & Geliştirici[cite: 6]
 
-**STranslate**
+**STranslate**[cite: 5, 6]
 
-Copyright © [zggsong](https://github.com/zggsong)
+Telif Hakkı © [zggsong](https://github.com/zggsong)[cite: 6]
 
-- Original author: [zggsong](https://github.com/zggsong)
-- Organization: [STranslate](https://github.com/STranslate)
-- License: [MIT](./LICENSE)
+- Özgün Yazar: [zggsong](https://github.com/zggsong)[cite: 6]
+- Organizasyon: [STranslate](https://github.com/STranslate)[cite: 6]
+- Lisans: [MIT](./LICENSE)[cite: 6]
 
-> [Website](https://stranslate.zggsong.com) [Blog](https://www.zggsong.com)
+> [Web Sitesi](https://stranslate.zggsong.com) [Blog](https://www.zggsong.com)[cite: 6]
 
 
-## Star History
+## Yıldız Geçmişi (Star History)[cite: 6]
 
-[![Star History Chart](https://api.star-history.com/svg?repos=ZGGSONG/STranslate&type=Date)](https://star-history.com/#ZGGSONG/STranslate&Date)
-
+[![Star History Chart](https://api.star-history.com/svg?repos=ZGGSONG/STranslate&type=Date)](https://star-history.com/#ZGGSONG/STranslate&Date)[cite: 6]

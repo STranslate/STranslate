@@ -22,7 +22,7 @@
 
 <h1 align="center">STranslate 2.0</h1>
 
-[**English**](./README.md) | **简体中文**
+[**English**](./README.md) | **Türkçe** | [**简体中文**](./README_ZH.md)
 
 <p align="center">
   <a href="https://trendshift.io/repositories/15843" target="_blank">
@@ -34,59 +34,59 @@
   </a>
 </p>
 
-<p align="center">WPF 开发的一款<strong>即用即走</strong>的翻译、OCR工具</p>
+<p align="center">WPF ile geliştirilmiş, <strong>kullanıma hazır (tak-çalıştır)</strong> bir çeviri ve OCR aracı.[cite: 5]</p>
 
 </div>
 
-## 访问
+## Erişim[cite: 5]
 
-| 国外 | 国内 |
+| Yurt Dışı | Yurt İçi (Çin) |[cite: 5]
 | :--: | :--: |
-| **[Github](https://github.com/STranslate/STranslate)** | **[Gitee](https://gitee.com/zggsong/STranslate)** |
+| **[Github](https://github.com/STranslate/STranslate)** | **[Gitee](https://gitee.com/zggsong/STranslate)** |[cite: 5]
 
 
-## 安装
+## Kurulum[cite: 5]
 
-下载最新 [Release](https://github.com/STranslate/STranslate/releases) 版本后解压即可使用
+En son [Sürüm (Release)](https://github.com/STranslate/STranslate/releases) paketini indirin ve kullanmak için arşivden çıkarın.[cite: 5]
 
-## 使用
+## Kullanım[cite: 5]
 
-[Document](https://stranslate.zggsong.com)
+[Dokümantasyon](https://stranslate.zggsong.com)[cite: 5]
 
-## 讨论
+## Tartışma ve İletişim[cite: 5]
 
-有疑问移步 [Discussions](https://github.com/STranslate/STranslate/discussions) 进行讨论
+Sorularınız için lütfen [Tartışmalar (Discussions)](https://github.com/STranslate/STranslate/discussions) bölümünü kullanın.[cite: 5]
 
-> 如果您想加入用户交流群，可以扫描下方二维码
+> Kullanıcı etkileşim grubuna katılmak isterseniz aşağıdaki QR kodu taratabilirsiniz[cite: 5]
 
-<img src="./images/telegram_group.jpg" Width="160" />
+<img src="./images/telegram_group.jpg" Width="160" />[cite: 5]
 
-## 感谢
+## Teşekkürler[cite: 5]
 
-<a href="https://jb.gg/OpenSourceSupport"><img src="./images/jb_beam.svg" /></a>
+<a href="https://jb.gg/OpenSourceSupport"><img src="./images/jb_beam.svg" /></a>[cite: 5]
 
-## 打赏
+## Bağışlar[cite: 5]
 
-觉得不错的话可以请作者喝杯阔落
+Eğer projeyi beğendiyseniz, yazara bir fincan kola ısmarlayabilirsiniz.[cite: 5]
 
-> 感谢打赏的朋友 [赞赏列表](Sponsor.md)
+> Bana destekte bulunan herkese teşekkür ederim: [Destekçi Listesi](Sponsor.md)[cite: 5]
 
-| 微信 | 支付宝 |
+| WeChat | Alipay |[cite: 5]
 | :--: | :--: |
-|![wehcatpay](./images/wechatpay.jpg) | ![alipay](./images/alipay.jpg) |
+|![wehcatpay](./images/wechatpay.jpg) | ![alipay](./images/alipay.jpg) |[cite: 5]
 
-## 作者
+## Yazar[cite: 5]
 
-**STranslate**
+**STranslate**[cite: 5]
 
-版权所有 © [zggsong](https://github.com/zggsong)
+Telif Hakkı Tüm Hakları Saklıdır © [zggsong](https://github.com/zggsong)[cite: 5]
 
-- 原始作者：[@zggsong](https://github.com/zggsong)
-- 项目组织：[STranslate](https://github.com/STranslate)
-- 许可证：[MIT](./LICENSE)
+- Özgün Yazar: [@zggsong](https://github.com/zggsong)[cite: 5]
+- Proje Organizasyonu: [STranslate](https://github.com/STranslate)[cite: 5]
+- Lisans: [MIT](./LICENSE)[cite: 5]
 
-> [Website](https://stranslate.zggsong.com) [Blog](https://www.zggsong.com)
+> [Web Sitesi](https://stranslate.zggsong.com) [Blog](https://www.zggsong.com)[cite: 5]
 
-## 星标历史
+## Yıldız Geçmişi (Star History)[cite: 5]
 
-[![Star History Chart](https://api.star-history.com/svg?repos=ZGGSONG/STranslate&type=Date)](https://star-history.com/#ZGGSONG/STranslate&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=ZGGSONG/STranslate&type=Date)](https://star-history.com/#ZGGSONG/STranslate&Date)[cite: 5]

@@ -1,26 +1,26 @@
-# Code of Conduct
+# Davranış Kuralları (Code of Conduct)
 
-## Our Pledge
+## Taahhüdümüz[cite: 4]
 
-We as members, contributors, and maintainers pledge to make participation in our community a harassment-free experience for everyone.
+Üyeler, katkıda bulunanlar ve yöneticiler olarak, topluluğumuza katılımı herkes için tacizden uzak bir deneyim haline getirmeyi taahhüt ediyoruz.[cite: 4]
 
-## Our Standards
+## Standartlarımız[cite: 4]
 
-Examples of behavior that contributes to a positive environment include:
-- Being respectful and inclusive
-- Using welcoming and constructive language
-- Respecting differing viewpoints and experiences
+Olumlu bir ortama katkıda bulunan davranış örnekleri şunlardır:[cite: 4]
+- Saygılı ve kapsayıcı olmak[cite: 4]
+- Karşılayıcı ve yapıcı bir dil kullanmak[cite: 4]
+- Farklı görüşlere ve deneyimlere saygı duymak[cite: 4]
 
-Examples of unacceptable behavior include:
-- Harassment or discrimination
-- Trolling or insulting comments
-- Public or private abuse
+Kabul edilemez davranış örnekleri şunlardır:[cite: 4]
+- Taciz veya ayrımcılık[cite: 4]
+- Trolleme veya hakaret içerikli yorumlar[cite: 4]
+- Kamusal veya özel taciz/suiistimal[cite: 4]
 
-## Enforcement
+## Uygulama[cite: 4]
 
-Project maintainers are responsible for clarifying and enforcing our standards.
+Proje yöneticileri, standartlarımızın netleştirilmesinden ve uygulanmasından sorumludur.[cite: 4]
 
-## Attribution
+## Atıf[cite: 4]
 
-This Code of Conduct is adapted from the Contributor Covenant.
-https://www.contributor-covenant.org/
+Bu Davranış Kuralları, Contributor Covenant platformundan uyarlanmıştır.[cite: 4]
+https://www.contributor-covenant.org/[cite: 4]

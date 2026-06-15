@@ -11,7 +11,7 @@ function Log([string]$msg, [string]$color = "Yellow") {
 
 # 去除版本号中的 'v' 前缀(如果存在)
 $CleanVersion = $Version -replace '^v', ''
-Log "Starting build for STranslate version: $CleanVersion" "Green"
+Log "开始构建 STranslate 版本: $CleanVersion" "Green"
 
 # 更新./src/SolutionAssemblyInfo.cs 中的版本号
 $asmInfo = "./src/SolutionAssemblyInfo.cs"
@@ -36,15 +36,15 @@ if (Test-Path $asmInfo) {
     # 写回文件
     Set-Content $asmInfo $content -Encoding UTF8
 
-    Log "SolutionAssemblyInfo.cs has been updated to version: $CleanVersion" "Green"
+    Log "SolutionAssemblyInfo.cs 已更新为版本: $CleanVersion" "Green"
 }
 else {
-    Log "Error: $asmInfo not found, cannot write version." "Red"
+    Log "未找到 $asmInfo，无法执行版本写入。" "Red"
     exit 1
 }
 
 # 清理构建输出
-Log "Cleaning previous builds..."
+Log "正在清理之前的构建..."
 $artifactPath = ".\src\.artifacts\Release\"
 
 if (Test-Path $artifactPath) {
@@ -52,7 +52,7 @@ if (Test-Path $artifactPath) {
 }
 
 # 更新 Fody 配置文件
-Log "Updating FodyWeavers..."
+Log "正在更新 FodyWeavers..."
 
 $src = "./src/STranslate/FodyWeavers.Release.xml"
 $bak = "./src/STranslate/FodyWeavers.xml.bak"
@@ -62,11 +62,11 @@ if (Test-Path $src) {
     Copy-Item $src $bak -Force
     Move-Item -Path $bak -Destination $dst -Force
 } else {
-    Log "Warning: $src not found, skipping update." "Red"
+    Log "未找到 $src，跳过更新。" "Red"
 }
 
 # 构建解决方案
-Log "Rebuilding solution..."
+Log "正在重新生成解决方案..."
 dotnet build .\src\STranslate.slnx `
   --configuration Release `
   --no-incremental `
@@ -76,11 +76,11 @@ dotnet build .\src\STranslate.slnx `
 
 
 # 还原 FodyWeavers.xml
-Log "Restoring FodyWeavers.xml and SolutionAssemblyInfo.cs..."
+Log "正在还原 FodyWeavers.xml SolutionAssemblyInfo.cs..."
 git restore $dst $asmInfo
 
 # 清理插件目录中多余文件
-Log "Cleaning redundant STranslate.Plugin files..."
+Log "正在清理多余的 STranslate.Plugin 文件..."
 
 $pluginsPath = "./src/.artifacts/Release/Plugins"
 if (Test-Path $pluginsPath) {
@@ -88,4 +88,4 @@ if (Test-Path $pluginsPath) {
         Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
-Log "Build completed successfully!" "Green"
+Log "构建完成！" "Green"

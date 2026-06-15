@@ -1,43 +1,42 @@
-# 隐私策略（Privacy Policy）
+# Gizlilik Politikası (Privacy Policy)
 
-**最后更新日期：2025年9月22日**
+**Son Güncelleme Tarihi: 22 Eylül 2025**
 
-本应用（以下简称“本软件”）非常重视用户的隐私。本隐私策略旨在说明本软件在使用过程中如何处理您的数据。
+Bu uygulama (bundan sonra "Yazılım" olarak anılacaktır), kullanıcıların gizliliğine son derece önem vermektedir. Bu gizlilik politikası, Yazılımın kullanım sürecinde verilerinizi nasıl işlediğini açıklamak amacıyla hazırlanmıştır.
 
-## 1. 数据收集
+## 1. Veri Toplama
 
-* 本软件 **不会主动收集** 任何能够识别您个人身份的信息（如姓名、电子邮件、电话号码等）。
-* 本软件可能会在本地保存配置文件或用户偏好设置，但这些数据仅存储在您的设备上，不会上传或共享。
+* Bu Yazılım, kişisel kimliğinizi tanımlayabilecek hiçbir bilgiyi (isim, e-posta adresi, telefon numarası vb.) **aktif olarak toplamaz**.
+* Yazılım, yerel olarak yapılandırma dosyalarını veya kullanıcı tercihlerini kaydedebilir; ancak bu veriler yalnızca cihazınızda depolanır, karşıya yüklenmez veya paylaşılmaz.
 
-## 2. 数据使用
+## 2. Veri Kullanımı
 
-* 本软件仅在您的设备上运行，所保存的数据仅用于提供功能或改善使用体验。
-* 除非您明确选择导出、上传或分享，本软件不会将任何数据传输至开发者或第三方。
+* Bu Yazılım yalnızca cihazınızda çalışır ve kaydedilen veriler sadece işlev sağlamak veya kullanıcı deneyimini iyileştirmek amacıyla kullanılır.
+* Siz açıkça dışa aktarmayı, yüklemeyi veya paylaşmayı seçmediğiniz sürece, Yazılım geliştiriciye veya herhangi bir üçüncü tarafa hiçbir veri aktarmaz.
 
-## 3. 第三方服务
+## 3. Üçüncü Taraf Servisler
 
-* 本软件 **不集成广告、分析或第三方追踪服务**。
-* 如果未来版本接入第三方服务，将在更新隐私策略时明确说明。
+* Bu Yazılım; **reklam, analiz veya üçüncü taraf takip hizmetleri barındırmaz**.
+* Gelecekteki sürümlerde üçüncü taraf servislerin entegre edilmesi durumunda, bu durum gizlilik politikası güncellenerek açıkça belirtilecektir.
 
-## 4. 数据安全
+## 4. Veri Güvenliği
 
-* 本软件不会收集或传输敏感信息，因此不存在外部数据泄露的风险。
-* 您本地的数据安全取决于您的设备和操作系统环境。
+* Bu Yazılım hassas bilgileri toplamadığı veya aktarmadığı için dışarıya veri sızması riski bulunmamaktadır.
+* Yerel verilerinizin güvenliği, cihazınıza ve işletim sistemi ortamınıza bağlıdır.
 
-## 5. 儿童隐私
+## 5. Çocukların Gizliliği
 
-* 本软件适用于所有用户，不含不适合儿童的内容。
-* 本软件不收集儿童的个人信息。
+* Bu Yazılım tüm kullanıcılar için uygundur ve çocuklara uygun olmayan içerik barındırmaz.
+* Bu Yazılım, çocukların kişisel bilgilerini toplamaz.
 
-## 6. 政策更新
+## 6. Politika Güncellemeleri
 
-* 如果本隐私策略有任何变更，将通过更新本文件的方式予以公布。
-* 请您定期查阅，以了解最新的隐私保护措施。
+* Bu gizlilik politikasında herhangi bir değişiklik yapılması durumunda, değişiklikler bu belgenin güncellenmesi yoluyla duyurulacaktır.
+* En güncel gizlilik koruma önlemlerinden haberdar olmak için lütfen bu politikayı düzenli olarak gözden geçirin.
 
-## 7. 联系方式
+## 7. İletişim
 
-如果您对本隐私策略有任何疑问或建议，请通过以下方式联系开发者：
+Bu gizlilik politikasıyla ilgili herhangi bir sorunuz veya öneriniz varsa, lütfen aşağıdaki kanallar üzerinden geliştiriciyle iletişime geçin:
 
 * GitHub Issues: https://github.com/ZGGSONG/STranslate
-* 电子邮件: zggsong@foxmail.com
-
+* E-posta: zggsong@foxmail.com
