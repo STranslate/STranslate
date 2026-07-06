@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Extensions.Logging;
-using Serilog;
 using STranslate.Core;
 using STranslate.Helpers;
 using STranslate.Plugin;
@@ -2070,12 +2069,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         var workAreaHeight = Math.Max(0, workAreaBottomRight.Y - workAreaTopLeft.Y - 8 * 2);
         var effectiveMaxHeight = Math.Max(window.MinHeight, workAreaHeight * ratio);
         MainWindowEffectiveMaxHeight = Math.Max(window.MinHeight, effectiveMaxHeight);
-
-        // [DIAG] 记录最大高度约束的计算过程
-        Log.Information(
-            "[DPI-DIAG] UpdateMaxHeightConstraint: workAreaPx=({WX}x{WY}) workAreaDipH={WH} ratio={R} effectiveMaxH={EMH} minH={MinH}",
-            targetMonitor.WorkingArea.Width, targetMonitor.WorkingArea.Height,
-            workAreaHeight, ratio, MainWindowEffectiveMaxHeight, window.MinHeight);
     }
 
     private MonitorInfo GetWindowMonitor()
@@ -2095,16 +2088,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public void UpdatePosition(bool hideOnStartup = false)
     {
         if (IsTopmost) return;
-
-        // [DIAG] 记录 UpdatePosition 入口状态
-        GetDpi(out var dpiX, out var dpiY);
-        Log.Information(
-            "[DPI-DIAG] UpdatePosition ENTER: hideOnStartup={Hide} VirtualScreen={W}x{H} dpi=({DX},{DY}) " +
-            "WindowScreen={WS} WindowAlign={WA} Left={L} Top={T} Width={WW} Prev=({PW}x{PH})",
-            hideOnStartup, SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight,
-            dpiX, dpiY, Settings.WindowScreen, Settings.WindowAlign,
-            Settings.MainWindowLeft, Settings.MainWindowTop, Settings.MainWindowWidth,
-            Settings.PreviousScreenWidth, Settings.PreviousScreenHeight);
 
         InternalUpdatePosition(hideOnStartup);
         InternalUpdatePosition(hideOnStartup);

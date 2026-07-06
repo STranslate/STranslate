@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Serilog;
 using STranslate.Core;
 using STranslate.Helpers;
 using STranslate.ViewModels;
@@ -15,10 +14,16 @@ public partial class MainWindow : IDisposable
 {
     private const int WmNcHitTest = 0x0084;
 
-    // WM_DPICHANGED：显示器/DPI 变化时系统下发，RDP 接入或跨屏移动会触发。
+    // WM_DPICHANGED：显示器 DPI 变化时系统下发（如跨屏移动到不同缩放的显示器）。
     // PerMonitorV2 下 WPF 默认只保持 DIP 尺寸不变，不会重新调用我们的布局约束逻辑，
     // 这里显式拦截，让运行中 DPI 切换也走一遍和启动相同的重排路径。
     private const int WmDpiChanged = 0x02E0;
+
+    // WM_DISPLAYCHANGE：显示分辨率变化时系统下发。RDP 全屏接入是典型场景——
+    // 客户端分辨率低于主机时，主机进程感知到的物理分辨率被砍半，但 DPI 不变
+    // （因此不会触发 WM_DPICHANGED）。此时 DIP 屏幕尺寸 = 物理像素 / DPI * 96 会缩水，
+    // 窗口 DIP 尺寸不变导致在屏幕中占比变大，体感"放大"。需重排约束与位置。
+    private const int WmDisplayChange = 0x007E;
 
     private static readonly IntPtr HtClient = new(1);
     private static readonly IntPtr HtLeft = new(10);
@@ -90,19 +95,12 @@ public partial class MainWindow : IDisposable
             Dispatcher.BeginInvoke(RefreshNotifyIcon, DispatcherPriority.Loaded);
         }
 
-        if (msg == WmDpiChanged)
+        // DPI 变化或显示分辨率变化都会让窗口的 DIP 尺寸与屏幕比例失调，
+        // 需要重排。两者都让 WPF 先完成默认处理，再在后台优先级重算约束和位置，
+        // 避免在系统处理过程中读到中间态的尺寸/位置值。
+        if (msg == WmDpiChanged || msg == WmDisplayChange)
         {
-            // [DIAG] 验证 WM_DPICHANGED 是否真的被触发，并记录新旧 DPI
-            var newDpiY = (uint)(lParam.ToInt64() >> 32) & 0xFFFF;
-            var newDpiX = (uint)(lParam.ToInt64() >> 16) & 0xFFFF;
-            var oldDpi = (uint)(wParam.ToInt64() & 0xFFFF);
-            Log.Information(
-                "[DPI-DIAG] WM_DPICHANGED received: oldDpi={OldDpi} newDpiX={NewDpiX} newDpiY={NewDpiY}",
-                oldDpi, newDpiX, newDpiY);
-
-            // 让 WPF 先按默认行为完成 DPI 切换与布局更新，再在后台优先级重算约束和位置，
-            // 避免在系统处理过程中读到中间态的尺寸/位置值。
-            Dispatcher.BeginInvoke(RefreshLayoutAfterDpiChanged, DispatcherPriority.Background);
+            Dispatcher.BeginInvoke(RefreshLayoutAfterDisplayChange, DispatcherPriority.Background);
         }
 
         if (msg == WmNcHitTest && TryHandleHorizontalResizeHitTest(lParam, out var hitTestResult))
@@ -114,23 +112,12 @@ public partial class MainWindow : IDisposable
         return IntPtr.Zero;
     }
 
-    private void RefreshLayoutAfterDpiChanged()
+    private void RefreshLayoutAfterDisplayChange()
     {
-        // [DIAG] 记录重排前的屏幕参数与窗口尺寸
-        Log.Information(
-            "[DPI-DIAG] RefreshLayout BEFORE: VirtualScreen={W}x{H} VirtualScreenLeft={L} VirtualScreenTop={T} Actual={AW}x{AH}",
-            SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight,
-            SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
-            ActualWidth, ActualHeight);
-
-        // 与 OnLoaded 走相同的重排路径，确保运行中 DPI 变化后
-        // 最大高度约束、窗口位置都与新屏幕/DPI 匹配。
+        // 与 OnLoaded 走相同的重排路径，确保运行中 DPI/分辨率变化后
+        // 最大高度约束、窗口位置都与新屏幕匹配。
         _viewModel.InitializeWindowLayoutConstraints();
         _viewModel.UpdatePosition();
-
-        Log.Information(
-            "[DPI-DIAG] RefreshLayout AFTER: MainWindowLeft={L} MainWindowTop={T} Actual={AW}x{AH}",
-            _settings.MainWindowLeft, _settings.MainWindowTop, ActualWidth, ActualHeight);
     }
 
     private bool TryHandleHorizontalResizeHitTest(IntPtr lParam, out IntPtr hitTestResult)
