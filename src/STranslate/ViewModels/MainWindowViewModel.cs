@@ -2289,21 +2289,20 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     private void AdjustPositionForResolutionChange()
     {
+        // SystemParameters.VirtualScreenWidth/Height 返回值已经是 DIP，
+        // 自身已包含 DPI 折算，宽度比即可反映分辨率+DPI 的综合变化，
+        // 不能再乘 DPI 比，否则会把 DPI 算两遍导致窗口位置被额外压缩。
         var screenWidth = SystemParameters.VirtualScreenWidth;
         var screenHeight = SystemParameters.VirtualScreenHeight;
-        GetDpi(out var currentDpiX, out var currentDpiY);
 
         var previousLeft = Settings.MainWindowLeft;
         var previousTop = Settings.MainWindowTop;
-        GetDpi(out var previousDpiX, out var previousDpiY);
 
         var widthRatio = screenWidth / Settings.PreviousScreenWidth;
         var heightRatio = screenHeight / Settings.PreviousScreenHeight;
-        var dpiXRatio = currentDpiX / previousDpiX;
-        var dpiYRatio = currentDpiY / previousDpiY;
 
-        var newLeft = previousLeft * widthRatio * dpiXRatio;
-        var newTop = previousTop * heightRatio * dpiYRatio;
+        var newLeft = previousLeft * widthRatio;
+        var newTop = previousTop * heightRatio;
 
         var screenLeft = SystemParameters.VirtualScreenLeft;
         var screenTop = SystemParameters.VirtualScreenTop;

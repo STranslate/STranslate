@@ -14,6 +14,11 @@ public partial class MainWindow : IDisposable
 {
     private const int WmNcHitTest = 0x0084;
 
+    // WM_DPICHANGED：显示器/DPI 变化时系统下发，RDP 接入或跨屏移动会触发。
+    // PerMonitorV2 下 WPF 默认只保持 DIP 尺寸不变，不会重新调用我们的布局约束逻辑，
+    // 这里显式拦截，让运行中 DPI 切换也走一遍和启动相同的重排路径。
+    private const int WmDpiChanged = 0x02E0;
+
     private static readonly IntPtr HtClient = new(1);
     private static readonly IntPtr HtLeft = new(10);
     private static readonly IntPtr HtRight = new(11);
@@ -84,6 +89,13 @@ public partial class MainWindow : IDisposable
             Dispatcher.BeginInvoke(RefreshNotifyIcon, DispatcherPriority.Loaded);
         }
 
+        if (msg == WmDpiChanged)
+        {
+            // 让 WPF 先按默认行为完成 DPI 切换与布局更新，再在后台优先级重算约束和位置，
+            // 避免在系统处理过程中读到中间态的尺寸/位置值。
+            Dispatcher.BeginInvoke(RefreshLayoutAfterDpiChanged, DispatcherPriority.Background);
+        }
+
         if (msg == WmNcHitTest && TryHandleHorizontalResizeHitTest(lParam, out var hitTestResult))
         {
             handled = true;
@@ -91,6 +103,14 @@ public partial class MainWindow : IDisposable
         }
 
         return IntPtr.Zero;
+    }
+
+    private void RefreshLayoutAfterDpiChanged()
+    {
+        // 与 OnLoaded 走相同的重排路径，确保运行中 DPI 变化后
+        // 最大高度约束、窗口位置都与新屏幕/DPI 匹配。
+        _viewModel.InitializeWindowLayoutConstraints();
+        _viewModel.UpdatePosition();
     }
 
     private bool TryHandleHorizontalResizeHitTest(IntPtr lParam, out IntPtr hitTestResult)
