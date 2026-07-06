@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Serilog;
 using STranslate.Core;
 using STranslate.Helpers;
 using STranslate.ViewModels;
@@ -91,6 +92,14 @@ public partial class MainWindow : IDisposable
 
         if (msg == WmDpiChanged)
         {
+            // [DIAG] 验证 WM_DPICHANGED 是否真的被触发，并记录新旧 DPI
+            var newDpiY = (uint)(lParam.ToInt64() >> 32) & 0xFFFF;
+            var newDpiX = (uint)(lParam.ToInt64() >> 16) & 0xFFFF;
+            var oldDpi = (uint)(wParam.ToInt64() & 0xFFFF);
+            Log.Information(
+                "[DPI-DIAG] WM_DPICHANGED received: oldDpi={OldDpi} newDpiX={NewDpiX} newDpiY={NewDpiY}",
+                oldDpi, newDpiX, newDpiY);
+
             // 让 WPF 先按默认行为完成 DPI 切换与布局更新，再在后台优先级重算约束和位置，
             // 避免在系统处理过程中读到中间态的尺寸/位置值。
             Dispatcher.BeginInvoke(RefreshLayoutAfterDpiChanged, DispatcherPriority.Background);
@@ -107,10 +116,21 @@ public partial class MainWindow : IDisposable
 
     private void RefreshLayoutAfterDpiChanged()
     {
+        // [DIAG] 记录重排前的屏幕参数与窗口尺寸
+        Log.Information(
+            "[DPI-DIAG] RefreshLayout BEFORE: VirtualScreen={W}x{H} VirtualScreenLeft={L} VirtualScreenTop={T} Actual={AW}x{AH}",
+            SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight,
+            SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
+            ActualWidth, ActualHeight);
+
         // 与 OnLoaded 走相同的重排路径，确保运行中 DPI 变化后
         // 最大高度约束、窗口位置都与新屏幕/DPI 匹配。
         _viewModel.InitializeWindowLayoutConstraints();
         _viewModel.UpdatePosition();
+
+        Log.Information(
+            "[DPI-DIAG] RefreshLayout AFTER: MainWindowLeft={L} MainWindowTop={T} Actual={AW}x{AH}",
+            _settings.MainWindowLeft, _settings.MainWindowTop, ActualWidth, ActualHeight);
     }
 
     private bool TryHandleHorizontalResizeHitTest(IntPtr lParam, out IntPtr hitTestResult)
