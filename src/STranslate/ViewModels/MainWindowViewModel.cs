@@ -25,6 +25,8 @@ namespace STranslate.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject, IDisposable
 {
+    private const double MainWindowEdgePadding = 8;
+
     #region Constructor & DI
 
     private readonly ILogger<MainWindowViewModel> _logger;
@@ -2110,35 +2112,21 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
             if (Settings.WindowScreen == WindowScreenType.FollowMouse)
             {
+                NormalizeMainWindowForDisplayChange();
                 UpdatePositionNearCursor();
+                ClampMainWindowWithinCurrentWorkArea(MonitorInfo.GetCursorDisplayMonitor());
                 return;
             }
 
             if (Settings.WindowScreen == WindowScreenType.RememberLastLaunchLocation)
             {
-                var previousScreenWidth = Settings.PreviousScreenWidth;
-                var previousScreenHeight = Settings.PreviousScreenHeight;
-                GetDpi(out var previousDpiX, out var previousDpiY);
-
-                Settings.PreviousScreenWidth = SystemParameters.VirtualScreenWidth;
-                Settings.PreviousScreenHeight = SystemParameters.VirtualScreenHeight;
-                GetDpi(out var currentDpiX, out var currentDpiY);
-
-                if (previousScreenWidth != 0 && previousScreenHeight != 0 &&
-                    previousDpiX != 0 && previousDpiY != 0 &&
-                    (previousScreenWidth != SystemParameters.VirtualScreenWidth ||
-                     previousScreenHeight != SystemParameters.VirtualScreenHeight ||
-                     previousDpiX != currentDpiX || previousDpiY != currentDpiY))
-                {
-                    AdjustPositionForResolutionChange();
-                    return;
-                }
-
+                NormalizeMainWindowForDisplayChange();
                 Settings.MainWindowLeft = Settings.MainWindowLeft;
                 Settings.MainWindowTop = Settings.MainWindowTop;
             }
             else
             {
+                NormalizeMainWindowForDisplayChange();
                 var screen = SelectedScreen();
                 switch (Settings.WindowAlign)
                 {
@@ -2167,6 +2155,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                         Settings.MainWindowTop = customTop.Y;
                         break;
                 }
+                ClampMainWindowWithinCurrentWorkArea(screen);
             }
         }
     }
@@ -2190,7 +2179,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             screen.WorkingArea.X + screen.WorkingArea.Width,
             screen.WorkingArea.Y + screen.WorkingArea.Height);
 
-        var windowWidth = MainWindow.ActualWidth > 0 ? MainWindow.ActualWidth : Settings.MainWindowWidth;
+        var windowWidth = GetCurrentMainWindowWidth();
         var windowHeight = MainWindow.ActualHeight > 0 ? MainWindow.ActualHeight : MainWindow.MinHeight;
 
         var left = cursorDip.X + horizontalOffset;
@@ -2287,33 +2276,181 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         Settings.MainWindowTop = targetTop;
     }
 
-    private void AdjustPositionForResolutionChange()
+    internal void HandleDisplayEnvironmentChanged()
     {
-        var screenWidth = SystemParameters.VirtualScreenWidth;
-        var screenHeight = SystemParameters.VirtualScreenHeight;
-        GetDpi(out var currentDpiX, out var currentDpiY);
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(HandleDisplayEnvironmentChanged));
+            return;
+        }
 
-        var previousLeft = Settings.MainWindowLeft;
-        var previousTop = Settings.MainWindowTop;
-        GetDpi(out var previousDpiX, out var previousDpiY);
+        UpdateMainWindowMaxHeightConstraint();
+        NormalizeMainWindowForDisplayChange();
 
-        var widthRatio = screenWidth / Settings.PreviousScreenWidth;
-        var heightRatio = screenHeight / Settings.PreviousScreenHeight;
-        var dpiXRatio = currentDpiX / previousDpiX;
-        var dpiYRatio = currentDpiY / previousDpiY;
+        if (!IsMainWindowVisible)
+            return;
 
-        var newLeft = previousLeft * widthRatio * dpiXRatio;
-        var newTop = previousTop * heightRatio * dpiYRatio;
-
-        var screenLeft = SystemParameters.VirtualScreenLeft;
-        var screenTop = SystemParameters.VirtualScreenTop;
-
-        var maxX = screenLeft + screenWidth - MainWindow.ActualWidth;
-        var maxY = screenTop + screenHeight - MainWindow.ActualHeight;
-
-        Settings.MainWindowLeft = Math.Max(screenLeft, Math.Min(newLeft, maxX));
-        Settings.MainWindowTop = Math.Max(screenTop, Math.Min(newTop, maxY));
+        ClampMainWindowWithinCurrentWorkArea();
+        AdjustPositionForContentSizeChanged();
     }
+
+    private bool NormalizeMainWindowForDisplayChange()
+    {
+        var previous = ReadPreviousMainWindowDisplaySnapshot();
+        var current = CaptureCurrentMainWindowDisplaySnapshot();
+        if (!current.IsInitialized)
+            return false;
+
+        if (!previous.IsInitialized)
+        {
+            StoreMainWindowDisplaySnapshot(current);
+            return false;
+        }
+
+        if (!MainWindowPlacementNormalizer.HasDisplayChanged(previous, current))
+            return false;
+
+        var actualHeight = GetCurrentMainWindowHeight();
+        if (IsMainWindowPositionHidden())
+        {
+            if (HasCachedMainWindowPosition())
+            {
+                var cachedPlacement = new MainWindowPlacement(_cacheLeft, _cacheTop, Settings.MainWindowWidth);
+                var normalizedCache = MainWindowPlacementNormalizer.NormalizeForDisplayChange(
+                    previous,
+                    current,
+                    cachedPlacement,
+                    actualHeight,
+                    MainWindow.MinWidth,
+                    MainWindowEdgePadding);
+
+                _cacheLeft = normalizedCache.Left;
+                _cacheTop = normalizedCache.Top;
+                Settings.MainWindowWidth = normalizedCache.Width;
+            }
+
+            StoreMainWindowDisplaySnapshot(current);
+            return true;
+        }
+
+        var placement = new MainWindowPlacement(
+            Settings.MainWindowLeft,
+            Settings.MainWindowTop,
+            Settings.MainWindowWidth);
+        var normalized = MainWindowPlacementNormalizer.NormalizeForDisplayChange(
+            previous,
+            current,
+            placement,
+            actualHeight,
+            MainWindow.MinWidth,
+            MainWindowEdgePadding);
+
+        ApplyMainWindowPlacement(normalized);
+        StoreMainWindowDisplaySnapshot(current);
+        return true;
+    }
+
+    private void ClampMainWindowWithinCurrentWorkArea(MonitorInfo? monitor = null)
+    {
+        if (IsMainWindowPositionHidden())
+            return;
+
+        var current = CaptureCurrentMainWindowDisplaySnapshot(monitor);
+        if (!current.IsInitialized)
+            return;
+
+        var placement = new MainWindowPlacement(
+            Settings.MainWindowLeft,
+            Settings.MainWindowTop,
+            Settings.MainWindowWidth);
+        var clamped = MainWindowPlacementNormalizer.ClampToWorkArea(
+            current,
+            placement,
+            GetCurrentMainWindowHeight(),
+            MainWindow.MinWidth,
+            MainWindowEdgePadding);
+
+        ApplyMainWindowPlacement(clamped);
+        StoreMainWindowDisplaySnapshot(current);
+    }
+
+    private MainWindowDisplaySnapshot ReadPreviousMainWindowDisplaySnapshot() =>
+        new(
+            Settings.PreviousMainWindowWorkAreaLeft,
+            Settings.PreviousMainWindowWorkAreaTop,
+            Settings.PreviousMainWindowWorkAreaWidth,
+            Settings.PreviousMainWindowWorkAreaHeight,
+            Settings.PreviousMainWindowDpiX,
+            Settings.PreviousMainWindowDpiY);
+
+    private MainWindowDisplaySnapshot CaptureCurrentMainWindowDisplaySnapshot(MonitorInfo? monitor = null)
+    {
+        var targetMonitor = monitor ?? GetWindowMonitor();
+        var workAreaTopLeft = Win32Helper.TransformPixelsToDIP(
+            MainWindow,
+            targetMonitor.WorkingArea.X,
+            targetMonitor.WorkingArea.Y);
+        var workAreaBottomRight = Win32Helper.TransformPixelsToDIP(
+            MainWindow,
+            targetMonitor.WorkingArea.X + targetMonitor.WorkingArea.Width,
+            targetMonitor.WorkingArea.Y + targetMonitor.WorkingArea.Height);
+        GetDpi(out var dpiX, out var dpiY);
+
+        return new MainWindowDisplaySnapshot(
+            workAreaTopLeft.X,
+            workAreaTopLeft.Y,
+            Math.Max(0, workAreaBottomRight.X - workAreaTopLeft.X),
+            Math.Max(0, workAreaBottomRight.Y - workAreaTopLeft.Y),
+            dpiX,
+            dpiY);
+    }
+
+    private void StoreMainWindowDisplaySnapshot(MainWindowDisplaySnapshot snapshot)
+    {
+        if (IsSameMainWindowDisplaySnapshot(ReadPreviousMainWindowDisplaySnapshot(), snapshot))
+            return;
+
+        Settings.PreviousMainWindowWorkAreaLeft = snapshot.WorkAreaLeft;
+        Settings.PreviousMainWindowWorkAreaTop = snapshot.WorkAreaTop;
+        Settings.PreviousMainWindowWorkAreaWidth = snapshot.WorkAreaWidth;
+        Settings.PreviousMainWindowWorkAreaHeight = snapshot.WorkAreaHeight;
+        Settings.PreviousMainWindowDpiX = snapshot.DpiX;
+        Settings.PreviousMainWindowDpiY = snapshot.DpiY;
+        Settings.SaveWithDebounce();
+    }
+
+    private void ApplyMainWindowPlacement(MainWindowPlacement placement)
+    {
+        Settings.MainWindowWidth = placement.Width;
+        Settings.MainWindowLeft = placement.Left;
+        Settings.MainWindowTop = placement.Top;
+    }
+
+    private double GetCurrentMainWindowHeight() =>
+        MainWindow.ActualHeight > 0 ? MainWindow.ActualHeight : MainWindow.MinHeight;
+
+    private double GetCurrentMainWindowWidth() =>
+        Settings.MainWindowWidth > 0 ? Settings.MainWindowWidth : Math.Max(MainWindow.ActualWidth, MainWindow.MinWidth);
+
+    private bool IsMainWindowPositionHidden() =>
+        Settings.MainWindowLeft <= -18000 && Settings.MainWindowTop <= -18000;
+
+    private bool HasCachedMainWindowPosition() =>
+        Math.Abs(_cacheLeft) > double.Epsilon || Math.Abs(_cacheTop) > double.Epsilon;
+
+    private static bool IsSameMainWindowDisplaySnapshot(
+        MainWindowDisplaySnapshot left,
+        MainWindowDisplaySnapshot right) =>
+        NearlyEqual(left.WorkAreaLeft, right.WorkAreaLeft) &&
+        NearlyEqual(left.WorkAreaTop, right.WorkAreaTop) &&
+        NearlyEqual(left.WorkAreaWidth, right.WorkAreaWidth) &&
+        NearlyEqual(left.WorkAreaHeight, right.WorkAreaHeight) &&
+        NearlyEqual(left.DpiX, right.DpiX) &&
+        NearlyEqual(left.DpiY, right.DpiY);
+
+    private static bool NearlyEqual(double left, double right) =>
+        Math.Abs(left - right) < 0.01;
 
     private void GetDpi(out double dpiX, out double dpiY)
     {
@@ -2365,7 +2502,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         var dip1 = Win32Helper.TransformPixelsToDIP(MainWindow, screen.WorkingArea.X, 0);
         var dip2 = Win32Helper.TransformPixelsToDIP(MainWindow, screen.WorkingArea.Width, 0);
-        var left = (dip2.X - MainWindow.ActualWidth) / 2 + dip1.X;
+        var left = (dip2.X - GetCurrentMainWindowWidth()) / 2 + dip1.X;
         return left;
     }
 
@@ -2381,7 +2518,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         var dip1 = Win32Helper.TransformPixelsToDIP(MainWindow, screen.WorkingArea.X, 0);
         var dip2 = Win32Helper.TransformPixelsToDIP(MainWindow, screen.WorkingArea.Width, 0);
-        var left = (dip1.X + dip2.X - MainWindow.ActualWidth) - 10;
+        var left = (dip1.X + dip2.X - GetCurrentMainWindowWidth()) - 10;
         return left;
     }
 

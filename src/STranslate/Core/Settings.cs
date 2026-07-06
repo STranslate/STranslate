@@ -153,6 +153,12 @@ public partial class Settings : ObservableObject
 
     public double PreviousScreenWidth { get; set; }
     public double PreviousScreenHeight { get; set; }
+    public double PreviousMainWindowWorkAreaLeft { get; set; }
+    public double PreviousMainWindowWorkAreaTop { get; set; }
+    public double PreviousMainWindowWorkAreaWidth { get; set; }
+    public double PreviousMainWindowWorkAreaHeight { get; set; }
+    public double PreviousMainWindowDpiX { get; set; }
+    public double PreviousMainWindowDpiY { get; set; }
     [ObservableProperty] public partial int CustomScreenNumber { get; set; } = 1;
     [ObservableProperty] public partial WindowScreenType WindowScreen { get; set; } = WindowScreenType.Cursor;
     public bool IsWindowAlignVisible =>

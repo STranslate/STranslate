@@ -13,6 +13,8 @@ namespace STranslate.Views;
 public partial class MainWindow : IDisposable
 {
     private const int WmNcHitTest = 0x0084;
+    private const int WmDisplayChange = 0x007E;
+    private const int WmDpiChanged = 0x02E0;
 
     private static readonly IntPtr HtClient = new(1);
     private static readonly IntPtr HtLeft = new(10);
@@ -82,6 +84,13 @@ public partial class MainWindow : IDisposable
         if (msg == Win32Helper.TaskbarCreatedMessage)
         {
             Dispatcher.BeginInvoke(RefreshNotifyIcon, DispatcherPriority.Loaded);
+        }
+
+        if (msg is WmDisplayChange or WmDpiChanged)
+        {
+            Dispatcher.BeginInvoke(
+                DispatcherPriority.Loaded,
+                new Action(_viewModel.HandleDisplayEnvironmentChanged));
         }
 
         if (msg == WmNcHitTest && TryHandleHorizontalResizeHitTest(lParam, out var hitTestResult))
