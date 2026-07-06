@@ -2130,7 +2130,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                      previousScreenHeight != SystemParameters.VirtualScreenHeight ||
                      previousDpiX != currentDpiX || previousDpiY != currentDpiY))
                 {
-                    AdjustPositionForResolutionChange();
+                    // 传入覆盖前保存的旧屏幕尺寸，AdjustPositionForResolutionChange 内部
+                    // 不能再读 Settings.PreviousScreenWidth（此时已被刷新为新值）。
+                    AdjustPositionForResolutionChange(previousScreenWidth, previousScreenHeight);
                     return;
                 }
 
@@ -2287,19 +2289,20 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         Settings.MainWindowTop = targetTop;
     }
 
-    private void AdjustPositionForResolutionChange()
+    private void AdjustPositionForResolutionChange(double previousScreenWidth, double previousScreenHeight)
     {
         // SystemParameters.VirtualScreenWidth/Height 返回值已经是 DIP，
         // 自身已包含 DPI 折算，宽度比即可反映分辨率+DPI 的综合变化，
         // 不能再乘 DPI 比，否则会把 DPI 算两遍导致窗口位置被额外压缩。
+        // 注意：调用方必须传入覆盖前保存的旧值，Settings.PreviousScreenWidth 此时已被刷新为新值。
         var screenWidth = SystemParameters.VirtualScreenWidth;
         var screenHeight = SystemParameters.VirtualScreenHeight;
 
         var previousLeft = Settings.MainWindowLeft;
         var previousTop = Settings.MainWindowTop;
 
-        var widthRatio = screenWidth / Settings.PreviousScreenWidth;
-        var heightRatio = screenHeight / Settings.PreviousScreenHeight;
+        var widthRatio = screenWidth / previousScreenWidth;
+        var heightRatio = screenHeight / previousScreenHeight;
 
         var newLeft = previousLeft * widthRatio;
         var newTop = previousTop * heightRatio;
