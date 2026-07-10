@@ -13,10 +13,10 @@ namespace STranslate.Services;
 
 public sealed class CursorOcrService
 {
-    private const int CaptureWidth = 360;
-    private const int CaptureHeight = 56;
-    private const int FallbackCaptureWidth = 720;
-    private const int FallbackCaptureHeight = 72;
+    private const int CaptureWidth = 480;
+    private const int CaptureHeight = 72;
+    private const int FallbackCaptureWidth = 840;
+    private const int FallbackCaptureHeight = 104;
     private const int ImageScale = 3;
     private const int SmXVirtualScreen = 76;
     private const int SmYVirtualScreen = 77;
@@ -26,11 +26,13 @@ public sealed class CursorOcrService
     private readonly ILogger<CursorOcrService> _logger;
     private readonly SemaphoreSlim _recognizeLock = new(1, 1);
     private OcrEngine? _ocrEngine;
+    private OcrEngine? _profileOcrEngine;
 
     public CursorOcrService(ILogger<CursorOcrService> logger)
     {
         _logger = logger;
         _ocrEngine = CreateOcrEngine();
+        _profileOcrEngine = OcrEngine.TryCreateFromUserProfileLanguages();
     }
 
     public async Task<CursorOcrResult> RecognizeWordUnderCursorAsync(
@@ -78,17 +80,63 @@ public sealed class CursorOcrService
     {
         using var captured = CaptureAroundCursor(captureWidth, captureHeight);
         using var prepared = PreprocessForOcr(captured.Bitmap, ImageScale);
-        using var softwareBitmap = await ToSoftwareBitmapAsync(prepared);
-        var ocrResult = await _ocrEngine!.RecognizeAsync(softwareBitmap);
+        var selected = await RecognizeBitmapAsync(prepared, captured, _ocrEngine!, cancellationToken);
+        if (selected != null && !LooksSuspicious(selected.Text))
+            return selected;
+
+        using var colorFallback = Resize(captured.Bitmap, ImageScale);
+        var fallback = await RecognizeBitmapAsync(
+            colorFallback,
+            captured,
+            _profileOcrEngine ?? _ocrEngine!,
+            cancellationToken);
+        return ChooseBetterResult(selected, fallback);
+    }
+
+    private async Task<SelectedWord?> RecognizeBitmapAsync(
+        Bitmap bitmap,
+        CapturedRegion captured,
+        OcrEngine engine,
+        CancellationToken cancellationToken)
+    {
+        using var softwareBitmap = await ToSoftwareBitmapAsync(bitmap);
+        var ocrResult = await engine.RecognizeAsync(softwareBitmap);
         cancellationToken.ThrowIfCancellationRequested();
 
         return SelectWordAtPoint(
             ocrResult,
-            prepared.Width,
-            prepared.Height,
+            bitmap.Width,
+            bitmap.Height,
             captured.CursorX * ImageScale,
             captured.CursorY * ImageScale);
     }
+
+    private static SelectedWord? ChooseBetterResult(SelectedWord? primary, SelectedWord? fallback)
+    {
+        if (primary == null)
+            return fallback;
+        if (fallback == null)
+            return primary;
+
+        var primarySuspicious = LooksSuspicious(primary.Text);
+        var fallbackSuspicious = LooksSuspicious(fallback.Text);
+        if (primarySuspicious != fallbackSuspicious)
+            return primarySuspicious ? fallback : primary;
+
+        return fallback.Text.Length > primary.Text.Length ? fallback : primary;
+    }
+
+    private static bool LooksSuspicious(string text)
+    {
+        var hasAsciiLetter = text.Any(character => character is >= 'A' and <= 'Z' or >= 'a' and <= 'z');
+        var hasUnexpectedLatin = text.Any(character => character > 127
+            && character <= 0x024F
+            && !IsCjk(character));
+        return hasAsciiLetter && hasUnexpectedLatin;
+    }
+
+    private static bool IsCjk(char character) =>
+        character is >= '\u3400' and <= '\u4DBF' or >= '\u4E00' and <= '\u9FFF';
 
     private static OcrEngine CreateOcrEngine()
     {
@@ -283,8 +331,13 @@ public sealed class CursorOcrService
         if (words.Count == 1)
             return CreateSelectedWord(words[0], imageWidth, cursorX);
 
-        var toleranceX = Math.Max(3, imageWidth * 0.004);
-        var toleranceY = Math.Max(2, imageHeight * 0.004);
+        var typicalWordHeight = words
+            .Select(word => word.BoundingRect.Height)
+            .Where(height => height > 0)
+            .OrderBy(height => height)
+            .ElementAtOrDefault(words.Count / 2);
+        var toleranceX = Math.Max(12, typicalWordHeight * 0.25);
+        var toleranceY = Math.Max(15, typicalWordHeight * 0.35);
 
         var candidates = words.Select(word =>
         {
@@ -368,7 +421,26 @@ public sealed class CursorOcrService
             .OrderBy(range => DistanceToRange(characterIndex, range.Start, range.End))
             .First();
 
-        return value[selected.Start..selected.End];
+        return NormalizeCommonOcrConfusions(value[selected.Start..selected.End]);
+    }
+
+    private static string NormalizeCommonOcrConfusions(string text)
+    {
+        if (text.Length < 3 || !text.Contains('1'))
+            return text;
+
+        var characters = text.ToCharArray();
+        for (var i = 1; i < characters.Length - 1; i++)
+        {
+            if (characters[i] == '1'
+                && char.IsLower(characters[i - 1])
+                && char.IsLower(characters[i + 1]))
+            {
+                characters[i] = 'l';
+            }
+        }
+
+        return new string(characters);
     }
 
     private static double DistanceToRange(double index, int start, int end)

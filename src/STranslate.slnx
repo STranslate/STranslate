@@ -20,13 +20,11 @@
   <Folder Name="/Plugins/">
     <!-- 内置翻译插件 -->
     <Project Path="Plugins/STranslate.Plugin.Translate.GoogleBuiltIn/STranslate.Plugin.Translate.GoogleBuiltIn.csproj" />
-    <Project Path="Plugins/STranslate.Plugin.Translate.DeepLBuiltIn/STranslate.Plugin.Translate.DeepLBuiltIn.csproj" />
     <Project Path="Plugins/STranslate.Plugin.Translate.ICibaBuiltIn/STranslate.Plugin.Translate.ICibaBuiltIn.csproj" />
     <Project Path="Plugins/STranslate.Plugin.Translate.ICibaTranslateBuiltIn/STranslate.Plugin.Translate.ICibaTranslateBuiltIn.csproj" />
     <Project Path="Plugins/STranslate.Plugin.Translate.MicrosoftBuiltIn/STranslate.Plugin.Translate.MicrosoftBuiltIn.csproj" />
     <Project Path="Plugins/STranslate.Plugin.Translate.TransmartBuiltIn/STranslate.Plugin.Translate.TransmartBuiltIn.csproj" />
     <Project Path="Plugins/STranslate.Plugin.Translate.YandexBuiltIn/STranslate.Plugin.Translate.YandexBuiltIn.csproj" />
-    <Project Path="Plugins/STranslate.Plugin.Translate.YoudaoBuiltIn/STranslate.Plugin.Translate.YoudaoBuiltIn.csproj" />
 
     <!-- API 翻译插件 -->
     <Project Path="Plugins/STranslate.Plugin.Translate.Baidu/STranslate.Plugin.Translate.Baidu.csproj" />

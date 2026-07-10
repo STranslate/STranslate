@@ -1184,6 +1184,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         var result = await _cursorOcrService.RecognizeWordUnderCursorAsync(cancellationToken);
         if (!result.IsSuccess || string.IsNullOrWhiteSpace(result.Text))
         {
+            Show();
             _snackbar.ShowWarning(string.IsNullOrWhiteSpace(result.ErrorMessage)
                 ? _i18n.GetTranslation("CursorOcrTranslateFailed")
                 : result.ErrorMessage);
@@ -1192,7 +1193,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
         _avoidCursorForNextShow = true;
         ExecuteTranslate(result.Text);
-        PlayAudioCommand.Execute(result.Text);
+        await PlayAudioAsync(result.Text, cancellationToken);
     }
 
     public async Task OcrHandlerAsync(Bitmap? bitmap)
