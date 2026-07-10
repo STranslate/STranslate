@@ -1,0 +1,9 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Translate_Youdao">소개</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Youdao_Content">이 플러그인은 Youdao 웹 번역 서비스를 무료로 제공합니다.</sys:String>
+
+</ResourceDictionary>

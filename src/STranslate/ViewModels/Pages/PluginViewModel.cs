@@ -697,7 +697,7 @@ public partial class PluginViewModel : ObservableObject
 
         if (restartResult == ContentDialogResult.Primary)
         {
-            UACHelper.Run(_settings.StartMode);
+            UACHelper.Restart(_settings.StartMode);
             App.Current.Shutdown();
         }
         else
@@ -844,7 +844,7 @@ public partial class PluginViewModel : ObservableObject
 
             if (restartResult == ContentDialogResult.Primary)
             {
-                UACHelper.Run(_settings.StartMode);
+                UACHelper.Restart(_settings.StartMode);
                 App.Current.Shutdown();
             }
         }
@@ -895,7 +895,7 @@ public partial class PluginViewModel : ObservableObject
             Content = _i18n.GetTranslation("PluginDeleteForRestart"),
         }.ShowAsync() == ContentDialogResult.Primary)
         {
-            UACHelper.Run(_settings.StartMode);
+            UACHelper.Restart(_settings.StartMode);
             App.Current.Shutdown();
         }
     }

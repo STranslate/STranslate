@@ -33,9 +33,11 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly IScreenshot _screenshot;
     private readonly ISnackbar _snackbar;
     private readonly INotification _notification;
+    private readonly CursorOcrService _cursorOcrService;
     private double _cacheLeft;
     private double _cacheTop;
     private bool _isAdjustingWindowPositionForContent;
+    private bool _avoidCursorForNextShow;
 
     public TranslateService TranslateService { get; }
     public OcrService OcrService { get; }
@@ -64,6 +66,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         IScreenshot screenshot,
         ISnackbar snackbar,
         INotification notification,
+        CursorOcrService cursorOcrService,
         TranslateService translateService,
         OcrService ocrService,
         TtsService ttsService,
@@ -83,6 +86,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _screenshot = screenshot;
         _snackbar = snackbar;
         _notification = notification;
+        _cursorOcrService = cursorOcrService;
         TranslateService = translateService;
         OcrService = ocrService;
         TtsService = ttsService;
@@ -1174,6 +1178,23 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         });
     }
 
+    [RelayCommand(IncludeCancelCommand = true)]
+    private async Task CursorOcrTranslateAsync(CancellationToken cancellationToken)
+    {
+        var result = await _cursorOcrService.RecognizeWordUnderCursorAsync(cancellationToken);
+        if (!result.IsSuccess || string.IsNullOrWhiteSpace(result.Text))
+        {
+            _snackbar.ShowWarning(string.IsNullOrWhiteSpace(result.ErrorMessage)
+                ? _i18n.GetTranslation("CursorOcrTranslateFailed")
+                : result.ErrorMessage);
+            return;
+        }
+
+        _avoidCursorForNextShow = true;
+        ExecuteTranslate(result.Text);
+        PlayAudioCommand.Execute(result.Text);
+    }
+
     public async Task OcrHandlerAsync(Bitmap? bitmap)
     {
         if (bitmap == null) return;
@@ -1757,6 +1778,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     public void Show()
     {
+        var avoidCursor = _avoidCursorForNextShow;
+        _avoidCursorForNextShow = false;
+
         if (Settings.MainWindowLeft <= -18000 && Settings.MainWindowTop <= -18000)
         {
             Settings.MainWindowLeft = _cacheLeft;
@@ -1764,8 +1788,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
         MainWindow.Visibility = Visibility.Visible;
         UpdateMainWindowMaxHeightConstraint();
-        UpdatePosition();
-        UpdateMainWindowMaxHeightConstraint();
+        if (avoidCursor)
+            UpdatePositionAwayFromCapturedWord();
+        else
+        {
+            UpdatePosition();
+            UpdateMainWindowMaxHeightConstraint();
+        }
 
         Win32Helper.SetForegroundWindow(MainWindow);
 
@@ -2212,6 +2241,54 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
         Settings.MainWindowLeft = Math.Clamp(left, minLeft, maxLeft);
         Settings.MainWindowTop = Math.Clamp(top, minTop, maxTop);
+    }
+
+    private void UpdatePositionAwayFromCapturedWord()
+    {
+        if (!PInvoke.GetCursorPos(out var cursorPosition))
+        {
+            UpdatePosition();
+            return;
+        }
+
+        const double wordGap = 44;
+        const double edgePadding = 8;
+
+        var cursorDip = Win32Helper.TransformPixelsToDIP(MainWindow, cursorPosition.X, cursorPosition.Y);
+        var screen = MonitorInfo.GetCursorDisplayMonitor();
+        UpdateMainWindowMaxHeightConstraint(screen);
+
+        var workAreaTopLeft = Win32Helper.TransformPixelsToDIP(MainWindow, screen.WorkingArea.X, screen.WorkingArea.Y);
+        var workAreaBottomRight = Win32Helper.TransformPixelsToDIP(
+            MainWindow,
+            screen.WorkingArea.X + screen.WorkingArea.Width,
+            screen.WorkingArea.Y + screen.WorkingArea.Height);
+
+        var windowWidth = MainWindow.ActualWidth > 0 ? MainWindow.ActualWidth : Settings.MainWindowWidth;
+        var minLeft = workAreaTopLeft.X + edgePadding;
+        var minTop = workAreaTopLeft.Y + edgePadding;
+        var maxLeft = Math.Max(minLeft, workAreaBottomRight.X - windowWidth - edgePadding);
+
+        var availableBelow = Math.Max(0, workAreaBottomRight.Y - edgePadding - cursorDip.Y - wordGap);
+        var availableAbove = Math.Max(0, cursorDip.Y - wordGap - minTop);
+        var placeBelow = availableBelow >= availableAbove;
+        var availableHeight = placeBelow ? availableBelow : availableAbove;
+
+        MainWindowEffectiveMaxHeight = Math.Max(MainWindow.MinHeight, availableHeight);
+        MainWindow.UpdateLayout();
+
+        var windowHeight = Math.Min(
+            MainWindow.ActualHeight > 0 ? MainWindow.ActualHeight : MainWindow.MinHeight,
+            MainWindowEffectiveMaxHeight);
+        var left = cursorDip.X <= (workAreaTopLeft.X + workAreaBottomRight.X) / 2
+            ? maxLeft
+            : minLeft;
+        var top = placeBelow
+            ? cursorDip.Y + wordGap
+            : cursorDip.Y - wordGap - windowHeight;
+
+        Settings.MainWindowLeft = Math.Clamp(left, minLeft, maxLeft);
+        Settings.MainWindowTop = Math.Clamp(top, minTop, Math.Max(minTop, workAreaBottomRight.Y - windowHeight - edgePadding));
     }
 
     /// <summary>

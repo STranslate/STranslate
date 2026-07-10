@@ -1,0 +1,22 @@
+<UserControl
+    x:Class="STranslate.Plugin.Translate.YoudaoBuiltIn.View.SettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:vm="clr-namespace:STranslate.Plugin.Translate.YoudaoBuiltIn.ViewModel"
+    d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <ikw:SimpleStackPanel Spacing="12">
+        <ui:SettingsCard Description="{DynamicResource STranslate_Plugin_Translate_Youdao_Content}" Header="{DynamicResource STranslate_Plugin_Translate_Youdao}">
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Info_20_Regular}" />
+            </ui:SettingsCard.HeaderIcon>
+        </ui:SettingsCard>
+    </ikw:SimpleStackPanel>
+</UserControl>

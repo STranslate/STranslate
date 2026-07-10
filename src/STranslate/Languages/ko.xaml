@@ -173,6 +173,9 @@
     <sys:String x:Key="CrosswordTranslateFetchFailedShowWindow">선택 텍스트를 가져오지 못했습니다. 메인 창을 표시했습니다.</sys:String>
     <sys:String x:Key="Hotkey_MouseHookTranslate">마우스 감지</sys:String>
     <sys:String x:Key="Hotkey_MouseHookTranslateDescription">마우스 드래그 텍스트 선택 번역 감지를 켜고 끄는 단축키입니다.</sys:String>
+    <sys:String x:Key="Hotkey_CursorOcrTranslate">커서 OCR 번역</sys:String>
+    <sys:String x:Key="Hotkey_CursorOcrTranslateDescription">수동 캡처 없이 커서 아래의 텍스트를 인식하여 번역합니다.</sys:String>
+    <sys:String x:Key="CursorOcrTranslateFailed">커서 아래에서 텍스트를 인식하지 못했습니다.</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslate">치환 번역</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslateDescription">마우스로 선택한 텍스트를 번역하고 원본 텍스트를 치환하는 단축키입니다.</sys:String>
     <sys:String x:Key="Hotkey_ScreenshotTranslate">스크린샷 번역</sys:String>

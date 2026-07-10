@@ -1,0 +1,9 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepLBuiltIn">概要</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepLBuiltIn_Content">このプラグインは DeepL ウェブ翻訳サービスを無料で利用します。</sys:String>
+
+</ResourceDictionary>

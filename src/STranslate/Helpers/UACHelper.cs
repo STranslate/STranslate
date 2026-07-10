@@ -48,6 +48,14 @@ internal class UACHelper
         Utilities.ExecuteProgram(DataLocation.HostExePath, args);
     }
 
+    /// <summary>
+    /// 重启当前应用。Host 会等待当前进程退出后再拉起新实例，避免被单实例检查拦截。
+    /// </summary>
+    public static void Restart(StartMode mode, int waitTimeoutSec = 6)
+    {
+        Run(mode, waitPid: Environment.ProcessId, waitTimeoutSec: waitTimeoutSec);
+    }
+
     public static void Create()
     {
         var info = GetTaskInfo(Constant.TaskName);

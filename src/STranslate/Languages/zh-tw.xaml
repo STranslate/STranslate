@@ -177,6 +177,9 @@
     <sys:String x:Key="CrosswordTranslateFetchFailedShowWindow">劃詞取詞失敗，已開啟主介面顯示</sys:String>
     <sys:String x:Key="Hotkey_MouseHookTranslate">監聽滑鼠劃詞</sys:String>
     <sys:String x:Key="Hotkey_MouseHookTranslateDescription">開啟/關閉監聽滑鼠劃詞選中文字觸發翻譯的快速鍵。</sys:String>
+    <sys:String x:Key="Hotkey_CursorOcrTranslate">游標取詞翻譯</sys:String>
+    <sys:String x:Key="Hotkey_CursorOcrTranslateDescription">自動辨識游標下方的文字並呼叫文字翻譯服務，無需手動截圖。</sys:String>
+    <sys:String x:Key="CursorOcrTranslateFailed">沒有辨識到游標下方的文字</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslate">替換翻譯</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslateDescription">滑鼠選中文本後觸發翻譯並替換原文本的快捷鍵。</sys:String>
     <sys:String x:Key="Hotkey_ScreenshotTranslate">截圖翻譯</sys:String>

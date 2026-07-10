@@ -177,6 +177,9 @@
     <sys:String x:Key="CrosswordTranslateFetchFailedShowWindow">划词取词失败，已打开主界面显示</sys:String>
     <sys:String x:Key="Hotkey_MouseHookTranslate">监听鼠标划词</sys:String>
     <sys:String x:Key="Hotkey_MouseHookTranslateDescription">开启/关闭监听鼠标划词选中文本触发翻译的快捷键。</sys:String>
+    <sys:String x:Key="Hotkey_CursorOcrTranslate">光标取词翻译</sys:String>
+    <sys:String x:Key="Hotkey_CursorOcrTranslateDescription">自动识别光标下方的文字并调用文本翻译服务，无需手动截图。</sys:String>
+    <sys:String x:Key="CursorOcrTranslateFailed">没有识别到光标下方的文字</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslate">替换翻译</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslateDescription">鼠标选中文本触发翻译并替换原文本的快捷键。</sys:String>
     <sys:String x:Key="Hotkey_ScreenshotTranslate">截图翻译</sys:String>
