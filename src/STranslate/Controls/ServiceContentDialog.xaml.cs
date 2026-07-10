@@ -19,11 +19,16 @@ public partial class ServiceContentDialog : INotifyPropertyChanged
 {
     private const string GroupListTag = "ServiceGroupList";
     private bool _isSyncingGroupSelection;
+    private readonly IReadOnlySet<string> _excludedPluginIds;
     private readonly Internationalization _i18n = Ioc.Default.GetRequiredService<Internationalization>();
 
-    public ServiceContentDialog(string title, ObservableCollection<PluginMetaData> itemsSource)
+    public ServiceContentDialog(
+        string title,
+        ObservableCollection<PluginMetaData> itemsSource,
+        IReadOnlySet<string>? excludedPluginIds = null)
     {
         ServiceTitle = title;
+        _excludedPluginIds = excludedPluginIds ?? new HashSet<string>();
 
         InitializeComponent();
 
@@ -45,6 +50,12 @@ public partial class ServiceContentDialog : INotifyPropertyChanged
     private void OnFilter(object sender, FilterEventArgs e)
     {
         if (e.Item is not PluginMetaData plugin)
+        {
+            e.Accepted = false;
+            return;
+        }
+
+        if (_excludedPluginIds.Contains(plugin.PluginID))
         {
             e.Accepted = false;
             return;

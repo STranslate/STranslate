@@ -54,9 +54,12 @@ public sealed class CursorOcrService
                 selected = fallback ?? selected;
             }
 
-            return string.IsNullOrWhiteSpace(selected?.Text)
-                ? CursorOcrResult.Fail("没有识别到光标下方的文字")
-                : CursorOcrResult.Success(selected.Text);
+            if (string.IsNullOrWhiteSpace(selected?.Text))
+                return CursorOcrResult.Fail("没有识别到光标下方的文字");
+
+            return IsEnglishWord(selected.Text)
+                ? CursorOcrResult.Success(selected.Text)
+                : CursorOcrResult.Fail("光标取词仅支持英文单词");
         }
         catch (OperationCanceledException)
         {
@@ -442,6 +445,32 @@ public sealed class CursorOcrService
 
         return new string(characters);
     }
+
+    private static bool IsEnglishWord(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return false;
+
+        for (var i = 0; i < text.Length; i++)
+        {
+            var character = text[i];
+            if (character is >= 'A' and <= 'Z' or >= 'a' and <= 'z')
+                continue;
+
+            var isConnector = character is '\'' or '-'
+                && i > 0
+                && i + 1 < text.Length
+                && IsAsciiLetter(text[i - 1])
+                && IsAsciiLetter(text[i + 1]);
+            if (!isConnector)
+                return false;
+        }
+
+        return true;
+    }
+
+    private static bool IsAsciiLetter(char character) =>
+        character is >= 'A' and <= 'Z' or >= 'a' and <= 'z';
 
     private static double DistanceToRange(double index, int start, int end)
     {

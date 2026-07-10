@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using STranslate.Plugin.Translate.TransmartBuiltIn.View;
 using STranslate.Plugin.Translate.TransmartBuiltIn.ViewModel;
 using System.Text.Json;
@@ -100,7 +101,11 @@ public class Main : TranslatePluginBase
         Settings = context.LoadSettingStorage<Settings>();
     }
 
-    public override void Dispose() { }
+    public override void Dispose()
+    {
+        _settingUi = null;
+        _viewModel = null;
+    }
 
     public override async Task TranslateAsync(TranslateRequest request, TranslateResult result, CancellationToken cancellationToken = default)
     {
@@ -144,12 +149,31 @@ public class Main : TranslatePluginBase
             }
         };
 
-        var response = await Context.HttpService.PostAsync(URL, content, option, cancellationToken: cancellationToken);
+        try
+        {
+            var response = await Context.HttpService.PostAsync(
+                URL,
+                content,
+                option,
+                cancellationToken: cancellationToken);
+            using var jsonDoc = JsonDocument.Parse(response);
+            if (!jsonDoc.RootElement.TryGetProperty("auto_translation", out var translation) ||
+                string.IsNullOrWhiteSpace(translation.GetString()))
+            {
+                result.Fail("No result.");
+                return;
+            }
 
-        // 解析Google翻译返回的JSON
-        var jsonDoc = JsonDocument.Parse(response);
-        var translatedText = jsonDoc.RootElement.GetProperty("auto_translation").GetString() ?? throw new Exception(response);
-
-        result.Success(translatedText);
+            result.Success(translation.GetString()!);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Context.Logger.LogError(ex, "Tencent translation failed");
+            result.Fail("Translation failed.");
+        }
     }
 }

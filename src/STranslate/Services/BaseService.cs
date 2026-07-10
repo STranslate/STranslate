@@ -67,7 +67,10 @@ public abstract partial class BaseService : ObservableObject, IDisposable
             ServiceType.Vocabulary => "添加生词本服务",
             _ => "添加服务"
         };
-        var contentDialog = new ServiceContentDialog(title, Plugins);
+        var addedPluginIds = Services
+            .Select(service => service.MetaData.PluginID)
+            .ToHashSet(StringComparer.Ordinal);
+        var contentDialog = new ServiceContentDialog(title, Plugins, addedPluginIds);
         if (await contentDialog.ShowAsync() == ContentDialogResult.Primary)
         {
             if (contentDialog.Result is PluginMetaData metaData)
@@ -81,6 +84,11 @@ public abstract partial class BaseService : ObservableObject, IDisposable
 
     internal Service AddFromPlugin(PluginMetaData metaData)
     {
+        var existingService = Services.FirstOrDefault(
+            service => service.MetaData.PluginID == metaData.PluginID);
+        if (existingService != null)
+            return existingService;
+
         var service = _serviceManager.AddService(metaData, ServiceType);
         // 非翻译服务默认关闭
         if (ServiceType != ServiceType.Translation)

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using STranslate.Plugin.Translate.ICibaTranslateBuiltIn.View;
 using STranslate.Plugin.Translate.ICibaTranslateBuiltIn.ViewModel;
 using System.Security.Cryptography;
@@ -36,7 +37,11 @@ public class Main : TranslatePluginBase
         Settings = context.LoadSettingStorage<Settings>();
     }
 
-    public override void Dispose() { }
+    public override void Dispose()
+    {
+        _settingUi = null;
+        _viewModel = null;
+    }
 
     public override string? GetSourceLanguage(LangEnum langEnum) => langEnum switch
     {
@@ -102,17 +107,29 @@ public class Main : TranslatePluginBase
             return;
         }
 
-        var translatedText = await TranslateWithBatchApiAsync(content, sourceStr, targetStr, cancellationToken);
-        if (string.IsNullOrWhiteSpace(translatedText))
-            translatedText = await TranslateWithWordPageAsync(content, cancellationToken);
-
-        if (string.IsNullOrWhiteSpace(translatedText))
+        try
         {
-            result.Fail("No result.");
-            return;
-        }
+            var translatedText = await TranslateWithBatchApiAsync(content, sourceStr, targetStr, cancellationToken);
+            if (string.IsNullOrWhiteSpace(translatedText))
+                translatedText = await TranslateWithWordPageAsync(content, cancellationToken);
 
-        result.Success(translatedText);
+            if (string.IsNullOrWhiteSpace(translatedText))
+            {
+                result.Fail("No result.");
+                return;
+            }
+
+            result.Success(translatedText);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Context.Logger.LogError(ex, "Kingsoft translation failed");
+            result.Fail("Translation failed.");
+        }
     }
 
     private async Task<string> TranslateWithBatchApiAsync(
