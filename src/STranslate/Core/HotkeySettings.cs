@@ -17,6 +17,8 @@ public partial class HotkeySettings : ObservableObject
 
     [ObservableProperty] public partial bool CrosswordTranslateByCtrlSameC { get; set; } = false;
 
+    [ObservableProperty] public partial bool CursorOcrAutoPlayAudio { get; set; } = false;
+
     [ObservableProperty] public partial Key IncrementalTranslateKey { get; set; } = Key.None;
 
     #region Setting Items
@@ -28,6 +30,7 @@ public partial class HotkeySettings : ObservableObject
     public GlobalHotkey ImageTranslateHotkey { get; set; } = new("Alt + Shift + X");
     public GlobalHotkey ReplaceTranslateHotkey { get; set; } = new(Constant.EmptyHotkey);
     public GlobalHotkey MouseHookTranslateHotkey { get; set; } = new(Constant.EmptyHotkey);
+    public GlobalHotkey CursorOcrTranslateHotkey { get; set; } = new("F2");
     public GlobalHotkey SilentOcrHotkey { get; set; } = new(Constant.EmptyHotkey);
     public GlobalHotkey SilentTtsHotkey { get; set; } = new(Constant.EmptyHotkey);
     public GlobalHotkey OcrHotkey { get; set; } = new("Alt + Shift + S");
@@ -74,6 +77,7 @@ public partial class HotkeySettings : ObservableObject
         CreateGlobalHotkeyData(InputTranslateHotkey.Key, "Hotkey_InputTranslate", () => InputTranslateHotkey.Key = Constant.EmptyHotkey),
         CreateGlobalHotkeyData(CrosswordTranslateHotkey.Key, "Hotkey_CrosswordTranslate", () => CrosswordTranslateHotkey.Key = Constant.EmptyHotkey),
         CreateGlobalHotkeyData(MouseHookTranslateHotkey.Key, "Hotkey_MouseHookTranslate", () => MouseHookTranslateHotkey.Key = Constant.EmptyHotkey),
+        CreateGlobalHotkeyData(CursorOcrTranslateHotkey.Key, "Hotkey_CursorOcrTranslate", () => CursorOcrTranslateHotkey.Key = Constant.EmptyHotkey),
         CreateGlobalHotkeyData(ReplaceTranslateHotkey.Key, "Hotkey_ReplaceTranslate", () => ReplaceTranslateHotkey.Key = Constant.EmptyHotkey),
         CreateGlobalHotkeyData(ScreenshotTranslateHotkey.Key, "Hotkey_ScreenshotTranslate", () => ScreenshotTranslateHotkey.Key = Constant.EmptyHotkey),
         CreateGlobalHotkeyData(ImageTranslateHotkey.Key, "Hotkey_ImageTranslate", () => ImageTranslateHotkey.Key = Constant.EmptyHotkey),
@@ -152,6 +156,10 @@ public partial class HotkeySettings : ObservableObject
                 ApplyCtrlCc();
                 Save();
             }
+            else if (e.PropertyName == nameof(CursorOcrAutoPlayAudio))
+            {
+                Save();
+            }
         };
 
         // 自动监听所有 GlobalHotkey 类型的属性
@@ -185,6 +193,7 @@ public partial class HotkeySettings : ObservableObject
             [nameof(ImageTranslateHotkey)] = "Alt + Shift + X",
             [nameof(ReplaceTranslateHotkey)] = "Alt + F",
             [nameof(MouseHookTranslateHotkey)] = "Alt + Shift + D",
+            [nameof(CursorOcrTranslateHotkey)] = "F2",
             [nameof(SilentOcrHotkey)] = "Alt + Shift + F",
             [nameof(SilentTtsHotkey)] = "Alt + Shift + G",
             [nameof(OcrHotkey)] = "Alt + Shift + S",
@@ -317,6 +326,7 @@ public partial class HotkeySettings : ObservableObject
         HandleGlobalLogic(nameof(InputTranslateHotkey));
         HandleGlobalLogic(nameof(CrosswordTranslateHotkey));
         HandleGlobalLogic(nameof(MouseHookTranslateHotkey));
+        HandleGlobalLogic(nameof(CursorOcrTranslateHotkey));
         HandleGlobalLogic(nameof(ReplaceTranslateHotkey));
         HandleGlobalLogic(nameof(ScreenshotTranslateHotkey));
         HandleGlobalLogic(nameof(ImageTranslateHotkey));
@@ -332,6 +342,7 @@ public partial class HotkeySettings : ObservableObject
         HotkeyManager.Current.Remove(InputTranslateHotkey.Key);
         HotkeyManager.Current.Remove(CrosswordTranslateHotkey.Key);
         HotkeyManager.Current.Remove(MouseHookTranslateHotkey.Key);
+        HotkeyManager.Current.Remove(CursorOcrTranslateHotkey.Key);
         HotkeyManager.Current.Remove(ReplaceTranslateHotkey.Key);
         HotkeyManager.Current.Remove(ScreenshotTranslateHotkey.Key);
         HotkeyManager.Current.Remove(ImageTranslateHotkey.Key);
@@ -356,6 +367,15 @@ public partial class HotkeySettings : ObservableObject
                 break;
             case nameof(MouseHookTranslateHotkey):
                 MouseHookTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(MouseHookTranslateHotkey.Key, WithFullscreenCheck(() => MainWindowViewModel.ToggleMouseHookTranslateCommand.Execute(null)));
+                break;
+            case nameof(CursorOcrTranslateHotkey):
+                CursorOcrTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(CursorOcrTranslateHotkey.Key, WithFullscreenCheck(() =>
+                {
+                    if (MainWindowViewModel.CursorOcrTranslateCommand.IsRunning)
+                        return;
+
+                    MainWindowViewModel.CursorOcrTranslateCommand.Execute(null);
+                }));
                 break;
             case nameof(ScreenshotTranslateHotkey):
                 ScreenshotTranslateHotkey.IsConflict = !HotkeyMapper.SetHotkey(ScreenshotTranslateHotkey.Key, WithFullscreenCheck(() => MainWindowViewModel.ScreenshotTranslateCommand.Execute(null)));

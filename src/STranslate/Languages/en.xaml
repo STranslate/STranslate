@@ -177,6 +177,11 @@
     <sys:String x:Key="CrosswordTranslateFetchFailedShowWindow">Failed to capture selected text, switched to main window display.</sys:String>
     <sys:String x:Key="Hotkey_MouseHookTranslate">Mouse Hook Translate</sys:String>
     <sys:String x:Key="Hotkey_MouseHookTranslateDescription">Shortcut key to enable/disable listening for mouse text selection to trigger translation.</sys:String>
+    <sys:String x:Key="Hotkey_CursorOcrTranslate">Cursor OCR Translation</sys:String>
+    <sys:String x:Key="Hotkey_CursorOcrTranslateDescription">Recognize text under the cursor and translate it without manual screenshot selection.</sys:String>
+    <sys:String x:Key="CursorOcrTranslateFailed">No text was recognized under the cursor.</sys:String>
+    <sys:String x:Key="CursorOcrAutoPlayAudio">Auto-play pronunciation after cursor lookup</sys:String>
+    <sys:String x:Key="CursorOcrAutoPlayAudioDescription">After a successful cursor lookup, play the word with the active text-to-speech service.</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslate">Replace Translation</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslateDescription">Shortcut key to translate the selected text and replace the original text.</sys:String>
     <sys:String x:Key="Hotkey_ScreenshotTranslate">Screenshot Translation</sys:String>

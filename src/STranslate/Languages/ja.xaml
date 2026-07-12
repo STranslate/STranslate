@@ -173,6 +173,11 @@
     <sys:String x:Key="CrosswordTranslateFetchFailedShowWindow">選択テキストの取得に失敗しました。メイン画面を表示しました。</sys:String>
     <sys:String x:Key="Hotkey_MouseHookTranslate">マウス選択監視</sys:String>
     <sys:String x:Key="Hotkey_MouseHookTranslateDescription">マウス選択による翻訳トリガーの監視を有効/無効化するホットキー。</sys:String>
+    <sys:String x:Key="Hotkey_CursorOcrTranslate">カーソル OCR 翻訳</sys:String>
+    <sys:String x:Key="Hotkey_CursorOcrTranslateDescription">手動で範囲選択せず、カーソル下の文字を認識して翻訳します。</sys:String>
+    <sys:String x:Key="CursorOcrTranslateFailed">カーソル下の文字を認識できませんでした。</sys:String>
+    <sys:String x:Key="CursorOcrAutoPlayAudio">カーソル取詞後に自動発音</sys:String>
+    <sys:String x:Key="CursorOcrAutoPlayAudioDescription">カーソル取詞に成功した後、現在有効な音声合成サービスで単語を発音します。</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslate">置換翻訳</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslateDescription">選択したテキストを翻訳し、元のテキストを置換するホットキー。</sys:String>
     <sys:String x:Key="Hotkey_ScreenshotTranslate">スクショ翻訳</sys:String>

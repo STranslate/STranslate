@@ -188,6 +188,29 @@
                             WindowTitle="{DynamicResource Hotkey_MouseHookTranslate}" />
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Description="{DynamicResource Hotkey_CursorOcrTranslateDescription}" Header="{DynamicResource Hotkey_CursorOcrTranslate}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.CursorHover_20_Regular}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <StackPanel Orientation="Horizontal">
+                            <control:HotkeyControl
+                                DefaultHotkey="{Binding HotkeySettings.CursorOcrTranslateHotkey.Default}"
+                                Hotkey="{Binding HotkeySettings.CursorOcrTranslateHotkey.Key}"
+                                IsRegistered="{Binding HotkeySettings.CursorOcrTranslateHotkey.IsConflict}"
+                                WindowTitle="{DynamicResource Hotkey_CursorOcrTranslate}" />
+                            <TextBlock
+                                Margin="16,0,8,0"
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                                Text="自动发音" />
+                            <ui:ToggleSwitch
+                                IsOn="{Binding HotkeySettings.CursorOcrAutoPlayAudio}"
+                                OffContent=""
+                                OnContent=""
+                                ToolTip="{DynamicResource CursorOcrAutoPlayAudioDescription}" />
+                        </StackPanel>
+                    </ui:SettingsCard>
+
                     <ui:SettingsCard Description="{DynamicResource Hotkey_SilentOcrDescription}" Header="{DynamicResource Hotkey_SilentOcr}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ScanTypeOff_24_Regular}" />
