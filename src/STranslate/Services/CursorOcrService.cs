@@ -8,7 +8,7 @@ using STranslate.Plugin;
 namespace STranslate.Services;
 
 /// <summary>
-/// 使用 STranslate 当前启用的 OCR 服务识别光标下的英文单词。
+/// 使用 STranslate 当前启用的 OCR 服务识别光标下的中英文文字。
 /// 截图保持原始尺寸和颜色，便于对比不同 OCR 服务的原生效果。
 /// </summary>
 public sealed class CursorOcrService
@@ -48,9 +48,9 @@ public sealed class CursorOcrService
             if (selected == null || string.IsNullOrWhiteSpace(selected.Text))
                 return CursorOcrResult.Fail("没有识别到光标下方的文字");
 
-            return IsEnglishWord(selected.Text)
+            return IsSupportedToken(selected.Text)
                 ? CursorOcrResult.Success(selected.Text)
-                : CursorOcrResult.Fail("光标取词仅支持英文单词");
+                : CursorOcrResult.Fail("光标取词仅支持中英文文字");
         }
         catch (OperationCanceledException)
         {
@@ -74,7 +74,7 @@ public sealed class CursorOcrService
         captured.Bitmap.Save(stream, ImageFormat.Png);
 
         var result = await plugin.RecognizeAsync(
-            new OcrRequest(stream.ToArray(), LangEnum.English, captured.Bitmap.Width, captured.Bitmap.Height),
+            new OcrRequest(stream.ToArray(), LangEnum.Auto, captured.Bitmap.Width, captured.Bitmap.Height),
             cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -150,7 +150,9 @@ public sealed class CursorOcrService
     private static string ExtractTokenAtCursor(string text, double wordX, double wordWidth, double cursorX)
     {
         var value = text.Trim();
-        var tokens = System.Text.RegularExpressions.Regex.Matches(value, @"[A-Za-z]+(?:['-][A-Za-z]+)*")
+        var tokens = System.Text.RegularExpressions.Regex.Matches(
+                value,
+                @"[A-Za-z]+(?:['-][A-Za-z]+)*|[一-龥㐀-䶿豈-﫿]+")
             .Select(match => (Start: match.Index, End: match.Index + match.Length)).ToList();
         if (tokens.Count == 0) return string.Empty;
         var index = Math.Clamp((cursorX - wordX) / Math.Max(1, wordWidth) * value.Length, 0, value.Length - 1);
@@ -158,8 +160,10 @@ public sealed class CursorOcrService
         return value[token.Start..token.End];
     }
 
-    private static bool IsEnglishWord(string text) =>
-        !string.IsNullOrWhiteSpace(text) && System.Text.RegularExpressions.Regex.IsMatch(text, @"^[A-Za-z]+(?:['-][A-Za-z]+)*$");
+    private static bool IsSupportedToken(string text) =>
+        !string.IsNullOrWhiteSpace(text) && System.Text.RegularExpressions.Regex.IsMatch(
+            text,
+            @"^(?:[A-Za-z]+(?:['-][A-Za-z]+)*|[一-龥㐀-䶿豈-﫿]+)$");
 
     private sealed record OcrItem(string Text, RectangleF? Bounds);
     private sealed record SelectedWord(string Text, bool TouchesHorizontalEdge);

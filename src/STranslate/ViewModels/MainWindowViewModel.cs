@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Drawing;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -30,12 +31,14 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly Internationalization _i18n;
     private readonly IAudioPlayer _audioPlayer;
+    private readonly IHttpService _httpService;
     private readonly IScreenshot _screenshot;
     private readonly ISnackbar _snackbar;
     private readonly INotification _notification;
     private readonly CursorOcrService _cursorOcrService;
     private double _cacheLeft;
     private double _cacheTop;
+    private (double Left, double Top)? _cursorOcrOriginalWindowPosition;
     private bool _isAdjustingWindowPositionForContent;
     private bool _avoidCursorForNextShow;
 
@@ -63,6 +66,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         ILogger<MainWindowViewModel> logger,
         Internationalization i18n,
         IAudioPlayer audioPlayer,
+        IHttpService httpService,
         IScreenshot screenshot,
         ISnackbar snackbar,
         INotification notification,
@@ -83,6 +87,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _logger = logger;
         _i18n = i18n;
         _audioPlayer = audioPlayer;
+        _httpService = httpService;
         _screenshot = screenshot;
         _snackbar = snackbar;
         _notification = notification;
@@ -1191,10 +1196,11 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             return;
         }
 
+        _cursorOcrOriginalWindowPosition ??= (Settings.MainWindowLeft, Settings.MainWindowTop);
         _avoidCursorForNextShow = true;
         ExecuteTranslate(result.Text);
         if (HotkeySettings.CursorOcrAutoPlayAudio)
-            await PlayAudioAsync(result.Text, cancellationToken);
+            await PlayCursorOcrAudioAsync(result.Text, cancellationToken);
     }
 
     public async Task OcrHandlerAsync(Bitmap? bitmap)
@@ -1332,6 +1338,47 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     #endregion
 
     #region TTS & Audio Commands
+
+    private async Task PlayCursorOcrAudioAsync(string text, CancellationToken cancellationToken)
+    {
+        if (!ContainsChinese(text))
+        {
+            await PlayAudioAsync(text, cancellationToken);
+            return;
+        }
+
+        try
+        {
+            // 中文取词先按谷歌翻译卡片的同一接口翻成英文，再朗读英文结果。
+            var response = await _httpService.PostAsync(
+                "https://googlet.deno.dev/translate",
+                new
+                {
+                    text,
+                    source_lang = "auto",
+                    target_lang = "en"
+                },
+                cancellationToken: cancellationToken);
+            using var jsonDocument = JsonDocument.Parse(response);
+            var translatedText = jsonDocument.RootElement.GetProperty("data").GetString();
+            if (string.IsNullOrWhiteSpace(translatedText))
+                return;
+
+            await PlayAudioAsync(translatedText, cancellationToken);
+        }
+        catch (TaskCanceledException)
+        {
+            _snackbar.ShowInfo(_i18n.GetTranslation("TtsCancelled"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "谷歌翻译后的英文发音播放失败");
+            _snackbar.ShowError(_i18n.GetTranslation("TtsFailed"));
+        }
+    }
+
+    private static bool ContainsChinese(string text) =>
+        text.Any(character => character is >= '\u3400' and <= '\u9FFF' || character is >= '\uF900' and <= '\uFAFF');
 
     [RelayCommand(IncludeCancelCommand = true)]
     private async Task PlayAudioAsync(string text, CancellationToken cancellationToken)
@@ -1783,6 +1830,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         var avoidCursor = _avoidCursorForNextShow;
         _avoidCursorForNextShow = false;
 
+        if (!avoidCursor)
+            RestoreCursorOcrWindowPosition();
+
         if (Settings.MainWindowLeft <= -18000 && Settings.MainWindowTop <= -18000)
         {
             Settings.MainWindowLeft = _cacheLeft;
@@ -1813,6 +1863,17 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         ExitInputTranslateMode();
         MainWindow.Visibility = Visibility.Collapsed;
+        RestoreCursorOcrWindowPosition();
+    }
+
+    private void RestoreCursorOcrWindowPosition()
+    {
+        if (_cursorOcrOriginalWindowPosition is not { } position)
+            return;
+
+        Settings.MainWindowLeft = position.Left;
+        Settings.MainWindowTop = position.Top;
+        _cursorOcrOriginalWindowPosition = null;
     }
 
     [RelayCommand]
