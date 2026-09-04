@@ -1,0 +1,21 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiKey">ApiKey</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiKey_Placeholder">Введіть свій apiKey</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiKey_Description">Введіть свій ключ DeepL</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiType">Кінцева точка API</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_ApiType_Description">Виберіть базову адресу API DeepL або вкажіть свою сумісну адресу</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_CustomApiUrl_Placeholder">Вкажіть базову адресу API, наприклад https://api-us.deepl.com</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_InvalidApiUrl">Вкажіть коректну базову адресу API за HTTP(S) — без параметрів запиту та якорів</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Usage">Стан використання</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Query">Запитати</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Query_Success">Запит виконано</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Query_Fail">Запит не вдався</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Query_Cancel">Скасувати запит</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Query_Error1">Дані про використання порожні</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_DeepL_Query_Error2">Ліміт використання порожній</sys:String>
+
+</ResourceDictionary>

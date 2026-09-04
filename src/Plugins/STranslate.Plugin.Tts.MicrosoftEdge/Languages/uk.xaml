@@ -1,0 +1,19 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Url">Адреса API</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Url_Placeholder">https://tts.wangwangit.com/v1/audio/speech</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Voice">Голос</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Voice_Description">Натисніть, щоб переглянути інші голоси</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Voice_Placeholder">zh-CN-XiaoxiaoNeural</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Speed">Швидкість</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Pitch">Тон</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Style">Стиль</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Style_Description">Натисніть, щоб переглянути інші стилі</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Style_Placeholder">General</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Support">Підтримати</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Tts_MicrosoftEdge_Support_Description">Плагін засновано на проєкті з відкритим кодом. Натисніть посилання, щоб підтримати його автора</sys:String>
+
+</ResourceDictionary>

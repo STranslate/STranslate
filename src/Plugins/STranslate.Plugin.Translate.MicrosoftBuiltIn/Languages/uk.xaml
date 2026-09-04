@@ -1,0 +1,13 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Translate_Microsoft">Опис</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Microsoft_Content">Плагін дає безкоштовний доступ до перекладача Microsoft.</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Microsoft_RequestMode">Режим запиту</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Microsoft_RequestMode_Description">«Типово» зберігає попередній спосіб підпису, «EdgeToken» використовує новий спосіб авторизації; якщо один режим не працює, спробуйте інший.</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Microsoft_RequestMode_Legacy">Типово</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_Microsoft_RequestMode_Edge">EdgeToken</sys:String>
+
+</ResourceDictionary>
