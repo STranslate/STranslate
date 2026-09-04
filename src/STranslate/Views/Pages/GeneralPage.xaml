@@ -744,6 +744,57 @@
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
 
+                <!--#region Dynamic Island-->
+
+                <TextBlock
+                    Margin="0,16,0,4"
+                    Style="{DynamicResource BodyStrongTextBlockStyle}"
+                    Text="{DynamicResource General_DynamicIsland}" />
+
+                <ui:SettingsCard Description="{DynamicResource General_DynamicIslandEnabledDescription}" Header="{DynamicResource General_DynamicIslandEnabled}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PanelTopGallery_20_Regular}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ui:ToggleSwitch
+                        IsOn="{Binding Settings.DynamicIslandEnabled}"
+                        OffContent="{DynamicResource Disable}"
+                        OnContent="{DynamicResource Enable}" />
+                </ui:SettingsCard>
+
+                <ui:SettingsExpander Header="{DynamicResource General_DynamicIsland}" IsEnabled="{Binding Settings.DynamicIslandEnabled}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PanelTopGallery_20_Regular}" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Description="{DynamicResource General_DynamicIslandDurationDescription}" Header="{DynamicResource General_DynamicIslandDuration}">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBox Width="80" VerticalAlignment="Center" Text="{Binding Settings.DynamicIslandDurationSeconds}" />
+                                <TextBlock VerticalAlignment="Center" Text="秒" />
+                            </ikw:SimpleStackPanel>
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Description="{DynamicResource General_DynamicIslandMaxWidthDescription}" Header="{DynamicResource General_DynamicIslandMaxWidth}">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBox Width="80" VerticalAlignment="Center" Text="{Binding Settings.DynamicIslandMaxWidth}" />
+                                <TextBlock VerticalAlignment="Center" Text="px" />
+                            </ikw:SimpleStackPanel>
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Description="{DynamicResource General_DynamicIslandHeightDescription}" Header="{DynamicResource General_DynamicIslandHeight}">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBox Width="80" VerticalAlignment="Center" Text="{Binding Settings.DynamicIslandHeight}" />
+                                <TextBlock VerticalAlignment="Center" Text="px" />
+                            </ikw:SimpleStackPanel>
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Description="{DynamicResource General_DynamicIslandTopMarginDescription}" Header="{DynamicResource General_DynamicIslandTopMargin}">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBox Width="80" VerticalAlignment="Center" Text="{Binding Settings.DynamicIslandTopMargin}" />
+                                <TextBlock VerticalAlignment="Center" Text="px" />
+                            </ikw:SimpleStackPanel>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <!--#endregion-->
+
                 <ui:SettingsExpander Header="{DynamicResource General_HideNotifyIcon}">
                     <ui:SettingsExpander.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.AlertOff_20_Regular}" />

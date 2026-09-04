@@ -186,6 +186,45 @@ public partial class Settings : ObservableObject
     }
     [ObservableProperty] public partial double MainWindowMaxHeight { get; set; } = 800;
 
+    #region 灵动岛
+
+    /// <summary>
+    /// 是否启用灵动岛（替代原翻译窗口展示翻译结果）
+    /// </summary>
+    [ObservableProperty] public partial bool DynamicIslandEnabled { get; set; } = false;
+
+    /// <summary>
+    /// 灵动岛最小宽度（文本较短时收缩到的宽度）
+    /// </summary>
+    [ObservableProperty] public partial double DynamicIslandMinWidth { get; set; } = 180;
+
+    /// <summary>
+    /// 灵动岛最大宽度（文本过长时截断显示的宽度）
+    /// </summary>
+    [ObservableProperty] public partial double DynamicIslandMaxWidth { get; set; } = 520;
+
+    /// <summary>
+    /// 灵动岛高度（胶囊高度）
+    /// </summary>
+    [ObservableProperty] public partial double DynamicIslandHeight { get; set; } = 54;
+
+    /// <summary>
+    /// 灵动岛自动隐藏时长（秒），显示翻译结果后无操作自动隐藏
+    /// </summary>
+    [ObservableProperty] public partial double DynamicIslandDurationSeconds { get; set; } = 10;
+
+    /// <summary>
+    /// 灵动岛内容字体大小
+    /// </summary>
+    [ObservableProperty] public partial double DynamicIslandFontSize { get; set; } = 15;
+
+    /// <summary>
+    /// 灵动岛距屏幕工作区顶部的间距
+    /// </summary>
+    [ObservableProperty] public partial double DynamicIslandTopMargin { get; set; } = 16;
+
+    #endregion
+
     [ObservableProperty] public partial bool ShowPascalCase { get; set; } = true;
     [ObservableProperty] public partial bool ShowCamelCase { get; set; } = false;
     [ObservableProperty] public partial bool ShowSnakeCase { get; set; } = true;

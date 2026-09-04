@@ -45,6 +45,17 @@
     <sys:String x:Key="General_WindowAlign">主窗口在显示器上的位置</sys:String>
     <sys:String x:Key="General_MainWindowMaxHeightRatio">主窗口最大高度（屏幕比例）</sys:String>
     <sys:String x:Key="General_MainWindowMaxHeightRatioDescription">控制主窗口最大高度占当前显示器工作区的比例（60%~100%）。</sys:String>
+    <sys:String x:Key="General_DynamicIsland">灵动岛</sys:String>
+    <sys:String x:Key="General_DynamicIslandEnabled">启用灵动岛</sys:String>
+    <sys:String x:Key="General_DynamicIslandEnabledDescription">取词翻译时以屏幕顶部胶囊展示翻译结果，替代弹出原翻译窗口；双击胶囊可展开原窗口。</sys:String>
+    <sys:String x:Key="General_DynamicIslandDuration">自动隐藏时长（秒）</sys:String>
+    <sys:String x:Key="General_DynamicIslandDurationDescription">显示翻译结果后，无操作时自动隐藏灵动岛的时间。</sys:String>
+    <sys:String x:Key="General_DynamicIslandMaxWidth">最大宽度</sys:String>
+    <sys:String x:Key="General_DynamicIslandMaxWidthDescription">灵动岛宽度上限，文本过长时截断显示。</sys:String>
+    <sys:String x:Key="General_DynamicIslandHeight">高度</sys:String>
+    <sys:String x:Key="General_DynamicIslandHeightDescription">灵动岛胶囊高度。</sys:String>
+    <sys:String x:Key="General_DynamicIslandTopMargin">距顶部间距</sys:String>
+    <sys:String x:Key="General_DynamicIslandTopMarginDescription">灵动岛距屏幕工作区顶部的距离。</sys:String>
     <sys:String x:Key="General_DisableGlobalHotkeys">禁用全局热键</sys:String>
     <sys:String x:Key="General_IgnoreHotkeysOnFullscreen">全屏模式下忽略热键</sys:String>
     <sys:String x:Key="General_IgnoreHotkeysOnFullscreenDescription">优先级低于「禁用全局热键」一般用于游戏场景</sys:String>

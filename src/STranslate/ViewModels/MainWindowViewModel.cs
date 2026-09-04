@@ -44,6 +44,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private double _cacheTop;
     private bool _isAdjustingWindowPositionForContent;
 
+    private DynamicIslandWindow? _dynamicIslandWindow;
+    private bool _isDynamicIslandActive;
+
     public TranslateService TranslateService { get; }
     public OcrService OcrService { get; }
     public TtsService TtsService { get; }
@@ -292,6 +295,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
         var skipShow = _skipShowForNextTranslate;
         _skipShowForNextTranslate = false;
+
+        // 灵动岛模式：取词翻译时用屏幕顶部胶囊展示结果，替代弹出原翻译窗口
+        if (ShouldUseDynamicIsland())
+        {
+            ShowDynamicIsland();
+            return;
+        }
 
         if (skipShow)
             return;
@@ -1981,6 +1991,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             MainWindow.PART_Input.Focus();
             Keyboard.Focus(MainWindow.PART_Input);
         }
+
+        // 主窗口已展示，收起灵动岛
+        HideDynamicIsland();
     }
 
     public void Hide()
@@ -2121,6 +2134,119 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     [RelayCommand]
     private void Exit(AppShutdownReason reason) => App.RequestShutdown(reason);
+
+    #endregion
+
+    #region Dynamic Island
+
+    private bool ShouldUseDynamicIsland()
+        => Settings.DynamicIslandEnabled && !IsMainWindowVisible;
+
+    private DynamicIslandWindow EnsureDynamicIslandWindow()
+    {
+        if (_dynamicIslandWindow == null)
+        {
+            _dynamicIslandWindow = new DynamicIslandWindow();
+            _dynamicIslandWindow.IslandDoubleClicked += OnDynamicIslandDoubleClicked;
+        }
+
+        // 同步灵动岛尺寸、时长等配置
+        _dynamicIslandWindow.AutoHideDuration = TimeSpan.FromSeconds(Math.Max(1, Settings.DynamicIslandDurationSeconds));
+        _dynamicIslandWindow.IslandMinWidth = Settings.DynamicIslandMinWidth;
+        _dynamicIslandWindow.IslandMaxWidth = Settings.DynamicIslandMaxWidth;
+        _dynamicIslandWindow.IslandHeight = Settings.DynamicIslandHeight;
+        _dynamicIslandWindow.IslandTopMargin = Settings.DynamicIslandTopMargin;
+        _dynamicIslandWindow.IslandFontSize = Settings.DynamicIslandFontSize;
+        return _dynamicIslandWindow;
+    }
+
+    private void ShowDynamicIsland()
+    {
+        EnsureDynamicIslandWindow();
+        _isDynamicIslandActive = true;
+        SubscribeDynamicIslandResultEvents();
+        _dynamicIslandWindow!.ShowIsland();
+        UpdateDynamicIslandText();
+    }
+
+    private void HideDynamicIsland()
+    {
+        _isDynamicIslandActive = false;
+        _dynamicIslandWindow?.HideIsland();
+    }
+
+    private void OnDynamicIslandDoubleClicked(object? sender, EventArgs e)
+    {
+        // 双击灵动岛：收起灵动岛并弹出原翻译窗口
+        HideDynamicIsland();
+        Show();
+    }
+
+    /// <summary>
+    /// 订阅各翻译服务的可见结果通道，翻译完成时刷新灵动岛内容。
+    /// </summary>
+    private void SubscribeDynamicIslandResultEvents()
+    {
+        foreach (var service in TranslateService.Services)
+        {
+            switch (service.Plugin)
+            {
+                case ITranslatePlugin tp:
+                    tp.TransResult.PropertyChanged -= OnDynamicIslandResultChanged;
+                    tp.TransResult.PropertyChanged += OnDynamicIslandResultChanged;
+                    break;
+                case IDictionaryPlugin dp:
+                    dp.DictionaryResult.PropertyChanged -= OnDynamicIslandResultChanged;
+                    dp.DictionaryResult.PropertyChanged += OnDynamicIslandResultChanged;
+                    break;
+            }
+        }
+    }
+
+    private void OnDynamicIslandResultChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (!_isDynamicIslandActive) return;
+        if (e.PropertyName is not (nameof(TranslateResult.Text) or nameof(TranslateResult.IsProcessing))) return;
+
+        _ = Application.Current.Dispatcher.BeginInvoke(UpdateDynamicIslandText, DispatcherPriority.Background);
+    }
+
+    private void UpdateDynamicIslandText()
+    {
+        if (!_isDynamicIslandActive || _dynamicIslandWindow == null) return;
+
+        var text = GetDynamicIslandResultText();
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        _dynamicIslandWindow.UpdateResult(text);
+    }
+
+    private string GetDynamicIslandResultText()
+    {
+        // 优先返回成功结果
+        foreach (var service in TranslateService.Services)
+        {
+            if (!service.IsEnabled) continue;
+
+            switch (service.Plugin)
+            {
+                case ITranslatePlugin tp when tp.TransResult.IsSuccess && !string.IsNullOrWhiteSpace(tp.TransResult.Text):
+                    return tp.TransResult.Text;
+                case IDictionaryPlugin dp when !string.IsNullOrWhiteSpace(dp.DictionaryResult.Text):
+                    return dp.DictionaryResult.Text;
+            }
+        }
+
+        // 兜底：展示失败信息
+        foreach (var service in TranslateService.Services)
+        {
+            if (!service.IsEnabled) continue;
+            if (service.Plugin is ITranslatePlugin tp && !string.IsNullOrWhiteSpace(tp.TransResult.Text))
+                return tp.TransResult.Text;
+        }
+
+        return string.Empty;
+    }
 
     #endregion
 
@@ -2913,6 +3039,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
             _debounceExecutor.Dispose();
             _clipboardMonitor?.Dispose();
+            _dynamicIslandWindow?.Dispose();
+            _dynamicIslandWindow = null;
 
             // 如果窗口一直没打开过，恢复位置后再退出
             if (Settings.MainWindowLeft <= -18000 && Settings.MainWindowTop <= -18000)
