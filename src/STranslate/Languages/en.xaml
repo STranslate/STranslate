@@ -219,6 +219,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">OCR | Image Translation Window Hotkey</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">Re-execute Text Recognition | Image Translation</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">Switch Rendering/Annotation Image</sys:String>
+    <sys:String x:Key="Hotkey_PinImageTranslate">Pin image translation (Compact)</sys:String>
     <sys:String x:Key="Hotkey_QrCode">Recognize QR Code</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">This hotkey is only supported in OCR window</sys:String>
     <sys:String x:Key="Hotkey_IncrementalTranslate">Incremental Translation</sys:String>
@@ -868,4 +869,10 @@
     <sys:String x:Key="EditPrompt_Content">Edit</sys:String>
     <sys:String x:Key="Temperature">Temperature Control</sys:String>
     <sys:String x:Key="Temperature_Description">Controls the randomness of the model's output</sys:String>
+    <sys:String x:Key="ImageTranslatePin">Pin</sys:String>
+    <sys:String x:Key="ImageTranslatePinFailed">Could not pin the result</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedCopyAll">Copy all text</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowOriginal">Show original image</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowTranslation">Show translation</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedWindowShadow">Window shadow</sys:String>
 </ResourceDictionary>

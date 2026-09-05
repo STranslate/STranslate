@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using STranslate.Core;
 using STranslate.Helpers;
@@ -44,10 +45,13 @@ public partial class ImageTranslateCompactWindow
     private bool _isClosing;
     private CompactWindowLayout? _layout;
     private DrawingRectangle? _pendingPhysicalBounds;
+    private DrawingRectangle _imagePhysicalBounds;
+    private bool _isPinning;
 
     private bool ShouldSuppressAutoClose =>
         _isContextMenuOpen ||
         _isToolbarDropDownOpen ||
+        _isPinning ||
         _viewModel.IsSaveDialogOpen ||
         _isClosing;
 
@@ -58,6 +62,7 @@ public partial class ImageTranslateCompactWindow
         DataContext = _viewModel;
 
         InitializeComponent();
+        PART_PinButton.Command = new RelayCommand(PinCurrentResult);
     }
 
     public void PlaceForCapture(DrawingRectangle? physicalBounds, DrawingSize bitmapSize)
@@ -116,6 +121,7 @@ public partial class ImageTranslateCompactWindow
 
     private void PlaceOnPhysicalBounds(DrawingRectangle bounds)
     {
+        _imagePhysicalBounds = bounds;
         var dpiScale = GetDpiScale(bounds);
         var workArea = GetPhysicalWorkArea(
             bounds.Left + bounds.Width / 2,
@@ -210,7 +216,33 @@ public partial class ImageTranslateCompactWindow
             FallbackScreenWidthRatio,
             FallbackScreenHeightRatio);
 
-        PlaceOnPhysicalWindowBounds(windowBounds, dpiScale);
+        PlaceOnPhysicalBounds(new DrawingRectangle(windowBounds.Location, bitmapSize));
+    }
+
+    private void PinCurrentResult()
+    {
+        if (_isPinning || _isClosing || !_viewModel.CanPin)
+            return;
+
+        _isPinning = true;
+        try
+        {
+            var snapshot = PinnedImageTranslateSnapshot.Create(
+                _viewModel.SourceImage!, _viewModel.AnnotatedImage!, _viewModel.ResultOverlay!,
+                _viewModel.OriginalSelectionWords, _viewModel.TranslatedSelectionWords, _imagePhysicalBounds,
+                _viewModel.Settings.IsImTranShowingAnnotated);
+            Ioc.Default.GetRequiredService<PinnedWindowController>().CreateWindow(snapshot);
+            Close();
+        }
+        catch (Exception ex)
+        {
+            Activate();
+            _viewModel.ReportPinFailure(ex);
+        }
+        finally
+        {
+            _isPinning = false;
+        }
     }
 
     /// <summary>

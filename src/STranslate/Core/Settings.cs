@@ -277,6 +277,7 @@ public partial class Settings : ObservableObject
     [ObservableProperty] public partial bool IsImTranShowingTextControl { get; set; } = false;
     [ObservableProperty] public partial LangEnum ImageTranslateOcrLanguage { get; set; } = LangEnum.Auto;
     [ObservableProperty] public partial bool IsImageTranslateCompactOcrLanguageVisible { get; set; } = false;
+    [ObservableProperty] public partial bool PinnedImageTranslateShowShadow { get; set; } = true;
     [ObservableProperty] public partial LangEnum ImageTranslateSourceLang { get; set; } = LangEnum.Auto;
     [ObservableProperty] public partial LangEnum ImageTranslateTargetLang { get; set; } = LangEnum.Auto;
 

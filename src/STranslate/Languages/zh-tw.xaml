@@ -219,6 +219,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">OCR | 圖片翻譯視窗快捷鍵</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">重新執行文字識別 | 圖片翻譯</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">切換渲染圖/標註圖</sys:String>
+    <sys:String x:Key="Hotkey_PinImageTranslate">貼圖（精簡圖片翻譯視窗）</sys:String>
     <sys:String x:Key="Hotkey_QrCode">識別二維碼</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">該熱鍵僅支援OCR視窗</sys:String>
     <sys:String x:Key="Hotkey_IncrementalTranslate">增量翻譯</sys:String>
@@ -871,4 +872,10 @@
     <sys:String x:Key="EditPrompt_Content">編輯</sys:String>
     <sys:String x:Key="Temperature">溫度控制</sys:String>
     <sys:String x:Key="Temperature_Description">控制著模型輸出的隨機性</sys:String>
+    <sys:String x:Key="ImageTranslatePin">貼圖</sys:String>
+    <sys:String x:Key="ImageTranslatePinFailed">貼圖失敗</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedCopyAll">複製全文</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowOriginal">顯示原圖</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowTranslation">顯示譯文</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedWindowShadow">視窗陰影</sys:String>
 </ResourceDictionary>

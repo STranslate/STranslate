@@ -110,7 +110,7 @@ internal static class ImageTranslateRenderer
                     overlay.FormattedText,
                     overlay.TextPosition,
                     overlay.Plan.TextClipRect,
-                    scaleFactor: 1)));
+                    scaleFactor: 1, preserveClippedText: true)), separateParagraphs: true);
 
         return new ImageTranslateOverlayDocument(
             overlays.ToArray(),

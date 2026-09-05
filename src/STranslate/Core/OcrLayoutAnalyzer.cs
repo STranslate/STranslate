@@ -138,6 +138,7 @@ internal static class OcrLayoutAnalyzer
                     Text = text,
                     BoxPoints = boxPoints,
                     LineBoxPoints = lineBoxPoints,
+                    SourceContents = lines.ToArray(),
                     Source = OcrLayoutSource.Provider,
                     Confidence = 1
                 });
@@ -155,6 +156,7 @@ internal static class OcrLayoutAnalyzer
                 Text = content.Text,
                 BoxPoints = CloneBoxPoints(content.BoxPoints),
                 LineBoxPoints = content.BoxPoints.Count > 0 ? [CloneBoxPoints(content.BoxPoints)] : [],
+                SourceContents = [content],
                 Source = OcrLayoutSource.NoMerge,
                 Confidence = 1
             })
@@ -1146,6 +1148,7 @@ internal static class OcrLayoutAnalyzer
                 Text = JoinParagraphText(Lines),
                 BoxPoints = CreateBoxPoints(bounds),
                 LineBoxPoints = Lines.Select(line => CreateBoxPoints(line.Bounds)).ToList(),
+                SourceContents = Lines.SelectMany(line => line.Items.Select(item => item.Content)).ToArray(),
                 Source = OcrLayoutSource.Smart,
                 Confidence = Confidence
             };

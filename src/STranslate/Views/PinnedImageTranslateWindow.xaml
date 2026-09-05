@@ -1,0 +1,28 @@
+<Window
+    x:Class="STranslate.Views.PinnedImageTranslateWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:control="clr-namespace:STranslate.Controls"
+    Title="{DynamicResource ImageTranslate}"
+    Width="600"
+    Height="400"
+    MinWidth="1"
+    MinHeight="1"
+    AllowsTransparency="True"
+    Background="Transparent"
+    ResizeMode="NoResize"
+    Topmost="True"
+    WindowStartupLocation="Manual"
+    WindowStyle="None">
+    <Grid>
+        <Grid x:Name="PART_ImageSurface" Panel.ZIndex="5">
+            <control:ImageZoom
+                x:Name="PART_ImageZoom"
+                Panel.ZIndex="5"
+                AlwaysHideZoomValueHint="True"
+                DisableDoubleClickReset="True"
+                DisableAnimation="True"
+                IsPanAndZoomEnabled="False" />
+        </Grid>
+    </Grid>
+</Window>

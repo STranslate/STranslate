@@ -219,6 +219,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">OCR | Görsel Çeviri Penceresi Kısayolu</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">Metin Tanımayı | Görsel Çeviriyi Yeniden Çalıştır</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">İşleme/Not Görüntüsünü Değiştir</sys:String>
+    <sys:String x:Key="Hotkey_PinImageTranslate">Görüntü çevirisini sabitle (Kompakt)</sys:String>
     <sys:String x:Key="Hotkey_QrCode">QR Kodu Tanı</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">Bu kısayol yalnızca OCR penceresinde desteklenir.</sys:String>
     <sys:String x:Key="Hotkey_IncrementalTranslate">Kademeli Çeviri</sys:String>
@@ -870,4 +871,10 @@
     <sys:String x:Key="EditPrompt_Content">Düzenle</sys:String>
     <sys:String x:Key="Temperature">Sıcaklık Kontrolü</sys:String>
     <sys:String x:Key="Temperature_Description">Modelin çıktısının rastgeleliğini kontrol eder.</sys:String>
+    <sys:String x:Key="ImageTranslatePin">Sabitle</sys:String>
+    <sys:String x:Key="ImageTranslatePinFailed">Sonuç sabitlenemedi</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedCopyAll">Tüm metni kopyala</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowOriginal">Orijinal resmi göster</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowTranslation">Çeviriyi göster</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedWindowShadow">Pencere gölgesi</sys:String>
 </ResourceDictionary>

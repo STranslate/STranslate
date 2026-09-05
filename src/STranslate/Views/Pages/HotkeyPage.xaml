@@ -362,6 +362,13 @@
                                 ValidateKeyGesture="False"
                                 WindowTitle="{DynamicResource Hotkey_QrCode}" />
                         </ui:SettingsCard>
+                        <ui:SettingsCard Header="{DynamicResource Hotkey_PinImageTranslate}">
+                            <control:HotkeyControl
+                                DefaultHotkey="{Binding HotkeySettings.PinImageTranslateHotkey.Default}"
+                                Hotkey="{Binding HotkeySettings.PinImageTranslateHotkey.Key}"
+                                Type="ImageTransWindow"
+                                WindowTitle="{DynamicResource Hotkey_PinImageTranslate}" />
+                        </ui:SettingsCard>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
             </ikw:SimpleStackPanel>

@@ -7,6 +7,10 @@ namespace STranslate.Core;
 
 internal static class OcrWordBuilder
 {
+    internal static ObservableCollection<OcrWord> CreateFromLayoutBlocks(IReadOnlyList<OcrLayoutBlock> blocks) =>
+        CreateIndexedCollectionFromGroups(blocks.Select(block => CreateFromOcrContents(block.SourceContents)),
+            separateParagraphs: true);
+
     public static ObservableCollection<OcrWord> CreateFromOcrContents(IEnumerable<OcrContent>? contents)
     {
         if (contents == null)
@@ -58,7 +62,7 @@ internal static class OcrWordBuilder
         FormattedText formattedText,
         Point origin,
         Rect clipRect,
-        double scaleFactor)
+        double scaleFactor, bool preserveClippedText = false)
     {
         if (string.IsNullOrEmpty(text) ||
             clipRect.IsEmpty ||
@@ -76,14 +80,19 @@ internal static class OcrWordBuilder
             var bounds = geometry?.Bounds ?? Rect.Empty;
             if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
             {
-                if (char.IsWhiteSpace(text[i]))
+                // 裁剪/省略只影响命中框，不能删掉复制全文或整段所需的逻辑字符。
+                if (preserveClippedText || char.IsWhiteSpace(text[i]))
                     words.Add(CreateTextOnlyWord(text[i].ToString()));
                 continue;
             }
 
             var clippedBounds = Rect.Intersect(bounds, clipRect);
             if (clippedBounds.IsEmpty || clippedBounds.Width <= 0 || clippedBounds.Height <= 0)
+            {
+                if (preserveClippedText)
+                    words.Add(CreateTextOnlyWord(text[i].ToString()));
                 continue;
+            }
 
             words.Add(new OcrWord
             {
@@ -118,10 +127,11 @@ internal static class OcrWordBuilder
     }
 
     public static ObservableCollection<OcrWord> CreateIndexedCollectionFromGroups(
-        IEnumerable<IEnumerable<OcrWord>> wordGroups)
+        IEnumerable<IEnumerable<OcrWord>> wordGroups, bool separateParagraphs = false)
     {
         var indexedWords = new List<OcrWord>();
         var nextVisualLineIndex = 0;
+        var paragraphIndex = 0;
         foreach (var wordGroup in wordGroups)
         {
             var groupWords = wordGroup
@@ -129,6 +139,13 @@ internal static class OcrWordBuilder
                                (IsSelectableBounds(word.BoundingBox) || word.BoundingBox.IsEmpty))
                 .ToList();
 
+            if (groupWords.Count == 0)
+                continue;
+            if (separateParagraphs && indexedWords.Count > 0)
+                indexedWords.Add(CreateTextOnlyWord(Environment.NewLine));
+            foreach (var word in groupWords)
+                word.ParagraphIndex = paragraphIndex;
+            paragraphIndex++;
             AssignVisualLineIndexes(groupWords, ref nextVisualLineIndex);
             indexedWords.AddRange(groupWords);
         }

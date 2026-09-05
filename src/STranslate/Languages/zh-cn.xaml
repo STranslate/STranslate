@@ -219,6 +219,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">OCR | 图片翻译窗口快捷键</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">重新执行文本识别 | 图片翻译</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">切换渲染图/标注图</sys:String>
+    <sys:String x:Key="Hotkey_PinImageTranslate">贴图（精简图片翻译窗口）</sys:String>
     <sys:String x:Key="Hotkey_QrCode">识别二维码</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">该热键仅支持OCR窗口</sys:String>
     <sys:String x:Key="Hotkey_IncrementalTranslate">增量翻译</sys:String>
@@ -869,4 +870,10 @@
     <sys:String x:Key="EditPrompt_Content">编辑</sys:String>
     <sys:String x:Key="Temperature">温度控制</sys:String>
     <sys:String x:Key="Temperature_Description">控制着模型输出的随机性</sys:String>
+    <sys:String x:Key="ImageTranslatePin">贴图</sys:String>
+    <sys:String x:Key="ImageTranslatePinFailed">贴图失败</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedCopyAll">复制全文</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowOriginal">显示原图</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowTranslation">显示译文</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedWindowShadow">窗口阴影</sys:String>
 </ResourceDictionary>

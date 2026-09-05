@@ -13,6 +13,8 @@ public class OcrWord
 
     internal int VisualLineIndex { get; set; } = -1;
 
+    internal int ParagraphIndex { get; set; } = -1;
+
     /// <summary>
     /// 该单词在全文中的起始索引
     /// </summary>

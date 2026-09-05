@@ -35,6 +35,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
     private MainWindow? _mainWindow;
     private MainWindowViewModel? _mainWindowViewModel;
     private PluginManager? _pluginManager;
+    private PinnedWindowController? _pinnedWindowController;
     private Notification? _notification;
     private AutoUpdateCheckerService? _autoUpdateCheckerService;
     private MouseSelectionService? _mouseSelectionService;
@@ -130,6 +131,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
                     services.AddSingleton<IAudioPlayer, AudioPlayer>();
                     services.AddSingleton<IScreenshot, Screenshot>();
                     services.AddSingleton<ISnackbar, Snackbar>();
+                    services.AddSingleton<PinnedWindowController>();
 
                     services.AddSingleton<BackupService>();
 
@@ -209,6 +211,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
         _pluginManager = Ioc.Default.GetRequiredService<PluginManager>();
         _pluginManager.LoadPlugins();
         Ioc.Default.GetRequiredService<ServiceManager>().LoadServices();
+        _pinnedWindowController = Ioc.Default.GetRequiredService<PinnedWindowController>();
         Ioc.Default.GetRequiredService<SqlService>().InitializeDB();
 
         RegisterAppDomainExceptions();
@@ -550,6 +553,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
             _autoUpdateCheckerService?.Dispose();
             _hotkeySettings?.Dispose();
             _notification?.Uninstall();
+            _pinnedWindowController?.CloseAll();
             _mainWindowViewModel?.Dispose();
             _mouseSelectionService?.Dispose();
             _mainWindow?.Dispatcher.Invoke(_mainWindow.Dispose);

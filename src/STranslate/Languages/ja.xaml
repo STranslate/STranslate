@@ -215,6 +215,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">OCR | 画像翻訳画面ホットキー</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">文字認識 | 画像翻訳を再実行</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">レンダリング画像/マークアップ画像の切替</sys:String>
+    <sys:String x:Key="Hotkey_PinImageTranslate">画像翻訳をピン留め（コンパクト）</sys:String>
     <sys:String x:Key="Hotkey_QrCode">QRコード認識</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">このホットキーはOCR画面でのみ有効です。</sys:String>
     <sys:String x:Key="Hotkey_IncrementalTranslate">増分翻訳</sys:String>
@@ -844,4 +845,10 @@
     <sys:String x:Key="EditPrompt_Content">編集</sys:String>
     <sys:String x:Key="Temperature">温度 (Temperature)</sys:String>
     <sys:String x:Key="Temperature_Description">モデル出力のランダム性を制御します</sys:String>
+    <sys:String x:Key="ImageTranslatePin">ピン留め</sys:String>
+    <sys:String x:Key="ImageTranslatePinFailed">ピン留めに失敗しました</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedCopyAll">全文をコピー</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowOriginal">元画像を表示</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowTranslation">翻訳を表示</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedWindowShadow">ウィンドウの影</sys:String>
 </ResourceDictionary>

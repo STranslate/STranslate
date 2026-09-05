@@ -72,6 +72,8 @@ public partial class HotkeySettings : ObservableObject, IDisposable
 
     public Hotkey SwitchImageHotkey { get; set; } = new("Ctrl + OemQuestion");
 
+    public Hotkey PinImageTranslateHotkey { get; set; } = new(Constant.EmptyHotkey);
+
     #endregion
 
     [JsonIgnore]
@@ -106,6 +108,7 @@ public partial class HotkeySettings : ObservableObject, IDisposable
         new RegisteredHotkeyData(ReExecuteOcrHotkey.Key, "Hotkey_ReExecuteOcr", HotkeyType.OcrWindow | HotkeyType.ImageTransWindow, () => ReExecuteOcrHotkey.Key = Constant.EmptyHotkey),
         new RegisteredHotkeyData(QrCodeHotkey.Key, "Hotkey_QrCode", HotkeyType.OcrWindow, () => QrCodeHotkey.Key = Constant.EmptyHotkey),
         new RegisteredHotkeyData(SwitchImageHotkey.Key, "Hotkey_SwitchImage", HotkeyType.OcrWindow | HotkeyType.ImageTransWindow, () => SwitchImageHotkey.Key = Constant.EmptyHotkey),
+        new RegisteredHotkeyData(PinImageTranslateHotkey.Key, "Hotkey_PinImageTranslate", HotkeyType.ImageTransWindow, () => PinImageTranslateHotkey.Key = Constant.EmptyHotkey),
 
         //TODO: Other Window
     ];
@@ -211,6 +214,7 @@ public partial class HotkeySettings : ObservableObject, IDisposable
             [nameof(ReExecuteOcrHotkey)] = "Ctrl + R",
             [nameof(QrCodeHotkey)] = "Ctrl + Shift + R",
             [nameof(SwitchImageHotkey)] = "Ctrl + OemQuestion",
+            [nameof(PinImageTranslateHotkey)] = Constant.EmptyHotkey,
         };
         foreach (var prop in GetType().GetProperties())
         {

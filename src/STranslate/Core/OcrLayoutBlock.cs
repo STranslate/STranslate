@@ -17,6 +17,9 @@ internal sealed class OcrLayoutBlock
 
     public List<List<BoxPoint>> LineBoxPoints { get; set; } = [];
 
+    // 保留分析器已确定的原始文本归属，选择段落时无需按坐标重新推断。
+    internal IReadOnlyList<OcrContent> SourceContents { get; init; } = [];
+
     public OcrLayoutSource Source { get; set; }
 
     public double Confidence { get; set; } = 1;

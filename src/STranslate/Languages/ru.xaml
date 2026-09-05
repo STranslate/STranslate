@@ -219,6 +219,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">Горячие клавиши окна распознавания текста | перевода изображения</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">Повторить распознавание текста | перевод изображения</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">Переключить изображение (результат/разметка)</sys:String>
+    <sys:String x:Key="Hotkey_PinImageTranslate">Закрепить перевод изображения (компактное окно)</sys:String>
     <sys:String x:Key="Hotkey_QrCode">Распознать QR-код</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">Работает только в окне распознавания текста</sys:String>
     <sys:String x:Key="Hotkey_IncrementalTranslate">Накопительный перевод</sys:String>
@@ -868,4 +869,10 @@
     <sys:String x:Key="EditPrompt_Content">Изменить</sys:String>
     <sys:String x:Key="Temperature">Температура</sys:String>
     <sys:String x:Key="Temperature_Description">Управляет случайностью ответов модели</sys:String>
+    <sys:String x:Key="ImageTranslatePin">Закрепить</sys:String>
+    <sys:String x:Key="ImageTranslatePinFailed">Не удалось закрепить</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedCopyAll">Копировать весь текст</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowOriginal">Показать оригинал</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowTranslation">Показать перевод</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedWindowShadow">Тень окна</sys:String>
 </ResourceDictionary>

@@ -326,6 +326,8 @@ public class ImageZoom : Control
     private static void OnOcrWordsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (ImageZoom)d;
+        // 数据源切换后旧选择索引失效。
+        control.ResetSelection();
         control._fullTextCache = null; // 清除缓存
         control.UpdateSelectedText(); // 更新选中文本
     }
@@ -576,6 +578,69 @@ public class ImageZoom : Control
 
     private bool IsPointOverAnyWord(Point point) => FindWordAtPoint(point) != null;
 
+    /// <summary>
+    /// 判断 ImageZoom 坐标是否位于可选文字上。
+    /// </summary>
+    public bool IsPointOverSelectableText(Point pointRelativeToControl)
+    {
+        if (_interactionCanvas == null || OcrWords == null || OcrWords.Count == 0)
+            return false;
+
+        var pointOnCanvas = TranslatePoint(pointRelativeToControl, _interactionCanvas);
+        return IsPointOverAnyWord(pointOnCanvas);
+    }
+
+    /// <summary>
+    /// 清除当前文字选择。
+    /// </summary>
+    public void ClearTextSelection() => ResetSelection();
+
+    internal bool IsPointOverTextSelection(Point point)
+    {
+        if (_interactionCanvas == null || _selectionStartIndex == null || _selectionEndIndex == null)
+            return false;
+        var word = FindWordAtPoint(TranslatePoint(point, _interactionCanvas));
+        return word != null && IsWordInSelection(word,
+            Math.Min(_selectionStartIndex.Value, _selectionEndIndex.Value),
+            Math.Max(_selectionStartIndex.Value, _selectionEndIndex.Value));
+    }
+
+    // Pinned 在 Preview 事件中调用；其他 ImageZoom 保留原有的双击选行行为。
+    internal void SelectTextAtPoint(Point point, bool selectParagraph)
+    {
+        if (_interactionCanvas == null)
+            return;
+        var canvasPoint = TranslatePoint(point, _interactionCanvas);
+        var word = FindWordAtPoint(canvasPoint);
+        if (word == null)
+            return;
+        if (selectParagraph)
+        {
+            if (OcrWordSelection.TryGetParagraphRange(OcrWords, word, out var paragraphStart, out var paragraphEnd))
+            {
+                _isSelecting = false;
+                _selectionStartIndex = paragraphStart;
+                _selectionEndIndex = paragraphEnd;
+                UpdateSelectionHighlight();
+            }
+            return;
+        }
+        if (OcrWordSelection.TryGetWordRange(GetFullText(), CalculateCharacterIndexInWord(word, canvasPoint),
+                out var start, out var end))
+        {
+            // 软换行不应截断单词，但独立段落的文字不能合成一个词。
+            if (OcrWordSelection.TryGetParagraphRange(OcrWords, word, out var lineStart, out var lineEnd))
+            {
+                start = Math.Max(start, lineStart);
+                end = Math.Min(end, lineEnd);
+            }
+            _isSelecting = false;
+            _selectionStartIndex = start;
+            _selectionEndIndex = end;
+            UpdateSelectionHighlight();
+        }
+    }
+
     private bool SelectVisualLineAtPoint(Point point)
     {
         var anchorWord = FindWordAtPoint(point);
@@ -765,6 +830,13 @@ public class ImageZoom : Control
         if (transform == null || property == null)
             return;
 
+        if (DisableAnimation)
+        {
+            transform.BeginAnimation(property, null);
+            transform.SetCurrentValue(property, targetValue);
+            return;
+        }
+
         var duration = useAnimation && !DisableAnimation
             ? TimeSpan.FromMilliseconds(AnimationDurationMs)
             : TimeSpan.Zero;
@@ -779,7 +851,7 @@ public class ImageZoom : Control
 
     private void AnimateZoomHint()
     {
-        if (_scaleTextBorder == null)
+        if (_scaleTextBorder == null || AlwaysHideZoomValueHint || DisableAnimation)
             return;
 
         var duration = TimeSpan.FromMilliseconds(ZoomValueHintAnimationDurationMs);
@@ -1056,9 +1128,6 @@ public class ImageZoom : Control
 
     private void ResetSelection()
     {
-        if (OcrWords == null || OcrWords.Count == 0)
-            return;
-
         _isSelecting = false;
         _selectionStartIndex = null;
         _selectionEndIndex = null;
@@ -1078,7 +1147,7 @@ public class ImageZoom : Control
         UpdateSelectionHighlight();
     }
 
-    private string GetFullText()
+    internal string GetFullText()
     {
         if (_fullTextCache != null)
             return _fullTextCache;

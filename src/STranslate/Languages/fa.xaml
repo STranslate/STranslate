@@ -220,6 +220,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">کلید میانبر پنجره OCR | ترجمه تصویر</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">اجرای مجدد تشخیص متن | ترجمه تصویر</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">سوئیچ بین تصویر رندرشده / نشانه‌گذاری‌شده</sys:String>
+    <sys:String x:Key="Hotkey_PinImageTranslate">سنجاق کردن ترجمهٔ تصویر (فشرده)</sys:String>
     <sys:String x:Key="Hotkey_QrCode">تشخیص کُد QR</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">این کلید میانبر فقط در پنجره OCR پشتیبانی می‌شود</sys:String>
     <sys:String x:Key="Hotkey_IncrementalTranslate">ترجمه افزایشی</sys:String>
@@ -885,4 +886,10 @@ Alt+کلیک چپ -> تنظیمات ترجمه متن</sys:String>
     <sys:String x:Key="EditPrompt_Content">ویرایش</sys:String>
     <sys:String x:Key="Temperature">میزان خلاقیت (Temperature)</sys:String>
     <sys:String x:Key="Temperature_Description">کنترل میزان تصادفی بودن خروجی مدل</sys:String>
+    <sys:String x:Key="ImageTranslatePin">سنجاق</sys:String>
+    <sys:String x:Key="ImageTranslatePinFailed">سنجاق نتیجه ناموفق بود</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedCopyAll">کپی تمام متن</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowOriginal">نمایش تصویر اصلی</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowTranslation">نمایش ترجمه</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedWindowShadow">سایه پنجره</sys:String>
 </ResourceDictionary>

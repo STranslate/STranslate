@@ -180,6 +180,8 @@ public static class Win32Helper
     #region Window Position
 
     private const uint SWP_NOZORDER = 0x0004;
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOACTIVATE = 0x0010;
     private const uint SWP_SHOWWINDOW = 0x0040;
     private const uint MONITOR_DEFAULTTONEAREST = 2;
@@ -231,6 +233,79 @@ public static class Win32Helper
         }
     }
 
+    /// <summary>
+    /// 在同一个 DeferWindowPos batch 中更新两个 HWND 的物理矩形。
+    /// 用于 Pinned 主内容窗与视觉 Chrome 伴随窗，避免快速拖动时两个窗口逐次 SetWindowPos 造成可见迟滞。
+    /// </summary>
+    internal static bool SetTwoWindowPhysicalBounds(
+        Window firstWindow,
+        System.Drawing.Rectangle firstBounds,
+        Window secondWindow,
+        System.Drawing.Rectangle secondBounds)
+    {
+        var first = new WindowInteropHelper(firstWindow).EnsureHandle();
+        var second = new WindowInteropHelper(secondWindow).EnsureHandle();
+        var deferred = BeginDeferWindowPos(2);
+        if (deferred == 0)
+            return false;
+
+        deferred = DeferWindowPos(
+            deferred,
+            first,
+            0,
+            firstBounds.Left,
+            firstBounds.Top,
+            Math.Max(1, firstBounds.Width),
+            Math.Max(1, firstBounds.Height),
+            SWP_NOZORDER | SWP_NOACTIVATE);
+        if (deferred == 0)
+            return false;
+
+        deferred = DeferWindowPos(
+            deferred,
+            second,
+            0,
+            secondBounds.Left,
+            secondBounds.Top,
+            Math.Max(1, secondBounds.Width),
+            Math.Max(1, secondBounds.Height),
+            SWP_NOZORDER | SWP_NOACTIVATE);
+        return deferred != 0 && EndDeferWindowPos(deferred);
+    }
+
+    internal static bool PlaceWindowBehind(Window window, Window windowAbove)
+    {
+        var hwnd = new WindowInteropHelper(window).EnsureHandle();
+        var above = new WindowInteropHelper(windowAbove).EnsureHandle();
+        return PlaceWindowBehind(hwnd, above);
+    }
+
+    internal static bool PlaceWindowBehind(nint hwnd, nint windowAbove)
+    {
+        if (hwnd == 0 || windowAbove == 0)
+            return false;
+
+        return SetWindowPos(
+            hwnd,
+            windowAbove,
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+
+    internal static void ConfigureClickThroughNoActivate(Window window)
+    {
+        var hwnd = GetWindowHandle(window, ensure: true);
+        var exStyle = GetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE).ToInt64();
+        exStyle |= (long)(uint)WINDOW_EX_STYLE.WS_EX_TRANSPARENT;
+        exStyle |= (long)(uint)WINDOW_EX_STYLE.WS_EX_NOACTIVATE;
+        exStyle |= (long)(uint)WINDOW_EX_STYLE.WS_EX_TOOLWINDOW;
+        exStyle &= ~(long)(uint)WINDOW_EX_STYLE.WS_EX_APPWINDOW;
+        SetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, new nint(exStyle));
+    }
+
     internal static unsafe bool SetWindowCloaked(Window window, bool cloaked)
     {
         var value = cloaked ? 1 : 0;
@@ -261,6 +336,24 @@ public static class Win32Helper
         int cx,
         int cy,
         uint flags);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint BeginDeferWindowPos(int nNumWindows);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint DeferWindowPos(
+        nint hWinPosInfo,
+        nint hWnd,
+        nint hWndInsertAfter,
+        int x,
+        int y,
+        int cx,
+        int cy,
+        uint uFlags);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool EndDeferWindowPos(nint hWinPosInfo);
 
     [DllImport("user32.dll")]
     private static extern HMONITOR MonitorFromPoint(NativePoint pt, uint flags);

@@ -215,6 +215,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">OCR | 이미지 번역 창 단축키</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">텍스트 인식 | 이미지 번역 재실행</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">렌더링 이미지/마킹 이미지 전환</sys:String>
+    <sys:String x:Key="Hotkey_PinImageTranslate">이미지 번역 고정 (간소화 창)</sys:String>
     <sys:String x:Key="Hotkey_QrCode">QR 코드 인식</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">이 단축키는 OCR 창에서만 지원됩니다.</sys:String>
     <sys:String x:Key="Hotkey_IncrementalTranslate">증분 번역</sys:String>
@@ -844,4 +845,10 @@
     <sys:String x:Key="EditPrompt_Content">편집</sys:String>
     <sys:String x:Key="Temperature">온도 (Temperature)</sys:String>
     <sys:String x:Key="Temperature_Description">모델 출력의 무작위성을 제어합니다</sys:String>
+    <sys:String x:Key="ImageTranslatePin">고정</sys:String>
+    <sys:String x:Key="ImageTranslatePinFailed">고정하지 못했습니다</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedCopyAll">전체 텍스트 복사</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowOriginal">원본 이미지 표시</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedShowTranslation">번역 표시</sys:String>
+    <sys:String x:Key="ImageTranslatePinnedWindowShadow">창 그림자</sys:String>
 </ResourceDictionary>
