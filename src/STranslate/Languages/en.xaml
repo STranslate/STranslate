@@ -45,6 +45,17 @@
     <sys:String x:Key="General_WindowAlign">Main Window Position on Monitor</sys:String>
     <sys:String x:Key="General_MainWindowMaxHeightRatio">Main Window Max Height (Screen Ratio)</sys:String>
     <sys:String x:Key="General_MainWindowMaxHeightRatioDescription">Controls the maximum main window height as a ratio of the current monitor work area (60%-100%).</sys:String>
+    <sys:String x:Key="General_DynamicIsland">Dynamic Island</sys:String>
+    <sys:String x:Key="General_DynamicIslandEnabled">Enable Dynamic Island</sys:String>
+    <sys:String x:Key="General_DynamicIslandEnabledDescription">Show translation results in a pill at the top of the screen instead of the translation window. Double-click the pill to open the full window.</sys:String>
+    <sys:String x:Key="General_DynamicIslandDuration">Auto-hide duration (seconds)</sys:String>
+    <sys:String x:Key="General_DynamicIslandDurationDescription">The time after which the Dynamic Island hides automatically when there is no interaction.</sys:String>
+    <sys:String x:Key="General_DynamicIslandMaxWidth">Maximum width</sys:String>
+    <sys:String x:Key="General_DynamicIslandMaxWidthDescription">The width cap of the Dynamic Island; text is truncated when too long.</sys:String>
+    <sys:String x:Key="General_DynamicIslandHeight">Height</sys:String>
+    <sys:String x:Key="General_DynamicIslandHeightDescription">The height of the Dynamic Island pill.</sys:String>
+    <sys:String x:Key="General_DynamicIslandTopMargin">Top margin</sys:String>
+    <sys:String x:Key="General_DynamicIslandTopMarginDescription">The distance from the Dynamic Island to the top of the screen work area.</sys:String>
     <sys:String x:Key="General_DisableGlobalHotkeys">Disable Global Hotkeys</sys:String>
     <sys:String x:Key="General_IgnoreHotkeysOnFullscreen">Ignore Hotkeys in Fullscreen Mode</sys:String>
     <sys:String x:Key="General_IgnoreHotkeysOnFullscreenDescription">Lower priority than "Disable Global Hotkeys", usually used in gaming scenarios.</sys:String>
