@@ -17,12 +17,15 @@ internal sealed class TranslationOperation
         string text,
         LangEnum sourceLang,
         LangEnum targetLang,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        PreparedTranslationInput preparedInput)
     {
         _coordinator = coordinator;
         _getTranslation = getTranslation;
         OperationId = operationId;
         Text = text;
+        RequestText = preparedInput.RequestText;
+        RulesFingerprint = preparedInput.RulesFingerprint;
         SourceLang = sourceLang;
         TargetLang = targetLang;
         CancellationToken = cancellationToken;
@@ -30,6 +33,9 @@ internal sealed class TranslationOperation
 
     internal long OperationId { get; }
     internal string Text { get; }
+    internal string RequestText { get; }
+    internal string RulesFingerprint { get; }
+    internal bool IsPreprocessed => !string.IsNullOrEmpty(RulesFingerprint);
     internal LangEnum SourceLang { get; }
     internal LangEnum TargetLang { get; }
     internal CancellationToken CancellationToken { get; }
@@ -72,7 +78,7 @@ internal sealed class TranslationOperation
         LangEnum target) =>
         ExecuteTranslateAsync(
             plugin,
-            new TranslateRequest(Text, source, target),
+            new TranslateRequest(RequestText, source, target),
             plugin.TransResult);
 
     internal Task<TranslateResult> BackTranslateAsync(
@@ -101,7 +107,7 @@ internal sealed class TranslationOperation
         result.IsProcessing = true;
         try
         {
-            await plugin.TranslateAsync(Text, result, CancellationToken).ConfigureAwait(false);
+            await plugin.TranslateAsync(RequestText, result, CancellationToken).ConfigureAwait(false);
             CancellationToken.ThrowIfCancellationRequested();
         }
         catch (OperationCanceledException)

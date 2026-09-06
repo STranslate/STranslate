@@ -128,6 +128,7 @@ internal sealed record PreparedTranslationInput(
     IReadOnlyList<TextReplacementMatchSummary> MatchSummaries)
 {
     internal bool IsChanged => !string.Equals(OriginalText, RequestText, StringComparison.Ordinal);
+    internal bool IsPreprocessed => !string.IsNullOrEmpty(RulesFingerprint);
     internal int TotalMatchCount => MatchSummaries.Sum(summary => summary.MatchCount);
 }
 
@@ -154,12 +155,17 @@ internal sealed class TextPreprocessingException : Exception
 /// <summary>
 /// 在翻译请求发出前执行规则快照和正则替换。
 /// </summary>
-internal sealed class TextPreprocessingService
+public sealed class TextPreprocessingService
 {
     private const string FingerprintVersion = "regex-v1";
     private readonly TextPreprocessingLimits _limits;
 
-    internal TextPreprocessingService(TextPreprocessingLimits? limits = null)
+    public TextPreprocessingService()
+        : this(null)
+    {
+    }
+
+    internal TextPreprocessingService(TextPreprocessingLimits? limits)
     {
         _limits = limits ?? TextPreprocessingLimits.Default;
         _limits.Validate();
@@ -307,6 +313,9 @@ internal sealed class TextPreprocessingService
         bool isEnabled,
         IReadOnlyList<TextReplacementRule> enabledRules)
     {
+        if (!isEnabled || enabledRules.Count == 0)
+            return string.Empty;
+
         var builder = new StringBuilder(FingerprintVersion);
         builder.Append('\n').Append(isEnabled ? "enabled" : "disabled");
         foreach (var rule in enabledRules)

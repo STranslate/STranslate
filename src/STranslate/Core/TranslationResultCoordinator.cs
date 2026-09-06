@@ -14,11 +14,35 @@ internal sealed class TranslationResultCoordinator
     private readonly object _automaticSideEffectsChannel = new();
     private readonly object _identifiedLanguageChannel = new();
     private readonly Func<string, string> _getTranslation;
+    private readonly Func<string, CancellationToken, PreparedTranslationInput> _prepareText;
     private long _lastOperationId;
 
     internal TranslationResultCoordinator(Func<string, string> getTranslation)
+        : this(
+            getTranslation,
+            static (text, _) => new PreparedTranslationInput(text, text, string.Empty, []))
+    {
+    }
+
+    internal TranslationResultCoordinator(
+        Func<string, string> getTranslation,
+        TextPreprocessingService preprocessingService,
+        Settings settings)
+        : this(
+            getTranslation,
+            (text, cancellationToken) => preprocessingService.Prepare(
+                text,
+                settings.TextPreprocessing,
+                cancellationToken))
+    {
+    }
+
+    private TranslationResultCoordinator(
+        Func<string, string> getTranslation,
+        Func<string, CancellationToken, PreparedTranslationInput> prepareText)
     {
         _getTranslation = getTranslation;
+        _prepareText = prepareText;
     }
 
     internal TranslationOperation BeginOperation(
@@ -35,7 +59,8 @@ internal sealed class TranslationResultCoordinator
             text,
             sourceLang,
             targetLang,
-            cancellationToken);
+            cancellationToken,
+            _prepareText(text, cancellationToken));
     }
 
     internal TranslationOperation BeginAutomaticOperation(
@@ -58,8 +83,7 @@ internal sealed class TranslationResultCoordinator
     }
 
     internal bool TryResetDictionary(DictionaryResult result, long operationId) =>
-        Application.Current.Dispatcher.Invoke(
-            () => TryReset(result, operationId));
+        InvokeOnDispatcher(() => TryReset(result, operationId));
 
     internal bool IsLatestAutomatic(long operationId) =>
         IsCurrent(_automaticSideEffectsChannel, operationId);
@@ -109,8 +133,15 @@ internal sealed class TranslationResultCoordinator
         DictionaryResult source,
         DictionaryResult target,
         long operationId) =>
-        Application.Current.Dispatcher.Invoke(
-            () => TryPublish(source, target, operationId));
+        InvokeOnDispatcher(() => TryPublish(source, target, operationId));
+
+    private static T InvokeOnDispatcher<T>(Func<T> callback)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        return dispatcher is null || dispatcher.CheckAccess()
+            ? callback()
+            : dispatcher.Invoke(callback);
+    }
 
     internal bool TryPublish(object channel, long operationId, Action publish)
     {

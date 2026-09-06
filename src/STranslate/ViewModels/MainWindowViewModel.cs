@@ -79,6 +79,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         SqlService sqlService,
         Settings settings,
         HotkeySettings hotkeySettings,
+        TextPreprocessingService textPreprocessingService,
         MouseSelectionService mouseSelectionService,
         MouseSelectionIconWindow mouseSelectionIconWindow)
     {
@@ -89,7 +90,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             .ToList();
         _logger = logger;
         _i18n = i18n;
-        _translationCoordinator = new(i18n.GetTranslation);
         _audioPlayer = audioPlayer;
         _screenshot = screenshot;
         _snackbar = snackbar;
@@ -101,6 +101,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _sqlService = sqlService;
         Settings = settings;
         HotkeySettings = hotkeySettings;
+        _translationCoordinator = new(i18n.GetTranslation, textPreprocessingService, settings);
         _mouseSelectionService = mouseSelectionService;
         _mouseSelectionIconWindow = mouseSelectionIconWindow;
         _mouseSelectionService.TextSelected += OnMouseSelectionTextSelected;
@@ -2749,7 +2750,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
         var (_, source, target) = await LanguageDetector
             .GetLanguageAsync(
-                operation.Text,
+                operation.RequestText,
                 operation.SourceLang,
                 operation.TargetLang,
                 operation.CancellationToken,
