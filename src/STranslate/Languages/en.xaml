@@ -232,6 +232,16 @@
     <sys:String x:Key="Hotkey_IncrementalTranslateDescription" xml:space="preserve">Hold down the hotkey and select text to continuously append content. Release the mouse to translate immediately.&#10;Only supports single keys, excludes Win/Alt/Ctrl/Shift</sys:String>
     <!--  // Translation Page //  -->
     <sys:String x:Key="ReplaceService">Replace Trans</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessing">Translation pre-processing</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingDescription">Apply ordered regular-expression replacements before language detection and translation. The input text remains unchanged.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingRuleName">Rule name</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPattern">Regular expression pattern</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">Replacement text</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">Move rule up</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">Move rule down</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">Ignore case</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMultiline">Multiline</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingSingleline">Singleline</sys:String>
     <sys:String x:Key="ImTranService">Image Trans</sys:String>
     <sys:String x:Key="NoServiceEnabled">No Service Enabled</sys:String>
     <sys:String x:Key="SpecialServiceInfo">Drag services from the left here, or right-click to select and enable.</sys:String>

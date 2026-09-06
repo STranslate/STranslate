@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace STranslate.Core;
 
@@ -32,47 +33,56 @@ public sealed class TextPreprocessingSettings
 /// <summary>
 /// 一条翻译前正则替换规则。
 /// </summary>
-public sealed class TextReplacementRule
+public partial class TextReplacementRule : ObservableObject
 {
+    private string _id = Guid.NewGuid().ToString("N");
+    private string _name = string.Empty;
+    private string _pattern = string.Empty;
+    private string _replacement = string.Empty;
+    private bool _isEnabled = true;
+    private bool _ignoreCase;
+    private bool _multiline;
+    private bool _singleline;
+
     /// <summary>
     /// 用于诊断和后续编辑定位的稳定标识。
     /// </summary>
-    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public string Id { get => _id; set => SetProperty(ref _id, value); }
 
     /// <summary>
     /// 规则显示名称。
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string Name { get => _name; set => SetProperty(ref _name, value); }
 
     /// <summary>
     /// .NET 正则表达式。
     /// </summary>
-    public string Pattern { get; set; } = string.Empty;
+    public string Pattern { get => _pattern; set => SetProperty(ref _pattern, value); }
 
     /// <summary>
     /// 替换文本，支持 .NET 捕获组替换语法。
     /// </summary>
-    public string Replacement { get; set; } = string.Empty;
+    public string Replacement { get => _replacement; set => SetProperty(ref _replacement, value); }
 
     /// <summary>
     /// 是否执行此规则。
     /// </summary>
-    public bool IsEnabled { get; set; } = true;
+    public bool IsEnabled { get => _isEnabled; set => SetProperty(ref _isEnabled, value); }
 
     /// <summary>
     /// 是否忽略大小写。
     /// </summary>
-    public bool IgnoreCase { get; set; }
+    public bool IgnoreCase { get => _ignoreCase; set => SetProperty(ref _ignoreCase, value); }
 
     /// <summary>
     /// 是否启用多行模式。
     /// </summary>
-    public bool Multiline { get; set; }
+    public bool Multiline { get => _multiline; set => SetProperty(ref _multiline, value); }
 
     /// <summary>
     /// 是否启用单行模式。
     /// </summary>
-    public bool Singleline { get; set; }
+    public bool Singleline { get => _singleline; set => SetProperty(ref _singleline, value); }
 
     internal TextReplacementRule Clone()
     {

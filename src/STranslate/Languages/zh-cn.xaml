@@ -232,6 +232,16 @@
     <sys:String x:Key="Hotkey_IncrementalTranslateDescription" xml:space="preserve">按住快捷键划词可持续追加内容，松开鼠标即刻翻译。&#10;仅支持单个按键，不包含 Win/Alt/Ctrl/Shift</sys:String>
     <!--  // Translation Page //  -->
     <sys:String x:Key="ReplaceService">替换翻译</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessing">翻译前替换</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingDescription">在语言识别和翻译前按顺序应用正则替换，输入框原文保持不变。</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingRuleName">规则名称</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPattern">正则表达式</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">替换文本</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">上移规则</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">下移规则</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">忽略大小写</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMultiline">多行模式</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingSingleline">单行模式</sys:String>
     <sys:String x:Key="ImTranService">图片翻译</sys:String>
     <sys:String x:Key="NoServiceEnabled">未启用服务</sys:String>
     <sys:String x:Key="SpecialServiceInfo">拖拽左侧服务至此或者右键选择以启用</sys:String>
