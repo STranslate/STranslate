@@ -307,6 +307,39 @@
                                         IsOn="{Binding IsTextPreprocessingEnabled, Mode=TwoWay}"
                                         OffContent="{DynamicResource Disable}"
                                         OnContent="{DynamicResource Enable}" />
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        Style="{DynamicResource CaptionTextBlockStyle}"
+                                        Text="{DynamicResource Translate_TextPreprocessingPreviewInput}" />
+                                    <TextBox
+                                        Margin="0,0,0,8"
+                                        AcceptsReturn="True"
+                                        MinHeight="52"
+                                        Text="{Binding PreviewInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        Style="{DynamicResource CaptionTextBlockStyle}"
+                                        Text="{DynamicResource Translate_TextPreprocessingPreviewOutput}" />
+                                    <TextBox
+                                        Margin="0,0,0,4"
+                                        AcceptsReturn="True"
+                                        IsReadOnly="True"
+                                        MinHeight="52"
+                                        Text="{Binding PreviewText}"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock
+                                        Margin="0,0,0,8"
+                                        Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}">
+                                        <Run Text="{DynamicResource Translate_TextPreprocessingMatchCount}" />
+                                        <Run Text=": " />
+                                        <Run Text="{Binding PreviewMatchCount}" />
+                                    </TextBlock>
+                                    <TextBlock
+                                        Margin="0,0,0,8"
+                                        Foreground="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorCautionBrushKey}}"
+                                        Text="{Binding PreviewError}"
+                                        TextWrapping="Wrap" />
                                     <ItemsControl ItemsSource="{Binding Rules}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>

@@ -11,17 +11,37 @@ namespace STranslate.ViewModels.Pages;
 public partial class TranslateViewModel : ServiceViewModelBase<TranslateService>
 {
     private readonly Settings _settings;
+    private readonly TextPreprocessingService _textPreprocessingService;
 
-    public TranslateViewModel(TranslateService service, Settings settings)
+    public TranslateViewModel(
+        TranslateService service,
+        Settings settings,
+        TextPreprocessingService textPreprocessingService)
         : base(service)
     {
         _settings = settings;
+        _textPreprocessingService = textPreprocessingService;
         Rules = new ObservableCollection<TextReplacementRule>(
             settings.TextPreprocessing.Rules?.Select(rule => rule.Clone()).ToList() ?? []);
         SubscribeToRules(Rules);
+        UpdatePreview();
     }
 
     public ObservableCollection<TextReplacementRule> Rules { get; }
+
+    [ObservableProperty]
+    public partial string PreviewInput { get; set; } = "Please review ACME-123 today.";
+
+    [ObservableProperty]
+    public partial string PreviewText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string PreviewError { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial int PreviewMatchCount { get; set; }
+
+    partial void OnPreviewInputChanged(string value) => UpdatePreview();
 
     public bool IsTextPreprocessingEnabled
     {
@@ -94,7 +114,10 @@ public partial class TranslateViewModel : ServiceViewModelBase<TranslateService>
         => rule.PropertyChanged += OnRulePropertyChanged;
 
     private void OnRulePropertyChanged(object? sender, PropertyChangedEventArgs e)
-        => PersistRules();
+    {
+        PersistRules();
+        UpdatePreview();
+    }
 
     private void PersistRules()
     {
@@ -110,6 +133,25 @@ public partial class TranslateViewModel : ServiceViewModelBase<TranslateService>
             IsEnabled = _settings.TextPreprocessing.IsEnabled,
             Rules = Rules.Select(rule => rule.Clone()).ToList()
         };
+    }
+
+    private void UpdatePreview()
+    {
+        try
+        {
+            var prepared = _textPreprocessingService.Prepare(
+                PreviewInput ?? string.Empty,
+                CreateConfiguration());
+            PreviewText = prepared.RequestText;
+            PreviewMatchCount = prepared.TotalMatchCount;
+            PreviewError = string.Empty;
+        }
+        catch (TextPreprocessingException ex)
+        {
+            PreviewText = string.Empty;
+            PreviewMatchCount = 0;
+            PreviewError = ex.Message;
+        }
     }
 
     // 翻译服务特有的功能

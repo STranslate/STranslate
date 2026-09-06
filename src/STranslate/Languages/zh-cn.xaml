@@ -242,6 +242,9 @@
     <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">忽略大小写</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMultiline">多行模式</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingSingleline">单行模式</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewInput">预览输入</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewOutput">发送给提供商的文本</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMatchCount">匹配数</sys:String>
     <sys:String x:Key="TranslatePreprocessingFailed">翻译前替换规则执行失败：{0}</sys:String>
     <sys:String x:Key="TranslatePreprocessingEmpty">翻译前替换后没有可翻译的文本。</sys:String>
     <sys:String x:Key="ImTranService">图片翻译</sys:String>

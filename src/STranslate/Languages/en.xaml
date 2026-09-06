@@ -242,6 +242,9 @@
     <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">Ignore case</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMultiline">Multiline</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingSingleline">Singleline</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewInput">Preview input</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewOutput">Text sent to the provider</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMatchCount">Matches</sys:String>
     <sys:String x:Key="TranslatePreprocessingFailed">Translation pre-processing rule failed: {0}</sys:String>
     <sys:String x:Key="TranslatePreprocessingEmpty">Translation pre-processing produced no translatable text.</sys:String>
     <sys:String x:Key="ImTranService">Image Trans</sys:String>
