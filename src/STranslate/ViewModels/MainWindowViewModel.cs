@@ -545,6 +545,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 {
                     TransResult = CloneTranslateResult(translateResult)
                 };
+                historyData.ApplyPreprocessingContext(operation);
 
                 if (service.Options?.AutoBackTranslation ?? false)
                 {
@@ -883,10 +884,16 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 history = CreateHistoryModel(operation.Text, context.CacheSource, context.CacheTarget);
             }
 
+            if (history.GetData(service) is { } existingData &&
+                !existingData.IsCompatible(operation.Text, operation.RequestText, operation.RulesFingerprint))
+            {
+                history.Data.Remove(existingData);
+            }
+
             ApplyEffectiveLanguages(history, context.EffectiveSource, context.EffectiveTarget);
 
-            var existingData = history.GetData(service);
-            if (existingData == null)
+            var currentData = history.GetData(service);
+            if (currentData == null)
             {
                 if (!createIfMissing)
                     return;
@@ -895,7 +902,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             }
             else
             {
-                MergeHistoryData(existingData, incomingData);
+                MergeHistoryData(currentData, incomingData);
             }
 
             var enabledServices = TranslateService.Services.Where(x => x.IsEnabled).ToList();
@@ -914,6 +921,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private static void MergeHistoryData(HistoryData existingData, HistoryData incomingData)
     {
         existingData.ServiceDisplayName = incomingData.ServiceDisplayName ?? existingData.ServiceDisplayName;
+        existingData.RequestText = incomingData.RequestText ?? existingData.RequestText;
+        existingData.PreprocessingFingerprint = incomingData.PreprocessingFingerprint ?? existingData.PreprocessingFingerprint;
         existingData.TransResult = incomingData.TransResult ?? existingData.TransResult;
         existingData.TransBackResult = incomingData.TransBackResult ?? existingData.TransBackResult;
         existingData.DictResult = incomingData.DictResult ?? existingData.DictResult;
@@ -941,6 +950,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             operation.CancellationToken.ThrowIfCancellationRequested();
             if (history.GetData(service) is { } data)
             {
+                if (!data.IsCompatible(operation.Text, operation.RequestText, operation.RulesFingerprint))
+                {
+                    history.Data.Remove(data);
+                    uncachedServices.Add(service);
+                    continue;
+                }
+
                 PopulateServiceResultFromData(service, data, operation);
                 if (!history.HasData(service))
                     uncachedServices.Add(service);
@@ -1105,6 +1121,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             return;
 
         var historyData = new HistoryData(service);
+        historyData.ApplyPreprocessingContext(operation);
         history.Data.Add(historyData);
         UpdateHistoryServiceSnapshot(historyData, service);
         historyData.TransResult = translateResult;
@@ -1161,6 +1178,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             return;
 
         var historyData = new HistoryData(service);
+        historyData.ApplyPreprocessingContext(operation);
         history.Data.Add(historyData);
         UpdateHistoryServiceSnapshot(historyData, service);
         historyData.DictResult = result;

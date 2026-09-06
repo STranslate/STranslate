@@ -562,6 +562,14 @@ public class HistoryData
     public string PluginID { get; set; } = string.Empty;
     public string ServiceID { get; set; } = string.Empty;
     public string? ServiceDisplayName { get; set; }
+    /// <summary>
+    /// 当时实际发送给服务的文本；旧历史记录没有此字段时回退到原文。
+    /// </summary>
+    public string? RequestText { get; set; }
+    /// <summary>
+    /// 生成 RequestText 时使用的规则指纹；空值表示未使用预处理。
+    /// </summary>
+    public string? PreprocessingFingerprint { get; set; }
     public TranslateResult? TransResult { get; set; }
     public TranslateResult? TransBackResult { get; set; }
     public DictionaryResult? DictResult { get; set; }
@@ -575,6 +583,20 @@ public class HistoryData
         PluginID = svc.MetaData.PluginID;
         ServiceID = svc.ServiceID;
         ServiceDisplayName = svc.DisplayName;
+    }
+
+    internal void ApplyPreprocessingContext(TranslationOperation operation)
+    {
+        RequestText = operation.RequestText;
+        PreprocessingFingerprint = operation.RulesFingerprint;
+    }
+
+    internal bool IsCompatible(string originalText, string requestText, string rulesFingerprint)
+    {
+        var storedFingerprint = PreprocessingFingerprint ?? string.Empty;
+        var storedRequestText = RequestText ?? originalText;
+        return string.Equals(storedFingerprint, rulesFingerprint, StringComparison.Ordinal) &&
+               string.Equals(storedRequestText, requestText, StringComparison.Ordinal);
     }
 }
 
