@@ -1,0 +1,12 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="STranslate_Plugin_Translate_GoogleBuiltIn_RequestMode">Режим запиту</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_GoogleBuiltIn_RequestMode_Description">«Власний API» використовує власний проксі-сервіс. «Безпосередньо до Google» вимагає, щоб із цього комп'ютера був доступ до Google.</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_GoogleBuiltIn_RequestMode_CustomApi">Власний API</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_GoogleBuiltIn_RequestMode_Direct">Безпосередньо до Google</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_GoogleBuiltIn_ApiUrl">Адреса API</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_GoogleBuiltIn_ApiUrl_Description">Вкажіть повну адресу перекладу сумісного проксі, наприклад https://example.deno.dev/translate.</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_GoogleBuiltIn_ApiUrl_Invalid">Вкажіть коректну адресу API за HTTP або HTTPS.</sys:String>
+</ResourceDictionary>

@@ -1,0 +1,12 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Vocabulary_Eudict_BookName">Назва словника</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Vocabulary_Eudict_Token">Token</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Vocabulary_Eudict_Token_Placeholder">Введіть свій token</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Vocabulary_Eudict_Check">Перевірка</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Vocabulary_Eudict_Check_Button_Content">Перевірити</sys:String>
+
+</ResourceDictionary>

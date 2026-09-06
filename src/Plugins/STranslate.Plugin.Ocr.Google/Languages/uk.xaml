@@ -1,0 +1,12 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Ocr_Google_Url">Адреса API</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Ocr_Google_Url_Description">Адреса Google Vision API, типово — офіційна.</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Ocr_Google_ApiKey">Ключ API</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Ocr_Google_Official">Офіційний сайт</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Ocr_Google_Official_Description">Перейдіть за посиланням нижче на офіційний сайт, щоб зареєструватися й почати роботу.</sys:String>
+
+</ResourceDictionary>

@@ -1,0 +1,14 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="STranslate_Plugin_Ocr_WeChat">Опис</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Ocr_WeChat_Content">Плагін розпізнає текст локально</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Ocr_WeChat_Support">Підтримати</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Ocr_WeChat_Support_Description">Плагін засновано на проєкті з відкритим кодом. Натисніть посилання, щоб підтримати його автора</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Ocr_WeChat_UseCount">Кількість використань</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Ocr_WeChat_UseCount_Format1">Використано</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Ocr_WeChat_UseCount_Format2">разів</sys:String>
+
+</ResourceDictionary>
