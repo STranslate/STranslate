@@ -242,6 +242,8 @@
     <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">Ignore case</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMultiline">Multiline</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingSingleline">Singleline</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">Translation pre-processing rule failed: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">Translation pre-processing produced no translatable text.</sys:String>
     <sys:String x:Key="ImTranService">Image Trans</sys:String>
     <sys:String x:Key="NoServiceEnabled">No Service Enabled</sys:String>
     <sys:String x:Key="SpecialServiceInfo">Drag services from the left here, or right-click to select and enable.</sys:String>

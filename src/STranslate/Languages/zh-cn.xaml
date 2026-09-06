@@ -242,6 +242,8 @@
     <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">忽略大小写</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMultiline">多行模式</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingSingleline">单行模式</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">翻译前替换规则执行失败：{0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">翻译前替换后没有可翻译的文本。</sys:String>
     <sys:String x:Key="ImTranService">图片翻译</sys:String>
     <sys:String x:Key="NoServiceEnabled">未启用服务</sys:String>
     <sys:String x:Key="SpecialServiceInfo">拖拽左侧服务至此或者右键选择以启用</sys:String>

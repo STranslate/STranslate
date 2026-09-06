@@ -34,6 +34,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
         MainWindowViewModel mainWindowViewModel,
         OcrService ocrService,
         TranslateService translateService,
+        TextPreprocessingService textPreprocessingService,
         TtsService ttsService,
         Internationalization i18n,
         ISnackbar snackbar,
@@ -46,6 +47,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
         _mainWindowViewModel = mainWindowViewModel;
         _ocrService = ocrService;
         _translateService = translateService;
+        _textPreprocessingService = textPreprocessingService;
         _ttsService = ttsService;
         _i18n = i18n;
         _snackbar = snackbar;
@@ -84,6 +86,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
     private readonly MainWindowViewModel _mainWindowViewModel;
     private readonly OcrService _ocrService;
     private readonly TranslateService _translateService;
+    private readonly TextPreprocessingService _textPreprocessingService;
     private readonly TtsService _ttsService;
     private readonly Internationalization _i18n;
     private readonly ISnackbar _snackbar;
@@ -231,9 +234,33 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             }
 
             ProcessRingText = _i18n.GetTranslation("TranslatingText");
+            var preprocessingSettings = Settings.TextPreprocessing.Clone();
 
             await Parallel.ForEachAsync(layoutBlocks, cancellationToken, async (block, cancellationToken) =>
             {
+                PreparedTranslationInput prepared;
+                try
+                {
+                    prepared = _textPreprocessingService.Prepare(
+                        block.Text,
+                        preprocessingSettings,
+                        cancellationToken);
+                }
+                catch (TextPreprocessingException ex)
+                {
+                    _logger.LogWarning(ex, "Image translation preprocessing failed for rule {RuleName}", ex.RuleName);
+                    _snackbar.ShowWarning(string.Format(
+                        _i18n.GetTranslation("TranslatePreprocessingFailed"),
+                        ex.RuleName));
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(prepared.RequestText))
+                {
+                    _logger.LogWarning("Image translation preprocessing produced empty text; keeping original OCR block");
+                    return;
+                }
+
                 var detectOptions = new LangDetectOptions(
                     Settings.ImageTranslateLanguageDetector,
                     Settings.ImageTranslateLocalDetectorRate,
@@ -243,7 +270,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
 
                 var (isSuccess, source, target) = await LanguageDetector
                     .GetLanguageAsync(
-                        block.Text,
+                        prepared.RequestText,
                         Settings.ImageTranslateSourceLang,
                         Settings.ImageTranslateTargetLang,
                         cancellationToken,
@@ -251,15 +278,12 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
                     .ConfigureAwait(false);
                 if (!isSuccess)
                 {
-                    _logger.LogWarning($"Language detection failed for text: {block.Text}");
+                    _logger.LogWarning("Language detection failed for preprocessed image text");
                     _snackbar.ShowWarning(_i18n.GetTranslation("LanguageDetectionFailed"));
                     return;
                 }
-                if (string.IsNullOrWhiteSpace(block.Text))
-                    return;
-
                 var result = new TranslateResult();
-                await tranSvc.TranslateAsync(new TranslateRequest(block.Text, source, target), result, cancellationToken);
+                await tranSvc.TranslateAsync(new TranslateRequest(prepared.RequestText, source, target), result, cancellationToken);
                 if (result.IsSuccess && !string.IsNullOrWhiteSpace(result.Text))
                 {
                     var normalizedText = ImageTranslateTextOverlayLayout.NormalizeOverlayText(result.Text);

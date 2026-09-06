@@ -35,6 +35,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly INotification _notification;
     private readonly MouseSelectionService _mouseSelectionService;
     private readonly MouseSelectionIconWindow _mouseSelectionIconWindow;
+    private readonly TextPreprocessingService _textPreprocessingService;
     private bool _mouseSelectionTranslationHasTopmostLease;
     private bool _incrementalHasTopmostLease;
     private int _managedTopmostLeaseCount;
@@ -101,6 +102,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _sqlService = sqlService;
         Settings = settings;
         HotkeySettings = hotkeySettings;
+        _textPreprocessingService = textPreprocessingService;
         _translationCoordinator = new(i18n.GetTranslation, textPreprocessingService, settings);
         _mouseSelectionService = mouseSelectionService;
         _mouseSelectionIconWindow = mouseSelectionIconWindow;
@@ -312,6 +314,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             // 用户取消属于正常控制流，不应让取消异常越过命令边界。
         }
+        catch (TextPreprocessingException ex)
+        {
+            _snackbar.ShowError(string.Format(
+                _i18n.GetTranslation("TranslatePreprocessingFailed"),
+                ex.RuleName));
+        }
     }
 
     private async Task ExecuteAutomaticTranslationAsync(object? force, CancellationToken cancellationToken)
@@ -328,10 +336,16 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             ? language
             : null;
 
-        ResetAllServices(operation);
-        ApplyIdentifiedLanguageState(forcedSourceLanguage.HasValue
+            ResetAllServices(operation);
+            ApplyIdentifiedLanguageState(forcedSourceLanguage.HasValue
             ? CreateDetectedIdentifiedLanguageState(forcedSourceLanguage.Value)
-            : IdentifiedLanguageState.Empty);
+                : IdentifiedLanguageState.Empty);
+
+            if (string.IsNullOrWhiteSpace(operation.RequestText))
+            {
+                _snackbar.ShowWarning(_i18n.GetTranslation("TranslatePreprocessingEmpty"));
+                return;
+            }
 
         // force 空则优先检查缓存
         var checkCacheFirst = force == null;
@@ -1913,14 +1927,24 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             var (success, text) = await GetTextAsync();
             if (!success || string.IsNullOrWhiteSpace(text)) return;
 
-            var (isSuccess, source, target) = await LanguageDetector.GetLanguageAsync(text, cancellationToken).ConfigureAwait(false);
+            var prepared = _textPreprocessingService.Prepare(
+                text,
+                Settings.TextPreprocessing,
+                cancellationToken);
+            if (string.IsNullOrWhiteSpace(prepared.RequestText))
+            {
+                _snackbar.ShowWarning(_i18n.GetTranslation("TranslatePreprocessingEmpty"));
+                return;
+            }
+
+            var (isSuccess, source, target) = await LanguageDetector.GetLanguageAsync(prepared.RequestText, cancellationToken).ConfigureAwait(false);
             if (!isSuccess)
             {
-                _logger.LogWarning($"Language detection failed for text: {text}");
+                _logger.LogWarning("Language detection failed for preprocessed replace-translation text");
                 _snackbar.ShowWarning(_i18n.GetTranslation("LanguageDetectionFailed"));
             }
             var result = new TranslateResult();
-            await transPlugin.TranslateAsync(new TranslateRequest(text, source, target), result, cancellationToken).ConfigureAwait(false);
+            await transPlugin.TranslateAsync(new TranslateRequest(prepared.RequestText, source, target), result, cancellationToken).ConfigureAwait(false);
 
             if (result.IsSuccess && !string.IsNullOrEmpty(result.Text))
                 InputHelper.PrintText(result.Text);
@@ -1930,6 +1954,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // Ignore
+        }
+        catch (TextPreprocessingException ex)
+        {
+            _snackbar.ShowError(string.Format(
+                _i18n.GetTranslation("TranslatePreprocessingFailed"),
+                ex.RuleName));
         }
         catch (Exception ex)
         {
