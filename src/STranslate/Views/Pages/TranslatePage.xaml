@@ -338,7 +338,7 @@
                                                         <ui:ToggleSwitch
                                                             Grid.Column="1"
                                                             Margin="0,0,8,6"
-                                                            IsOn="{Binding IsEnabled}" />
+                                                            IsOn="{Binding IsEnabled, Mode=TwoWay}" />
                                                         <Button
                                                             Grid.Column="2"
                                                             Margin="0,0,4,6"
@@ -381,16 +381,16 @@
                                                         <WrapPanel Grid.Row="3" Grid.ColumnSpan="5">
                                                             <ui:ToggleSwitch
                                                                 Margin="0,0,12,0"
-                                                                IsOn="{Binding IgnoreCase}"
+                                                                IsOn="{Binding IgnoreCase, Mode=TwoWay}"
                                                                 OffContent="{DynamicResource Translate_TextPreprocessingIgnoreCase}"
                                                                 OnContent="{DynamicResource Translate_TextPreprocessingIgnoreCase}" />
                                                             <ui:ToggleSwitch
                                                                 Margin="0,0,12,0"
-                                                                IsOn="{Binding Multiline}"
+                                                                IsOn="{Binding Multiline, Mode=TwoWay}"
                                                                 OffContent="{DynamicResource Translate_TextPreprocessingMultiline}"
                                                                 OnContent="{DynamicResource Translate_TextPreprocessingMultiline}" />
                                                             <ui:ToggleSwitch
-                                                                IsOn="{Binding Singleline}"
+                                                                IsOn="{Binding Singleline, Mode=TwoWay}"
                                                                 OffContent="{DynamicResource Translate_TextPreprocessingSingleline}"
                                                                 OnContent="{DynamicResource Translate_TextPreprocessingSingleline}" />
                                                         </WrapPanel>

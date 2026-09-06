@@ -441,13 +441,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (!TryStartManualTranslation(service, out var cancellationTokenSource))
             return;
 
-        var operation = _translationCoordinator.BeginOperation(
-            InputText,
-            Settings.SourceLang,
-            Settings.TargetLang,
-            cancellationTokenSource.Token);
         try
         {
+            var operation = _translationCoordinator.BeginOperation(
+                InputText,
+                Settings.SourceLang,
+                Settings.TargetLang,
+                cancellationTokenSource.Token);
             await ExecuteSingleTranslateAsync(
                 service,
                 operation).ConfigureAwait(false);
@@ -455,6 +455,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         catch (OperationCanceledException) when (cancellationTokenSource.IsCancellationRequested)
         {
             // Ignore
+        }
+        catch (TextPreprocessingException ex)
+        {
+            _snackbar.ShowError(string.Format(
+                _i18n.GetTranslation("TranslatePreprocessingFailed"),
+                ex.RuleName));
         }
         finally
         {
@@ -466,8 +472,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         Service service,
         TranslationOperation operation)
     {
-        if (string.IsNullOrWhiteSpace(operation.Text))
+        if (string.IsNullOrWhiteSpace(operation.Text) ||
+            string.IsNullOrWhiteSpace(operation.RequestText))
+        {
+            if (!string.IsNullOrWhiteSpace(operation.Text))
+                _snackbar.ShowWarning(_i18n.GetTranslation("TranslatePreprocessingEmpty"));
             return;
+        }
 
         switch (service.Plugin)
         {
@@ -504,7 +515,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                     operation.SourceLang,
                     operation.TargetLang);
                 // 词典手动执行保持现有历史语义：仅更新内存对象，不额外落盘。
-                history.Data.Add(new(service) { DictResult = result });
+                var dictionaryHistoryData = new HistoryData(service)
+                {
+                    DictResult = result
+                };
+                dictionaryHistoryData.ApplyPreprocessingContext(operation);
+                history.Data.Add(dictionaryHistoryData);
                 return;
 
             case ITranslatePlugin plugin:
@@ -578,13 +594,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (!TryStartManualTranslation(service, out var cancellationTokenSource))
             return;
 
-        var operation = _translationCoordinator.BeginOperation(
-            InputText,
-            Settings.SourceLang,
-            Settings.TargetLang,
-            cancellationTokenSource.Token);
         try
         {
+            var operation = _translationCoordinator.BeginOperation(
+                InputText,
+                Settings.SourceLang,
+                Settings.TargetLang,
+                cancellationTokenSource.Token);
             await ExecuteSingleTransBackAsync(
                 service,
                 operation).ConfigureAwait(false);
@@ -592,6 +608,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         catch (OperationCanceledException) when (cancellationTokenSource.IsCancellationRequested)
         {
             // Ignore
+        }
+        catch (TextPreprocessingException ex)
+        {
+            _snackbar.ShowError(string.Format(
+                _i18n.GetTranslation("TranslatePreprocessingFailed"),
+                ex.RuleName));
         }
         finally
         {
@@ -794,12 +816,15 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
             if (history != null)
             {
-                operation.PublishIdentifiedLanguage(
-                    () => ApplyIdentifiedLanguageState(CreateCacheIdentifiedLanguageState(history)));
                 uncachedSvcs = PopulateResultsFromCache(
                     history,
                     enabledSvcs,
                     operation);
+                if (history.Data.Any())
+                {
+                    operation.PublishIdentifiedLanguage(
+                        () => ApplyIdentifiedLanguageState(CreateCacheIdentifiedLanguageState(history)));
+                }
             }
         }
 
