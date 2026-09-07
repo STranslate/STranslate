@@ -1,16 +1,18 @@
 # 翻译前正则替换功能规划
 
-状态：规划稿，尚未实现。基于 2026-09-06 当前工作区代码核对。
+状态：首版已实现并通过离线验收。原设计核对日期为 2026-09-06，实现及验收日期为 2026-09-07。
 
 ## 目标与默认假设
 
 用户输入翻译内容后，按配置的正则规则替换匹配片段，将处理结果发送给下游翻译提供商。
 
-本稿把“部分文字”理解为正则命中的片段。建议采用全局规则，输入框继续显示原文，发送文本使用独立副本；默认关闭，开启后对各翻译入口生效。本稿按“替换后直接翻译”设计，译文保留替换产生的表达。译后恢复原内容需要额外的占位符映射及完整性检查，应在明确需要时另行设计。
+“部分文字”指正则命中的片段。首版采用全局规则，输入框继续显示原文，发送文本使用独立副本；默认关闭，开启后对各翻译入口生效。译文保留替换产生的表达。译后恢复原内容需要额外的占位符映射及完整性检查，属于后续扩展。
 
 例如规则 `\bACME-\d+\b` → `产品A`，将 `Please review ACME-123 today.` 处理为 `Please review 产品A today.`，下游只接收后者。未匹配内容保持原样。
 
-## 当前代码与接入依据
+## 设计时的接入依据
+
+下表保留实施前的接入分析；当前执行方式见 [主翻译链路](flow-main-translation.md)、[图片翻译链路](flow-image-translation.md) 和 [配置与历史](config-storage-history.md)。
 
 | 当前位置 | 已核实的行为 | 规划中的调整 |
 | --- | --- | --- |
@@ -28,7 +30,7 @@
 
 ## 功能与交互
 
-建议在“设置 → 翻译”增加“翻译前替换”入口，打开规则管理界面。
+在“设置 → 翻译”点击“翻译前替换”打开规则管理界面。
 
 | 能力 | 首版行为 |
 | --- | --- |
@@ -104,7 +106,7 @@
 
 ## 验收清单
 
-以下均为实施后的验收要求，本次规划未实现或运行这些测试。
+以下为首版验收要求，验证记录见本文末尾。
 
 1. 单条/多条规则、顺序变化、单条关闭、全局关闭、无匹配、全量删除、捕获组、字面量 `$`、Unicode、多行与零宽匹配符合约定，原文始终保留。
 2. 无效正则、灾难性回溯、输出膨胀、取消和空结果均在受影响请求的网络调用前终止；预览与执行给出同类错误。
@@ -119,3 +121,48 @@
 实施完成后，在 `src` 目录运行 `dotnet test Tests/STranslate.Tests/STranslate.Tests.csproj --configuration Debug`，以及 `dotnet build STranslate.slnx --configuration Debug`；随后对设置界面和上述翻译入口执行人工冒烟。按需更新 `flow-main-translation.md`、`flow-image-translation.md`、`config-storage-history.md`，保持 `AGENTS.md` 为文档导航入口。
 
 后续可单独扩展按服务/语种配置规则、规则导入导出、译后还原；当前首版先完成全局输入替换的完整闭环。
+
+## 使用示例
+
+新增规则后填写表达式和替换文本，启用全局开关并保存。可先在弹窗下方输入样例检查结果；取消会丢弃本次全部编辑。
+
+| 表达式 | 替换文本 | 输入 | 实际请求 |
+| --- | --- | --- | --- |
+| `\bACME-\d+\b` | `产品A` | `Review ACME-123.` | `Review 产品A.` |
+| `(?<code>ACME)-(?<number>\d+)` | `${code} product ${number}` | `ACME-42` | `ACME product 42` |
+| `secret` | 留空 | `remove secret here` | `remove  here` |
+| `USD` | `$$` | `USD 10` | `$ 10` |
+
+需要实际换行时直接在替换框中换行。输入框中的原文不会变化，主窗口的请求详情按钮和历史记录中的请求详情按钮分别展示本次及当时的发送文本。
+
+## 验证入口
+
+```powershell
+# 在 src 目录运行
+dotnet test Tests/STranslate.Tests/STranslate.Tests.csproj --configuration Debug
+dotnet build STranslate.slnx --configuration Debug
+dotnet run --project Tests/STranslate.UiSmoke/STranslate.UiSmoke.csproj --configuration Debug -- .artifacts/preprocessing-ui-smoke
+```
+
+`STranslate.UiSmoke` 使用独立进程、本地伪提供商和输出目录内的便携配置/SQLite，不连接真实翻译服务。它运行真实主翻译命令，点击中英文弹窗按钮，验证保存/取消、请求详情、完整 Settings 重启和 ZIP/备份恢复，并在 `.artifacts/preprocessing-ui-smoke` 输出 1000×780、700×600 窗口截图。引擎、缓存和并发测试继续放在 `STranslate.Tests`。
+
+## 验收记录
+
+2026-09-07 完成五个实施步骤，检查结果如下。
+
+| 验收项 | 当前证据 |
+| --- | --- |
+| 1. 规则语义与原文保留 | `TextPreprocessingServiceTests`、`TextPreprocessingEdgeCaseTests` 与 .NET 原生替换对照；覆盖顺序、开关、捕获组、删除、Unicode、多行、零宽、无匹配和字面量美元符 |
+| 2. 错误与资源限制 | 无效规则、灾难性回溯、总时限、捕获组膨胀前的分配上限、取消、空结果测试；`TextPreprocessingEditorTests` 验证预览错误和保存校验 |
+| 3. 实际发送参数 | `TranslationOperationPreprocessingTests` 和 `MainTranslationSmoke` 验证检测、两个流式伪提供商、词典共用处理文本；主输入保持原文，单服务重试从原文开始 |
+| 4. 快照与并发所有权 | `TranslationResultCoordinatorTests` 与预处理操作测试覆盖旧流式回调、取消、新请求处理失败、规则中途修改和一次准备多次复用；实际主命令验证错误/空结果不调用服务、不保留旧显示 |
+| 5. 缓存与回译 | `TranslationCacheContextTests` 直接调用生产缓存填充逻辑，覆盖旧 JSON、混合命中、失败主译/回译、重排/改名/开关及不匹配结果零发布；`HistoryDataPreprocessingTests` 覆盖主译替换及回译合并；真实主命令验证 SQLite 元数据和缓存重用 |
+| 6. 入口覆盖 | 主窗口手动/自动服务、单服务和回译由真实命令验证；粘贴、取词、截图、剪贴板、外部调用的 `ExecuteTranslate` 路由已核对；替换翻译与图片块共用 `DirectTranslationRunner`，伪检测器/提供商测试覆盖取消、空结果和不跨块匹配；失败图片块不生成覆盖层 |
+| 7. 设置与界面 | 草稿取消/校验/一次保存、预览竞争测试通过；独立 WPF 进程点击中英文弹窗保存/取消并查看请求详情；两种尺寸的 8 张截图已检查；完整 Settings 同步重启、ZIP 往返和 `.bak` 恢复通过 |
+
+- `dotnet test Tests/STranslate.Tests/STranslate.Tests.csproj --configuration Debug`：333 通过，0 失败，0 跳过。
+- `dotnet build STranslate.slnx --configuration Debug`：25 个项目构建成功，0 警告，0 错误。
+- `dotnet run --project Tests/STranslate.UiSmoke/STranslate.UiSmoke.csproj --configuration Debug -- .artifacts/preprocessing-ui-smoke`：主翻译流程及中英文界面两组 PASS。
+- 验证使用本地伪提供商和窗口交互自动化，未调用真实外部翻译/OCR API，也未启用全局鼠标 Hook。截图、取词等操作系统取词本身沿用既有实现；本次检查集中在取得文本后的预处理发送路径。
+
+实施过程中额外修复了异步备份恢复的 Windows 文件占用问题：`StorageBase.TryLoadBackupAsync()` 现在在 `File.Replace` 前关闭读取流，相应往返测试已覆盖。
