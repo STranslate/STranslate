@@ -1,6 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace STranslate.Core;
@@ -8,6 +11,7 @@ namespace STranslate.Core;
 /// <summary>
 /// 翻译请求的文本预处理配置。
 /// </summary>
+[JsonConverter(typeof(TextPreprocessingSettingsJsonConverter))]
 public sealed class TextPreprocessingSettings
 {
     /// <summary>
@@ -20,12 +24,15 @@ public sealed class TextPreprocessingSettings
     /// </summary>
     public List<TextReplacementRule> Rules { get; set; } = [];
 
+    internal JsonElement? InvalidConfiguration { get; set; }
+
     internal TextPreprocessingSettings Clone()
     {
         return new TextPreprocessingSettings
         {
             IsEnabled = IsEnabled,
-            Rules = Rules?.Select(rule => rule.Clone()).ToList() ?? []
+            Rules = Rules?.Select(rule => rule?.Clone()!).ToList()!,
+            InvalidConfiguration = InvalidConfiguration
         };
     }
 }
@@ -105,8 +112,10 @@ public partial class TextReplacementRule : ObservableObject
 /// </summary>
 internal readonly record struct TextPreprocessingLimits(
     TimeSpan RegexTimeout,
-    int MaxOutputLength)
+    int MaxOutputLength,
+    TimeSpan? TotalTimeout = null)
 {
+    internal TimeSpan OperationTimeout => TotalTimeout ?? TimeSpan.FromMilliseconds(500);
     internal static TextPreprocessingLimits Default => new(
         TimeSpan.FromMilliseconds(100),
         1_000_000);
@@ -117,6 +126,8 @@ internal readonly record struct TextPreprocessingLimits(
             throw new ArgumentOutOfRangeException(nameof(RegexTimeout));
         if (MaxOutputLength <= 0)
             throw new ArgumentOutOfRangeException(nameof(MaxOutputLength));
+        if (OperationTimeout <= TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(TotalTimeout));
     }
 }
 
@@ -151,15 +162,19 @@ internal sealed class TextPreprocessingException : Exception
         string ruleId,
         string ruleName,
         string message,
-        Exception? innerException = null)
+        Exception? innerException = null,
+        string errorKind = "InvalidPattern")
         : base(message, innerException)
     {
         RuleId = ruleId;
         RuleName = ruleName;
+        ErrorKind = errorKind;
     }
 
     internal string RuleId { get; }
     internal string RuleName { get; }
+    internal string ErrorKind { get; }
+    internal int? ErrorOffset => (InnerException as RegexParseException)?.Offset;
 }
 
 /// <summary>
@@ -169,6 +184,8 @@ public sealed class TextPreprocessingService
 {
     private const string FingerprintVersion = "regex-v1";
     private readonly TextPreprocessingLimits _limits;
+    private readonly Dictionary<(string Pattern, string Replacement, RegexOptions Options), CompiledTextReplacement> _cache = [];
+    private readonly object _cacheLock = new();
 
     public TextPreprocessingService()
         : this(null)
@@ -188,14 +205,18 @@ public sealed class TextPreprocessingService
     {
         ArgumentNullException.ThrowIfNull(text);
 
-        var snapshot = (settings ?? new TextPreprocessingSettings()).Clone();
+        cancellationToken.ThrowIfCancellationRequested();
+        var started = Stopwatch.GetTimestamp();
+        var snapshot = Capture(settings);
         var enabledRules = snapshot.IsEnabled
-            ? snapshot.Rules.Where(rule => rule is not null && rule.IsEnabled).ToList()
+            ? snapshot.Rules.Where(rule => rule.IsEnabled).ToList()
             : [];
+        foreach (var rule in enabledRules)
+            ValidateRuleFields(rule);
         var fingerprint = CreateFingerprint(snapshot.IsEnabled, enabledRules);
 
         cancellationToken.ThrowIfCancellationRequested();
-        if (enabledRules.Count == 0 || text.Length == 0)
+        if (enabledRules.Count == 0)
         {
             return new PreparedTranslationInput(text, text, fingerprint, []);
         }
@@ -205,61 +226,105 @@ public sealed class TextPreprocessingService
         foreach (var rule in enabledRules)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            currentText = ApplyRule(currentText, rule, summaries, cancellationToken);
+            currentText = ApplyRule(currentText, rule, summaries, started, cancellationToken);
         }
 
         cancellationToken.ThrowIfCancellationRequested();
-        return new PreparedTranslationInput(text, currentText, fingerprint, summaries);
+        return new PreparedTranslationInput(text, currentText, fingerprint, summaries.AsReadOnly());
+    }
+
+    internal static TextPreprocessingSettings Capture(TextPreprocessingSettings? settings)
+    {
+        if (settings is null || settings.InvalidConfiguration.HasValue ||
+            settings.Rules is null || settings.Rules.Any(rule => rule is null))
+            throw new TextPreprocessingException(string.Empty, string.Empty,
+                "翻译前替换配置损坏，请在设置中修正后重试。", errorKind: "InvalidConfiguration");
+        return settings.Clone();
+    }
+
+    internal Task<PreparedTranslationInput> PrepareAsync(
+        string text, TextPreprocessingSettings? settings, CancellationToken cancellationToken = default)
+    {
+        var snapshot = Capture(settings);
+        return Task.Run(() => Prepare(text, snapshot, cancellationToken), cancellationToken);
+    }
+
+    internal void Validate(TextPreprocessingSettings settings)
+    {
+        var snapshot = Capture(settings);
+        foreach (var rule in snapshot.Rules)
+            GetCompiledRule(rule);
+    }
+
+    private static void ValidateRuleFields(TextReplacementRule rule)
+    {
+        if (string.IsNullOrEmpty(rule.Pattern))
+            throw new TextPreprocessingException(rule.Id, RuleName(rule),
+                $"翻译前替换规则“{RuleName(rule)}”的正则表达式不能为空。");
+        if (rule.Replacement is null || string.IsNullOrWhiteSpace(rule.Id))
+            throw new TextPreprocessingException(rule.Id, RuleName(rule),
+                $"翻译前替换规则“{RuleName(rule)}”的配置无效。", errorKind: "InvalidConfiguration");
+    }
+
+    private static string RuleName(TextReplacementRule rule) =>
+        string.IsNullOrWhiteSpace(rule.Name) ? rule.Id : rule.Name;
+
+    private CompiledTextReplacement GetCompiledRule(TextReplacementRule rule)
+    {
+        ValidateRuleFields(rule);
+        var key = (rule.Pattern, rule.Replacement, CreateRegexOptions(rule));
+        lock (_cacheLock)
+        {
+            if (_cache.TryGetValue(key, out var compiled))
+                return compiled;
+            try
+            {
+                compiled = new CompiledTextReplacement(new Regex(key.Pattern, key.Item3, _limits.RegexTimeout), key.Replacement);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new TextPreprocessingException(rule.Id, RuleName(rule),
+                    $"翻译前替换规则“{RuleName(rule)}”的正则表达式无效。", ex);
+            }
+            if (_cache.Count >= 128)
+                _cache.Clear();
+            _cache.Add(key, compiled);
+            return compiled;
+        }
     }
 
     private string ApplyRule(
         string text,
         TextReplacementRule rule,
         ICollection<TextReplacementMatchSummary> summaries,
+        long started,
         CancellationToken cancellationToken)
     {
-        var ruleName = string.IsNullOrWhiteSpace(rule.Name) ? rule.Id : rule.Name;
-        if (string.IsNullOrEmpty(rule.Pattern))
-        {
-            throw new TextPreprocessingException(
-                rule.Id,
-                ruleName,
-                $"翻译前替换规则“{ruleName}”的正则表达式不能为空。");
-        }
-
-        Regex regex;
-        try
-        {
-            regex = new Regex(
-                rule.Pattern,
-                CreateRegexOptions(rule),
-                _limits.RegexTimeout);
-        }
-        catch (Exception ex) when (ex is ArgumentException or NotSupportedException)
-        {
-            throw new TextPreprocessingException(
-                rule.Id,
-                ruleName,
-                $"翻译前替换规则“{ruleName}”的正则表达式无效。",
-                ex);
-        }
-
-        var replacement = rule.Replacement ?? string.Empty;
+        var ruleName = RuleName(rule);
+        var ruleStarted = Stopwatch.GetTimestamp();
+        var compiled = GetCompiledRule(rule);
         var builder = new StringBuilder(Math.Min(text.Length, _limits.MaxOutputLength));
         var lastIndex = 0;
         var matchCount = 0;
         try
         {
-            foreach (Match match in regex.Matches(text))
+            CheckBudget();
+            for (var match = compiled.Regex.Match(text); match.Success; match = match.NextMatch())
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                CheckBudget();
                 AppendWithLimit(builder, text.AsSpan(lastIndex, match.Index - lastIndex), rule, ruleName);
-                AppendWithLimit(builder, match.Result(replacement), rule, ruleName);
+                foreach (var part in compiled.Parts)
+                {
+                    CheckBudget();
+                    AppendWithLimit(builder, part.Resolve(text, match, compiled.Replacement), rule, ruleName);
+                }
                 lastIndex = match.Index + match.Length;
                 matchCount++;
             }
 
-            AppendWithLimit(builder, text.AsSpan(lastIndex), rule, ruleName);
+            CheckBudget();
+            if (matchCount > 0)
+                AppendWithLimit(builder, text.AsSpan(lastIndex), rule, ruleName);
         }
         catch (TextPreprocessingException)
         {
@@ -271,7 +336,7 @@ public sealed class TextPreprocessingService
                 rule.Id,
                 ruleName,
                 $"翻译前替换规则“{ruleName}”执行超时。",
-                ex);
+                ex, "Timeout");
         }
         catch (ArgumentException ex)
         {
@@ -284,6 +349,15 @@ public sealed class TextPreprocessingService
 
         summaries.Add(new TextReplacementMatchSummary(rule.Id, ruleName, matchCount));
         return matchCount == 0 ? text : builder.ToString();
+
+        void CheckBudget()
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (Stopwatch.GetElapsedTime(started) > _limits.OperationTimeout ||
+                Stopwatch.GetElapsedTime(ruleStarted) > _limits.RegexTimeout)
+                throw new TextPreprocessingException(rule.Id, ruleName,
+                    $"翻译前替换规则“{ruleName}”执行超时。", errorKind: "Timeout");
+        }
     }
 
     private void AppendWithLimit(
@@ -297,18 +371,11 @@ public sealed class TextPreprocessingService
             throw new TextPreprocessingException(
                 rule.Id,
                 ruleName,
-                $"翻译前替换规则“{ruleName}”的结果超过长度限制。");
+                $"翻译前替换规则“{ruleName}”的结果超过长度限制。", errorKind: "OutputLimit");
         }
 
         builder.Append(value);
     }
-
-    private void AppendWithLimit(
-        StringBuilder builder,
-        string value,
-        TextReplacementRule rule,
-        string ruleName)
-        => AppendWithLimit(builder, value.AsSpan(), rule, ruleName);
 
     private static RegexOptions CreateRegexOptions(TextReplacementRule rule)
     {
