@@ -944,6 +944,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 history.Data.Remove(existingData);
             }
 
+            history.SnapshotLegacyContexts();
             ApplyEffectiveLanguages(history, context.EffectiveSource, context.EffectiveTarget);
 
             var currentData = history.GetData(service);
@@ -986,11 +987,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     /// <summary>
     /// 从缓存填充翻译结果，并返回未缓存的服务列表
     /// </summary>
-    private List<Service> PopulateResultsFromCache(
+    internal static List<Service> PopulateResultsFromCache(
         HistoryModel history,
         List<Service> services,
         TranslationOperation operation)
     {
+        history.SnapshotLegacyContexts();
         var uncachedServices = new List<Service>();
         foreach (var service in services)
         {

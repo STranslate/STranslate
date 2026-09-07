@@ -6,5 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../STranslate/STranslate.csproj" />
+    <Resource Include="../../STranslate/Resources/*.ico" Link="Resources/%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

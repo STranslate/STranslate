@@ -19,6 +19,7 @@ internal static class Program
     {
         var output = Path.GetFullPath(args.FirstOrDefault() ?? ".artifacts/preprocessing-ui-smoke");
         Directory.CreateDirectory(output);
+        Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, Constant.PortableFolderName));
         var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         var exitCode = 0;
         app.Startup += async (_, _) =>
@@ -50,6 +51,9 @@ internal static class Program
                     app.Resources.MergedDictionaries.Remove(resources);
                 }
                 await VerifyStorageAsync(output);
+                app.Resources.MergedDictionaries.Add(new ResourceDictionary
+                    { Source = new Uri(Path.Combine(AppContext.BaseDirectory, "Languages", "en.xaml")) });
+                await MainTranslationSmoke.RunAsync();
                 if (trace.Errors.Count > 0)
                     throw new InvalidOperationException(string.Join(Environment.NewLine, trace.Errors));
                 Console.WriteLine("PASS: Chinese/English dialogs, owner, draft/apply/cancel, preview, request details, layout pixels, Settings restart and ZIP/backup recovery.");

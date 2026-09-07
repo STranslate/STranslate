@@ -535,6 +535,21 @@ public class HistoryModel
             return Data.FirstOrDefault(d => d.PluginID == svc.MetaData.PluginID && d.ServiceID == svc.ServiceID);
     }
 
+    internal void SnapshotLegacyContexts()
+    {
+        foreach (var data in Data)
+        {
+            if (string.IsNullOrEmpty(data.PreprocessingFingerprint))
+            {
+                data.RequestText ??= SourceText;
+                data.PreprocessingFingerprint ??= string.Empty;
+            }
+            if (data.TransResult is null) continue;
+            data.EffectiveSourceLang ??= EffectiveSourceLang ?? SourceLang;
+            data.EffectiveTargetLang ??= EffectiveTargetLang ?? TargetLang;
+        }
+    }
+
     internal static JsonSerializerOptions JsonOption =>
         new()
         {
@@ -623,6 +638,8 @@ public class HistoryData
 
     internal bool IsCompatible(string originalText, string requestText, string rulesFingerprint)
     {
+        if (!string.IsNullOrEmpty(PreprocessingFingerprint) && RequestText is null)
+            return false;
         var storedFingerprint = PreprocessingFingerprint ?? string.Empty;
         var storedRequestText = RequestText ?? originalText;
         return string.Equals(storedFingerprint, rulesFingerprint, StringComparison.Ordinal) &&
