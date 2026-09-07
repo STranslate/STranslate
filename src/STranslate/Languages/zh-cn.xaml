@@ -251,6 +251,10 @@
     <sys:String x:Key="TranslatePreprocessingTimeout">翻译前替换规则执行超时：{0}</sys:String>
     <sys:String x:Key="TranslatePreprocessingOutputLimit">翻译前替换结果超过长度限制：{0}</sys:String>
     <sys:String x:Key="TranslatePreprocessingBlocksFailed">{0} 个图片块未能完成处理，已保留原始内容。</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">规则 {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">位置：{0}。</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingApplied">已替换 {0} 处</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingRequestDetails">请求详情</sys:String>
     <sys:String x:Key="ImTranService">图片翻译</sys:String>
     <sys:String x:Key="NoServiceEnabled">未启用服务</sys:String>
     <sys:String x:Key="SpecialServiceInfo">拖拽左侧服务至此或者右键选择以启用</sys:String>

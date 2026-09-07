@@ -13,6 +13,7 @@ internal sealed class TranslationResultCoordinator
     private readonly ConditionalWeakTable<object, OperationChannel> _channels = new();
     private readonly object _automaticSideEffectsChannel = new();
     private readonly object _identifiedLanguageChannel = new();
+    private readonly object _inputPreviewChannel = new();
     private readonly Func<string, string> _getTranslation;
     private readonly TextPreprocessingService? _preprocessingService;
     private readonly Settings? _settings;
@@ -40,6 +41,7 @@ internal sealed class TranslationResultCoordinator
         CancellationToken cancellationToken)
     {
         var operationId = Interlocked.Increment(ref _lastOperationId);
+        TryActivate(_inputPreviewChannel, operationId);
         var snapshot = _settings?.TextPreprocessing?.Clone();
         return new TranslationOperation(
             this,
@@ -83,6 +85,7 @@ internal sealed class TranslationResultCoordinator
     {
         var operationId = Interlocked.Increment(ref _lastOperationId);
         TryActivate(_identifiedLanguageChannel, operationId);
+        TryActivate(_inputPreviewChannel, operationId);
         TryPublish(_identifiedLanguageChannel, operationId, reset);
     }
 
@@ -150,6 +153,9 @@ internal sealed class TranslationResultCoordinator
             ? callback()
             : dispatcher.Invoke(callback);
     }
+
+    internal bool TryPublishInputPreview(long operationId, Action publish) =>
+        TryPublish(_inputPreviewChannel, operationId, publish);
 
     internal bool TryPublish(object channel, long operationId, Action publish)
     {

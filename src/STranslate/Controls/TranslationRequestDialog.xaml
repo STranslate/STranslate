@@ -1,0 +1,20 @@
+<ui:ContentDialog
+    x:Class="STranslate.Controls.TranslationRequestDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    Title="{DynamicResource Translate_TextPreprocessingRequestDetails}"
+    CloseButtonText="{DynamicResource Close}">
+    <ui:ContentDialog.Resources>
+        <sys:Double x:Key="ContentDialogMaxWidth">760</sys:Double>
+        <sys:Double x:Key="ContentDialogMaxHeight">540</sys:Double>
+        <sys:Double x:Key="ContentDialogMinWidth">320</sys:Double>
+    </ui:ContentDialog.Resources>
+    <StackPanel>
+        <TextBlock Text="{Binding Languages}" TextWrapping="Wrap" Margin="0,0,0,10" />
+        <TextBlock Text="{DynamicResource Translate_TextPreprocessingPreviewOutput}" TextWrapping="Wrap" Margin="0,0,0,4" />
+        <TextBox MinHeight="120" MaxHeight="330" MinWidth="280" IsReadOnly="True" TextWrapping="Wrap"
+            VerticalScrollBarVisibility="Auto" Text="{Binding RequestText, Mode=OneWay}" />
+    </StackPanel>
+</ui:ContentDialog>

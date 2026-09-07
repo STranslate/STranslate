@@ -13,145 +13,25 @@ public partial class TranslateViewModel : ServiceViewModelBase<TranslateService>
     private readonly Settings _settings;
     private readonly TextPreprocessingService _textPreprocessingService;
 
-    public TranslateViewModel(
-        TranslateService service,
-        Settings settings,
-        TextPreprocessingService textPreprocessingService)
-        : base(service)
+    private readonly Internationalization _i18n;
+
+    public TranslateViewModel(TranslateService service, Settings settings,
+        TextPreprocessingService textPreprocessingService, Internationalization i18n) : base(service)
     {
         _settings = settings;
         _textPreprocessingService = textPreprocessingService;
-        Rules = new ObservableCollection<TextReplacementRule>(
-            settings.TextPreprocessing.Rules?.Select(rule => rule.Clone()).ToList() ?? []);
-        SubscribeToRules(Rules);
-        UpdatePreview();
-    }
-
-    public ObservableCollection<TextReplacementRule> Rules { get; }
-
-    [ObservableProperty]
-    public partial string PreviewInput { get; set; } = "Please review ACME-123 today.";
-
-    [ObservableProperty]
-    public partial string PreviewText { get; set; } = string.Empty;
-
-    [ObservableProperty]
-    public partial string PreviewError { get; set; } = string.Empty;
-
-    [ObservableProperty]
-    public partial int PreviewMatchCount { get; set; }
-
-    partial void OnPreviewInputChanged(string value) => UpdatePreview();
-
-    public bool IsTextPreprocessingEnabled
-    {
-        get => _settings.TextPreprocessing.IsEnabled;
-        set
-        {
-            if (value == IsTextPreprocessingEnabled)
-                return;
-
-            var configuration = CreateConfiguration();
-            configuration.IsEnabled = value;
-            _settings.TextPreprocessing = configuration;
-            OnPropertyChanged();
-        }
+        _i18n = i18n;
     }
 
     [RelayCommand]
-    private void AddTextReplacementRule()
+    private async Task EditTextPreprocessingAsync(System.Windows.FrameworkElement element)
     {
-        var rule = new TextReplacementRule
-        {
-            Name = $"Rule {Rules.Count + 1}",
-            Pattern = string.Empty,
-            Replacement = string.Empty
-        };
-        Rules.Add(rule);
-        SubscribeToRule(rule);
-        PersistRules();
-    }
-
-    [RelayCommand]
-    private void RemoveTextReplacementRule(TextReplacementRule? rule)
-    {
-        if (rule is null || !Rules.Remove(rule))
-            return;
-
-        rule.PropertyChanged -= OnRulePropertyChanged;
-        PersistRules();
-    }
-
-    [RelayCommand]
-    private void MoveTextReplacementRuleUp(TextReplacementRule? rule)
-        => MoveRule(rule, -1);
-
-    [RelayCommand]
-    private void MoveTextReplacementRuleDown(TextReplacementRule? rule)
-        => MoveRule(rule, 1);
-
-    private void MoveRule(TextReplacementRule? rule, int offset)
-    {
-        if (rule is null)
-            return;
-
-        var currentIndex = Rules.IndexOf(rule);
-        var targetIndex = currentIndex + offset;
-        if (currentIndex < 0 || targetIndex < 0 || targetIndex >= Rules.Count)
-            return;
-
-        Rules.Move(currentIndex, targetIndex);
-        PersistRules();
-    }
-
-    private void SubscribeToRules(IEnumerable<TextReplacementRule> rules)
-    {
-        foreach (var rule in rules)
-            SubscribeToRule(rule);
-    }
-
-    private void SubscribeToRule(TextReplacementRule rule)
-        => rule.PropertyChanged += OnRulePropertyChanged;
-
-    private void OnRulePropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        PersistRules();
-        UpdatePreview();
-    }
-
-    private void PersistRules()
-    {
-        var configuration = CreateConfiguration();
-        configuration.IsEnabled = IsTextPreprocessingEnabled;
-        _settings.TextPreprocessing = configuration;
-    }
-
-    private TextPreprocessingSettings CreateConfiguration()
-    {
-        return new TextPreprocessingSettings
-        {
-            IsEnabled = _settings.TextPreprocessing.IsEnabled,
-            Rules = Rules.Select(rule => rule.Clone()).ToList()
-        };
-    }
-
-    private void UpdatePreview()
-    {
-        try
-        {
-            var prepared = _textPreprocessingService.Prepare(
-                PreviewInput ?? string.Empty,
-                CreateConfiguration());
-            PreviewText = prepared.RequestText;
-            PreviewMatchCount = prepared.TotalMatchCount;
-            PreviewError = string.Empty;
-        }
-        catch (TextPreprocessingException ex)
-        {
-            PreviewText = string.Empty;
-            PreviewMatchCount = 0;
-            PreviewError = ex.Message;
-        }
+        var owner = System.Windows.Window.GetWindow(element);
+        if (owner is null) return;
+        using var draft = new STranslate.ViewModels.TextPreprocessingEditViewModel(
+            _settings, _textPreprocessingService, _i18n.GetTranslation);
+        var dialog = new STranslate.Controls.TextPreprocessingDialog(draft);
+        await dialog.ShowAsync(owner);
     }
 
     // 翻译服务特有的功能

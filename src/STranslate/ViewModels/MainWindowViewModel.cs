@@ -64,6 +64,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     public Settings Settings { get; }
     public HotkeySettings HotkeySettings { get; }
+    private PreparedTranslationInput? _lastPreparedInput;
+    [ObservableProperty] public partial string ReplacementStatus { get; set; } = string.Empty;
+    [ObservableProperty] public partial bool HasReplacements { get; set; }
 
     public MainWindowViewModel(
         DataProvider dataProvider,
@@ -337,6 +340,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             : null;
 
         ResetAllServices(operation);
+        ClearPreparedInputPreview();
         ApplyIdentifiedLanguageState(forcedSourceLanguage.HasValue
             ? CreateDetectedIdentifiedLanguageState(forcedSourceLanguage.Value)
             : IdentifiedLanguageState.Empty);
@@ -347,6 +351,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             if (!operation.IsLatestAutomatic)
                 return;
             operation.EnsureNonEmptyInput();
+            PublishPreparedInputPreview(operation);
         }
         catch (TextPreprocessingException ex)
         {
@@ -496,10 +501,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 return;
         }
         operation.ActivateIdentifiedLanguage();
+        ClearPreparedInputPreview();
         await operation.PrepareInputAsync().ConfigureAwait(false);
         if (!operation.IsCurrent(channel))
             return;
         operation.EnsureNonEmptyInput();
+        PublishPreparedInputPreview(operation);
 
         switch (service.Plugin)
         {
@@ -2756,6 +2763,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     partial void OnInputTextChanged(string value)
     {
+        ClearPreparedInputPreview();
         ResetTranslationLanguageState();
 
         if (!Settings.AutoTranslate)
@@ -2860,15 +2868,30 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         _logger.LogWarning("Translation preprocessing failed: rule {RuleId}, kind {ErrorKind}",
             exception.RuleId, exception.ErrorKind);
-        var key = exception.ErrorKind switch
+        _snackbar.ShowWarning(TextPreprocessingErrorText.Format(exception, _i18n.GetTranslation));
+    }
+
+    private void ClearPreparedInputPreview()
+    {
+        _lastPreparedInput = null;
+        ReplacementStatus = string.Empty;
+        HasReplacements = false;
+    }
+
+    private void PublishPreparedInputPreview(TranslationOperation operation) =>
+        operation.TryPublishInputPreview(() =>
         {
-            "EmptyResult" => "TranslatePreprocessingEmpty",
-            "InvalidConfiguration" => "TranslatePreprocessingInvalidConfiguration",
-            "Timeout" => "TranslatePreprocessingTimeout",
-            "OutputLimit" => "TranslatePreprocessingOutputLimit",
-            _ => "TranslatePreprocessingFailed"
-        };
-        _snackbar.ShowWarning(string.Format(_i18n.GetTranslation(key), exception.RuleName));
+            _lastPreparedInput = operation.PreparedInput;
+            HasReplacements = _lastPreparedInput.TotalMatchCount > 0;
+            ReplacementStatus = string.Format(_i18n.GetTranslation("Translate_TextPreprocessingApplied"),
+                _lastPreparedInput.TotalMatchCount);
+        });
+
+    [RelayCommand]
+    private async Task ShowPreparedRequestAsync(FrameworkElement element)
+    {
+        if (_lastPreparedInput is not { } input || Window.GetWindow(element) is not { } owner) return;
+        await new Controls.TranslationRequestDialog(input.RequestText).ShowAsync(owner);
     }
 
     private IdentifiedLanguageState CreateCacheIdentifiedLanguageState(HistoryModel history)

@@ -1,0 +1,88 @@
+<ui:ContentDialog
+    x:Class="STranslate.Controls.TextPreprocessingDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cnvt="clr-namespace:STranslate.Converters"
+    xmlns:control="clr-namespace:STranslate.Controls"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    Title="{DynamicResource Translate_TextPreprocessing}"
+    CloseButtonText="{DynamicResource Cancel}"
+    PrimaryButtonText="{DynamicResource Save}"
+    PrimaryButtonClick="OnPrimaryButtonClick"
+    DefaultButton="Primary">
+    <ui:ContentDialog.Resources>
+        <sys:Double x:Key="ContentDialogMaxWidth">840</sys:Double>
+        <sys:Double x:Key="ContentDialogMaxHeight">680</sys:Double>
+        <sys:Double x:Key="ContentDialogMinWidth">560</sys:Double>
+    </ui:ContentDialog.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+            <ui:ToggleSwitch Margin="0,0,0,12" IsOn="{Binding IsEnabled, Mode=TwoWay}"
+                OnContent="{DynamicResource Enable}" OffContent="{DynamicResource Disable}" />
+            <Grid Height="240">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="170" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <DockPanel Margin="0,0,12,0">
+                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0">
+                        <control:IconButton Width="32" Height="32" Command="{Binding AddRuleCommand}" Icon="{x:Static ui:FluentSystemIcons.Add_20_Regular}" ToolTip="{DynamicResource Add}" />
+                        <control:IconButton Width="32" Height="32" Command="{Binding RemoveRuleCommand}" Icon="{x:Static ui:FluentSystemIcons.Delete_20_Regular}" ToolTip="{DynamicResource Delete}" />
+                        <control:IconButton Width="32" Height="32" Command="{Binding MoveRuleUpCommand}" Icon="{x:Static ui:FluentSystemIcons.ChevronUp_20_Regular}" ToolTip="{DynamicResource Translate_TextPreprocessingMoveUp}" />
+                        <control:IconButton Width="32" Height="32" Command="{Binding MoveRuleDownCommand}" Icon="{x:Static ui:FluentSystemIcons.ChevronDown_20_Regular}" ToolTip="{DynamicResource Translate_TextPreprocessingMoveDown}" />
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding Rules}" SelectedItem="{Binding SelectedRule}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="28" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <CheckBox IsChecked="{Binding IsEnabled}" ToolTip="{DynamicResource Enable}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" MaxWidth="105" VerticalAlignment="Center"
+                                        TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel DataContext="{Binding SelectedRule}" Visibility="{Binding Converter={cnvt:EqualToVisibilityInverseConverter}}">
+                        <TextBlock Text="{DynamicResource Translate_TextPreprocessingRuleName}" Margin="0,0,0,4" />
+                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" />
+                        <TextBlock Text="{DynamicResource Translate_TextPreprocessingPattern}" Margin="0,0,0,4" />
+                        <TextBox Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas" TextWrapping="Wrap" Margin="0,0,0,8" MinHeight="32" />
+                        <TextBlock Text="{DynamicResource Translate_TextPreprocessingReplacement}" Margin="0,0,0,4" />
+                        <TextBox Text="{Binding Replacement, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="48" MaxHeight="120" VerticalScrollBarVisibility="Auto" Margin="0,0,0,8" />
+                        <WrapPanel>
+                            <CheckBox Content="{DynamicResource Translate_TextPreprocessingIgnoreCase}" IsChecked="{Binding IgnoreCase}" Margin="0,0,12,6" />
+                            <CheckBox Content="{DynamicResource Translate_TextPreprocessingMultiline}" IsChecked="{Binding Multiline}" Margin="0,0,12,6" />
+                            <CheckBox Content="{DynamicResource Translate_TextPreprocessingSingleline}" IsChecked="{Binding Singleline}" Margin="0,0,0,6" />
+                        </WrapPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+            <Separator Margin="0,12" />
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,6,0">
+                    <TextBlock Text="{DynamicResource Translate_TextPreprocessingPreviewInput}" Margin="0,0,0,4" TextWrapping="Wrap" />
+                    <TextBox Height="90" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Text="{Binding PreviewInput, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                    <TextBlock Text="{DynamicResource Translate_TextPreprocessingPreviewOutput}" Margin="0,0,0,4" TextWrapping="Wrap" />
+                    <TextBox Height="90" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Text="{Binding PreviewText, Mode=OneWay}" />
+                </StackPanel>
+            </Grid>
+            <ProgressBar Height="3" Margin="0,6,0,0" IsIndeterminate="True" Visibility="{Binding IsPreviewing, Converter={cnvt:BoolToVisibilityConverter}}" />
+            <TextBlock Margin="0,6,0,4">
+                <Run Text="{DynamicResource Translate_TextPreprocessingMatchCount}" /><Run Text=": " /><Run Text="{Binding PreviewMatchCount, Mode=OneWay}" />
+            </TextBlock>
+            <ItemsControl ItemsSource="{Binding PreviewMatches}">
+                <ItemsControl.ItemTemplate><DataTemplate>
+                    <DockPanel><TextBlock DockPanel.Dock="Right" Text="{Binding MatchCount}" Margin="12,0,0,0" /><TextBlock Text="{Binding RuleName}" TextTrimming="CharacterEllipsis" /></DockPanel>
+                </DataTemplate></ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="{Binding PreviewError}" TextWrapping="Wrap" Margin="0,8,0,0" Foreground="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorCautionBrushKey}}" />
+        </StackPanel>
+    </ScrollViewer>
+</ui:ContentDialog>

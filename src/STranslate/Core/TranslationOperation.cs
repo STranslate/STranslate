@@ -80,6 +80,9 @@ internal sealed class TranslationOperation
     internal bool TryPublishAutomatic(Action publish) =>
         _coordinator.TryPublishAutomatic(OperationId, publish);
 
+    internal bool TryPublishInputPreview(Action publish) =>
+        _coordinator.TryPublishInputPreview(OperationId, publish);
+
     internal void ActivateIdentifiedLanguage() =>
         _coordinator.ActivateIdentifiedLanguage(OperationId);
 
