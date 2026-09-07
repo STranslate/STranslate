@@ -9,6 +9,8 @@ internal sealed class TranslationOperation
 {
     private readonly TranslationResultCoordinator _coordinator;
     private readonly Func<string, string> _getTranslation;
+    private readonly Lazy<Task<PreparedTranslationInput>> _preparation;
+    private PreparedTranslationInput? _preparedInput;
 
     internal TranslationOperation(
         TranslationResultCoordinator coordinator,
@@ -18,14 +20,16 @@ internal sealed class TranslationOperation
         LangEnum sourceLang,
         LangEnum targetLang,
         CancellationToken cancellationToken,
-        PreparedTranslationInput preparedInput)
+        PreparedTranslationInput? preparedInput = null,
+        Func<Task<PreparedTranslationInput>>? prepareInput = null)
     {
         _coordinator = coordinator;
         _getTranslation = getTranslation;
         OperationId = operationId;
         Text = text;
-        RequestText = preparedInput.RequestText;
-        RulesFingerprint = preparedInput.RulesFingerprint;
+        _preparedInput = preparedInput ?? (prepareInput is null
+            ? new PreparedTranslationInput(text, text, string.Empty, []) : null);
+        _preparation = new(prepareInput ?? (() => Task.FromResult(_preparedInput!)));
         SourceLang = sourceLang;
         TargetLang = targetLang;
         CancellationToken = cancellationToken;
@@ -33,13 +37,26 @@ internal sealed class TranslationOperation
 
     internal long OperationId { get; }
     internal string Text { get; }
-    internal string RequestText { get; }
-    internal string RulesFingerprint { get; }
+    internal PreparedTranslationInput PreparedInput => _preparedInput ?? throw new InvalidOperationException("翻译输入尚未准备完成。");
+    internal string RequestText => PreparedInput.RequestText;
+    internal string RulesFingerprint => PreparedInput.RulesFingerprint;
     internal bool IsPreprocessed => !string.IsNullOrEmpty(RulesFingerprint);
     internal LangEnum SourceLang { get; }
     internal LangEnum TargetLang { get; }
     internal CancellationToken CancellationToken { get; }
     internal bool IsLatestAutomatic => _coordinator.IsLatestAutomatic(OperationId);
+
+    internal async Task<PreparedTranslationInput> PrepareInputAsync()
+    {
+        var input = await _preparation.Value.ConfigureAwait(false);
+        CancellationToken.ThrowIfCancellationRequested();
+        _preparedInput = input;
+        return input;
+    }
+
+    internal void BindMainResult(ITranslatePlugin plugin, string text, LangEnum source, LangEnum target) =>
+        _coordinator.BindResultContext(plugin.TransResult, OperationId,
+            new(PreparedInput, SourceLang, TargetLang, source, target, text));
 
     internal bool TryPrepare(ITranslatePlugin plugin)
     {
@@ -72,14 +89,28 @@ internal sealed class TranslationOperation
     internal void PublishDictionary(DictionaryResult source, DictionaryResult target) =>
         _coordinator.PublishDictionary(source, target, OperationId);
 
-    internal Task<TranslateResult> TranslateAsync(
+    internal async Task<TranslateResult> TranslateAsync(
         ITranslatePlugin plugin,
         LangEnum source,
-        LangEnum target) =>
-        ExecuteTranslateAsync(
+        LangEnum target)
+    {
+        await PrepareInputAsync().ConfigureAwait(false);
+        EnsureNonEmptyInput();
+        var result = await ExecuteTranslateAsync(
             plugin,
             new TranslateRequest(RequestText, source, target),
-            plugin.TransResult);
+            plugin.TransResult).ConfigureAwait(false);
+        if (result.IsSuccess && !string.IsNullOrWhiteSpace(result.Text))
+            BindMainResult(plugin, result.Text, source, target);
+        return result;
+    }
+
+    internal void EnsureNonEmptyInput()
+    {
+        if (string.IsNullOrWhiteSpace(RequestText))
+            throw new TextPreprocessingException(string.Empty, string.Empty,
+                "替换后没有可翻译内容。", errorKind: "EmptyResult");
+    }
 
     internal Task<TranslateResult> BackTranslateAsync(
         ITranslatePlugin plugin,
@@ -93,6 +124,8 @@ internal sealed class TranslationOperation
 
     internal async Task<DictionaryResult> LookupAsync(IDictionaryPlugin plugin)
     {
+        await PrepareInputAsync().ConfigureAwait(false);
+        EnsureNonEmptyInput();
         var result = new DictionaryResult();
         if (!IsCurrent(plugin.DictionaryResult))
         {
@@ -107,6 +140,7 @@ internal sealed class TranslationOperation
         result.IsProcessing = true;
         try
         {
+            CancellationToken.ThrowIfCancellationRequested();
             await plugin.TranslateAsync(RequestText, result, CancellationToken).ConfigureAwait(false);
             CancellationToken.ThrowIfCancellationRequested();
         }
@@ -150,6 +184,7 @@ internal sealed class TranslationOperation
         result.IsProcessing = true;
         try
         {
+            CancellationToken.ThrowIfCancellationRequested();
             await plugin.TranslateAsync(request, result, CancellationToken).ConfigureAwait(false);
             CancellationToken.ThrowIfCancellationRequested();
         }
@@ -178,3 +213,11 @@ internal sealed class TranslationOperation
     private IDisposable Forward(TranslateResult source, TranslateResult target) =>
         _coordinator.Forward(source, target, OperationId);
 }
+
+internal sealed record TranslationResultContext(
+    PreparedTranslationInput Input,
+    LangEnum SourceLang,
+    LangEnum TargetLang,
+    LangEnum EffectiveSource,
+    LangEnum EffectiveTarget,
+    string TranslatedText);

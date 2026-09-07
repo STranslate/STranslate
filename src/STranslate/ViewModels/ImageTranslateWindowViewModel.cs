@@ -10,6 +10,7 @@ using STranslate.Plugin;
 using STranslate.Services;
 using STranslate.Views.Pages;
 using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
@@ -197,6 +198,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
                 return;
             }
 
+            var preprocessingSettings = Settings.TextPreprocessing?.Clone();
             var data = Utilities.ToBytes(bitmap, Settings.GetImageFormat());
             _lastOcrResult = await ocrSvc.RecognizeAsync(
                 new OcrRequest(data, Settings.ImageTranslateOcrLanguage, bitmap.Width, bitmap.Height),
@@ -234,78 +236,65 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             }
 
             ProcessRingText = _i18n.GetTranslation("TranslatingText");
-            var preprocessingSettings = Settings.TextPreprocessing.Clone();
+            var failedBlocks = 0;
+            var translatedBlocks = new ConcurrentBag<OcrLayoutBlock>();
 
             await Parallel.ForEachAsync(layoutBlocks, cancellationToken, async (block, cancellationToken) =>
             {
-                PreparedTranslationInput prepared;
-                try
-                {
-                    prepared = _textPreprocessingService.Prepare(
-                        block.Text,
-                        preprocessingSettings,
-                        cancellationToken);
-                }
-                catch (TextPreprocessingException ex)
-                {
-                    _logger.LogWarning(ex, "Image translation preprocessing failed for rule {RuleName}", ex.RuleName);
-                    _snackbar.ShowWarning(string.Format(
-                        _i18n.GetTranslation("TranslatePreprocessingFailed"),
-                        ex.RuleName));
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(prepared.RequestText))
-                {
-                    _logger.LogWarning("Image translation preprocessing produced empty text; keeping original OCR block");
-                    return;
-                }
-
                 var detectOptions = new LangDetectOptions(
                     Settings.ImageTranslateLanguageDetector,
                     Settings.ImageTranslateLocalDetectorRate,
                     Settings.ImageTranslateSourceLangIfAuto,
                     Settings.ImageTranslateFirstLanguage,
                     Settings.ImageTranslateSecondLanguage);
-
-                var (isSuccess, source, target) = await LanguageDetector
-                    .GetLanguageAsync(
-                        prepared.RequestText,
-                        Settings.ImageTranslateSourceLang,
-                        Settings.ImageTranslateTargetLang,
-                        cancellationToken,
-                        options: detectOptions)
-                    .ConfigureAwait(false);
-                if (!isSuccess)
+                TranslateResult? result;
+                try
                 {
-                    _logger.LogWarning("Language detection failed for preprocessed image text");
-                    _snackbar.ShowWarning(_i18n.GetTranslation("LanguageDetectionFailed"));
+                    result = await DirectTranslationRunner.TranslateAsync(block.Text, preprocessingSettings,
+                        _textPreprocessingService, tranSvc,
+                        (text, token) => LanguageDetector.GetLanguageAsync(text,
+                            Settings.ImageTranslateSourceLang, Settings.ImageTranslateTargetLang, token,
+                            options: detectOptions), cancellationToken).ConfigureAwait(false);
+                }
+                catch (TextPreprocessingException ex)
+                {
+                    _logger.LogWarning("Image preprocessing failed: rule {RuleId}, kind {ErrorKind}", ex.RuleId, ex.ErrorKind);
+                    Interlocked.Increment(ref failedBlocks);
                     return;
                 }
-                var result = new TranslateResult();
-                await tranSvc.TranslateAsync(new TranslateRequest(prepared.RequestText, source, target), result, cancellationToken);
-                if (result.IsSuccess && !string.IsNullOrWhiteSpace(result.Text))
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning("Image translation block failed: {ErrorType}", ex.GetType().Name);
+                    Interlocked.Increment(ref failedBlocks);
+                    return;
+                }
+                if (result is { IsSuccess: true } && !string.IsNullOrWhiteSpace(result.Text))
                 {
                     var normalizedText = ImageTranslateTextOverlayLayout.NormalizeOverlayText(result.Text);
                     if (!string.IsNullOrWhiteSpace(normalizedText))
+                    {
                         block.Text = normalizedText;
+                        translatedBlocks.Add(block);
+                        return;
+                    }
                 }
-                else
-                {
-                    // 翻译失败（接口报错或返回空）：保留 OCR 原文，仅记录日志避免并发 snackbar 刷屏。
-                    var reason = result.IsSuccess ? "empty translation" : result.Text;
-                    _logger.LogWarning("Image translate failed for a block ({Reason}); keeping original OCR text", reason);
-                }
+                Interlocked.Increment(ref failedBlocks);
             });
 
             cancellationToken.ThrowIfCancellationRequested();
+            if (failedBlocks > 0)
+                _snackbar.ShowWarning(string.Format(_i18n.GetTranslation("TranslatePreprocessingBlocksFailed"), failedBlocks));
 
             _lastOcrResult.OcrContents.Clear();
             _lastOcrResult.OcrContents.AddRange(layoutBlocks.Select(x => x.ToOcrContent()));
 
             // 生成原图坐标系中的矢量译文覆盖文档，不再创建超采样结果位图。
             _resultOverlayDocument = ImageTranslateRenderer.CreateTranslatedOverlay(
-                layoutBlocks, GetOverlayTheme());
+                layoutBlocks.Where(translatedBlocks.Contains).ToList(), GetOverlayTheme());
             _translatedSelectionWords = new ObservableCollection<OcrWord>(
                 _resultOverlayDocument.SelectableWords);
             Result = _lastOcrResult.Text;

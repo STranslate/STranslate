@@ -247,6 +247,10 @@
     <sys:String x:Key="Translate_TextPreprocessingMatchCount">Matches</sys:String>
     <sys:String x:Key="TranslatePreprocessingFailed">Translation pre-processing rule failed: {0}</sys:String>
     <sys:String x:Key="TranslatePreprocessingEmpty">Translation pre-processing produced no translatable text.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">The replacement configuration is invalid. Correct it in Settings before translating.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">Replacement rule timed out: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">Replacement output exceeded the length limit: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">{0} image blocks could not be processed. Their original content was kept.</sys:String>
     <sys:String x:Key="ImTranService">Image Trans</sys:String>
     <sys:String x:Key="NoServiceEnabled">No Service Enabled</sys:String>
     <sys:String x:Key="SpecialServiceInfo">Drag services from the left here, or right-click to select and enable.</sys:String>

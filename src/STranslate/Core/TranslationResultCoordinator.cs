@@ -14,35 +14,23 @@ internal sealed class TranslationResultCoordinator
     private readonly object _automaticSideEffectsChannel = new();
     private readonly object _identifiedLanguageChannel = new();
     private readonly Func<string, string> _getTranslation;
-    private readonly Func<string, CancellationToken, PreparedTranslationInput> _prepareText;
+    private readonly TextPreprocessingService? _preprocessingService;
+    private readonly Settings? _settings;
     private long _lastOperationId;
 
     internal TranslationResultCoordinator(Func<string, string> getTranslation)
-        : this(
-            getTranslation,
-            static (text, _) => new PreparedTranslationInput(text, text, string.Empty, []))
     {
+        _getTranslation = getTranslation;
     }
 
     internal TranslationResultCoordinator(
         Func<string, string> getTranslation,
         TextPreprocessingService preprocessingService,
         Settings settings)
-        : this(
-            getTranslation,
-            (text, cancellationToken) => preprocessingService.Prepare(
-                text,
-                settings.TextPreprocessing,
-                cancellationToken))
+        : this(getTranslation)
     {
-    }
-
-    private TranslationResultCoordinator(
-        Func<string, string> getTranslation,
-        Func<string, CancellationToken, PreparedTranslationInput> prepareText)
-    {
-        _getTranslation = getTranslation;
-        _prepareText = prepareText;
+        _preprocessingService = preprocessingService;
+        _settings = settings;
     }
 
     internal TranslationOperation BeginOperation(
@@ -52,6 +40,7 @@ internal sealed class TranslationResultCoordinator
         CancellationToken cancellationToken)
     {
         var operationId = Interlocked.Increment(ref _lastOperationId);
+        var snapshot = _settings?.TextPreprocessing?.Clone();
         return new TranslationOperation(
             this,
             _getTranslation,
@@ -60,8 +49,23 @@ internal sealed class TranslationResultCoordinator
             sourceLang,
             targetLang,
             cancellationToken,
-            _prepareText(text, cancellationToken));
+            prepareInput: _preprocessingService is null ? null :
+                () => _preprocessingService.PrepareAsync(text, snapshot, cancellationToken));
     }
+
+    internal TranslationOperation BeginBackOperation(TranslationResultContext context, CancellationToken cancellationToken) =>
+        new(this, _getTranslation, Interlocked.Increment(ref _lastOperationId),
+            context.Input.OriginalText, context.SourceLang, context.TargetLang, cancellationToken, context.Input);
+
+    internal TranslationResultContext? GetResultContext(TranslateResult result)
+    {
+        var state = _channels.GetOrCreateValue(result);
+        lock (state.SyncRoot)
+            return state.Context;
+    }
+
+    internal void BindResultContext(TranslateResult result, long operationId, TranslationResultContext context) =>
+        TryPublish(result, operationId, () => _channels.GetOrCreateValue(result).Context = context);
 
     internal TranslationOperation BeginAutomaticOperation(
         string text,
@@ -101,7 +105,11 @@ internal sealed class TranslationResultCoordinator
         TryActivate(channel, operationId, static () => { });
 
     internal bool TryReset(TranslateResult result, long operationId) =>
-        TryActivate(result, operationId, () => Reset(result));
+        TryActivate(result, operationId, () =>
+        {
+            _channels.GetOrCreateValue(result).Context = null;
+            Reset(result);
+        });
 
     internal bool TryReset(DictionaryResult result, long operationId) =>
         TryActivate(result, operationId, () => Reset(result));
@@ -258,6 +266,7 @@ internal sealed class TranslationResultCoordinator
     {
         internal object SyncRoot { get; } = new();
         internal long OperationId { get; set; }
+        internal TranslationResultContext? Context { get; set; }
     }
 
     private sealed class PropertyChangedSubscription(

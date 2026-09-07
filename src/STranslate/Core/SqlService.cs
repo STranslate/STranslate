@@ -524,27 +524,16 @@ public class HistoryModel
 
     internal bool HasData(Service svc)
     {
-        if (svc.Plugin is ITranslatePlugin tPlugin)
-            return Data.Any(d =>
-                d.PluginID == svc.MetaData.PluginID &&
-                d.ServiceID == svc.ServiceID &&
-                d.TransResult != null &&
-                d.TransResult.IsSuccess &&
-                !string.IsNullOrWhiteSpace(d.TransResult.Text) &&
-                (!(svc.Options?.AutoBackTranslation ?? false) || (d.TransBackResult != null && d.TransBackResult.IsSuccess && !string.IsNullOrWhiteSpace(d.TransBackResult.Text)))
-            );
-        else
-            return Data.Any(d =>
-                d.PluginID == svc.MetaData.PluginID &&
-                d.ServiceID == svc.ServiceID &&
-                d.DictResult != null &&
-                d.DictResult.ResultType != DictionaryResultType.None &&
-                d.DictResult.ResultType != DictionaryResultType.Error
-            );
+        var data = GetData(svc);
+        return data?.HasSuccessfulMainResult(svc) == true &&
+            (svc.Plugin is not ITranslatePlugin || !(svc.Options?.AutoBackTranslation ?? false) || data.HasSuccessfulBackResult);
     }
 
-    internal HistoryData? GetData(Service svc) =>
-        Data.FirstOrDefault(d => d.PluginID == svc.MetaData.PluginID && d.ServiceID == svc.ServiceID);
+    internal HistoryData? GetData(Service svc)
+    {
+        lock (Data)
+            return Data.FirstOrDefault(d => d.PluginID == svc.MetaData.PluginID && d.ServiceID == svc.ServiceID);
+    }
 
     internal static JsonSerializerOptions JsonOption =>
         new()
@@ -570,6 +559,9 @@ public class HistoryData
     /// 生成 RequestText 时使用的规则指纹；空值表示未使用预处理。
     /// </summary>
     public string? PreprocessingFingerprint { get; set; }
+    public string? EffectiveSourceLang { get; set; }
+    public string? EffectiveTargetLang { get; set; }
+    public string? BackTranslationSourceText { get; set; }
     public TranslateResult? TransResult { get; set; }
     public TranslateResult? TransBackResult { get; set; }
     public DictionaryResult? DictResult { get; set; }
@@ -585,10 +577,48 @@ public class HistoryData
         ServiceDisplayName = svc.DisplayName;
     }
 
-    internal void ApplyPreprocessingContext(TranslationOperation operation)
+    internal void ApplyPreprocessingContext(TranslationOperation operation, LangEnum? source = null, LangEnum? target = null)
     {
         RequestText = operation.RequestText;
         PreprocessingFingerprint = operation.RulesFingerprint;
+        EffectiveSourceLang = source?.ToString();
+        EffectiveTargetLang = target?.ToString();
+    }
+
+    internal bool HasSuccessfulMainResult(Service service) => service.Plugin is ITranslatePlugin
+        ? TransResult is { IsSuccess: true } result && !string.IsNullOrWhiteSpace(result.Text)
+        : DictResult is { ResultType: not (DictionaryResultType.None or DictionaryResultType.Error) };
+
+    internal bool HasSuccessfulBackResult =>
+        TransResult is { IsSuccess: true } main && !string.IsNullOrWhiteSpace(main.Text) &&
+        TransBackResult is { IsSuccess: true } back && !string.IsNullOrWhiteSpace(back.Text) &&
+        (BackTranslationSourceText is null || BackTranslationSourceText == main.Text);
+
+    internal void MergeFrom(HistoryData incoming)
+    {
+        if (incoming.TransResult is null && incoming.TransBackResult is not null)
+        {
+            if (incoming.BackTranslationSourceText != TransResult?.Text ||
+                incoming.RequestText != RequestText ||
+                incoming.PreprocessingFingerprint != PreprocessingFingerprint ||
+                incoming.EffectiveSourceLang != EffectiveSourceLang || incoming.EffectiveTargetLang != EffectiveTargetLang)
+                return;
+            TransBackResult = incoming.TransBackResult;
+            BackTranslationSourceText = incoming.BackTranslationSourceText;
+            return;
+        }
+        ServiceDisplayName = incoming.ServiceDisplayName ?? ServiceDisplayName;
+        RequestText = incoming.RequestText;
+        PreprocessingFingerprint = incoming.PreprocessingFingerprint;
+        EffectiveSourceLang = incoming.EffectiveSourceLang;
+        EffectiveTargetLang = incoming.EffectiveTargetLang;
+        if (incoming.TransResult is not null)
+        {
+            TransResult = incoming.TransResult;
+            TransBackResult = incoming.TransBackResult;
+            BackTranslationSourceText = incoming.BackTranslationSourceText;
+        }
+        DictResult = incoming.DictResult ?? DictResult;
     }
 
     internal bool IsCompatible(string originalText, string requestText, string rulesFingerprint)

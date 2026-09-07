@@ -6,7 +6,7 @@ namespace STranslate.Tests;
 public class TranslationCacheContextTests
 {
     [Fact]
-    public void SameOriginalTextWithChangedRulesIsNotCompatible()
+    public async Task SameOriginalTextWithChangedRulesIsNotCompatible()
     {
         var firstCoordinator = CreateCoordinator("public");
         var secondCoordinator = CreateCoordinator("private");
@@ -21,6 +21,8 @@ public class TranslationCacheContextTests
             LangEnum.ChineseSimplified,
             CancellationToken.None);
         var data = new HistoryData();
+        await firstOperation.PrepareInputAsync();
+        await secondOperation.PrepareInputAsync();
         data.ApplyPreprocessingContext(firstOperation);
 
         Assert.False(data.IsCompatible(
