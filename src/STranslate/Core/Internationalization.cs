@@ -397,6 +397,7 @@ internal static class AvailableLanguages
     public static I18nPair Turkish = new("tr", "Türkçe");
     public static I18nPair Russian = new("ru", "Русский");
     public static I18nPair Ukrainian = new("uk", "Українська");
+    public static I18nPair Persian = new("fa", "فارسی");
 
     public static List<I18nPair> GetAvailableLanguages()
     {
@@ -410,6 +411,7 @@ internal static class AvailableLanguages
             Turkish,
             Russian,
             Ukrainian,
+            Persian,
         ];
         return languages;
     }
@@ -426,6 +428,7 @@ internal static class AvailableLanguages
             "ko" => "시스템",
             "ru" => "Система",
             "uk" => "Система",
+            "fa" => "سیستم",
             _ => "System",
         };
     }
