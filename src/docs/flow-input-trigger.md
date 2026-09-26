@@ -60,6 +60,13 @@
 - 鼠标划词：拖选和双击选词共用同一条完成事件链路。`IsMouseSelectionTranslationEnabled` 和 `IsMouseSelectionIconEnabled` 是独立开关，任意一个开启都会维持同一个 Hook。处理优先级为增量翻译、直接翻译、悬浮图标；两者同时开启时直接翻译，不显示图标。
 - 剪贴板监听：`ClipboardMonitor` 收到 `WM_CLIPBOARDUPDATE` 后读取文本，触发 `OnClipboardTextChanged -> ExecuteTranslate()`。
 
+### Acrobat 自定义文字光标兼容
+- `MouseHookService.IsIBeamCursor()` 保留系统 `IDC_IBEAM` 句柄匹配；不匹配时，`AcrobatCursorCompatibility` 仅对前台进程 `Acrobat` / `AcroRd32` 检查已知文字光标位图指纹。
+- 当前样本覆盖同一 Acrobat 文字光标的 37×37 与 56×56 版本。后者来自与主程序相同的 PerMonitorV2 环境下实际拖选；不能把不同 DPI 上下文采集的指纹视为相同。其他版本、主题和缩放仍需实测，不对任意自定义光标放宽限制。
+- 进程名和光标结果缓存最多 2 秒，前台进程或光标改变时刷新；进程退出、读取失败及未知位图均返回不匹配。`GetIconInfo` 创建的位图在 `finally` 中释放。
+- 仍使用原有拖选/双击阈值、取词超时与服务分发。不修改 Acrobat 首选项，也不采集或记录文档正文。
+- 回归验证：开启鼠标划词，在可复制 PDF 中拖选/双击；确认 Acrobat 文字光标触发、其他拖动不误触发，并检查 Foxit/浏览器的标准光标路径。自动测试同时覆盖进程限制、DPI 样本、缓存失效和读取异常。
+
 ### 触发后的窗口置前
 - 全局热键由 STranslate 接收并不代表 STranslate 已是前台应用；触发时浏览器、编辑器或 Explorer 通常仍持有前台窗口。
 - `ExecuteTranslate()`、`InputClear()` 及其他显示入口最终统一调用 `Win32Helper.ActivateForegroundWindow()`，再执行 WPF `Activate()` / `Focus()`。

@@ -17,6 +17,7 @@ public sealed class MouseHookService(ILogger<MouseHookService> logger) : IMouseH
     private static readonly TimeSpan ThreadTransitionTimeout = TimeSpan.FromSeconds(2);
     private readonly Lock _stateLock = new();
     private readonly Lock _eventDispatchLock = new();
+    private readonly STranslate.Helpers.AcrobatCursorCompatibility _acrobatCursorCompatibility = new();
     private Task _eventDispatchTask = Task.CompletedTask;
     private Thread? _hookThread;
     private ManualResetEventSlim? _startupCompleted;
@@ -222,10 +223,12 @@ public sealed class MouseHookService(ILogger<MouseHookService> logger) : IMouseH
         return PInvoke.CallNextHookEx(HHOOK.Null, nCode, wParam, lParam);
     }
 
-    private bool IsIBeamCursor()
+    private unsafe bool IsIBeamCursor()
     {
         var cursorInfo = new CURSORINFO { cbSize = (uint)Marshal.SizeOf<CURSORINFO>() };
-        return PInvoke.GetCursorInfo(ref cursorInfo) && cursorInfo.hCursor == _iBeamCursor;
+        return PInvoke.GetCursorInfo(ref cursorInfo) &&
+            (cursorInfo.hCursor == _iBeamCursor ||
+             _acrobatCursorCompatibility.IsTextCursor((IntPtr)cursorInfo.hCursor.Value));
     }
 
     private void QueueEvent(Action callback)
