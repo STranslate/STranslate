@@ -245,6 +245,13 @@
     <sys:String x:Key="Translate_TextPreprocessingPreviewInput">Preview input</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingPreviewOutput">Text sent to the provider</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMatchCount">Matches</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingRules">Rules</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreview">Live Preview</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNoRuleSelected">Select a rule to edit, or add a new rule</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCaseDescription">(?i) Ignore case when matching</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMultilineDescription">(?m) Multiline mode: ^ and $ match line starts and ends</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingSinglelineDescription">(?s) Singleline mode: dot (.) matches all characters including newlines</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewInputPlaceholder">Type test text to preview replacements...</sys:String>
     <sys:String x:Key="TranslatePreprocessingFailed">Translation pre-processing rule failed: {0}</sys:String>
     <sys:String x:Key="TranslatePreprocessingEmpty">Translation pre-processing produced no translatable text.</sys:String>
     <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">The replacement configuration is invalid. Correct it in Settings before translating.</sys:String>
