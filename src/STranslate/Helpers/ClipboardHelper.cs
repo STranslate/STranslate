@@ -22,19 +22,25 @@ public class ClipboardHelper
         _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.CONTROL);
         _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LCONTROL);
         _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RCONTROL);
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.MENU);
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LMENU);
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RMENU);
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LWIN);
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RWIN);
         _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.SHIFT);
         _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LSHIFT);
         _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RSHIFT);
+        // 先释放 Shift，再按住 Ctrl 松开 Alt/Win，避免额外组成 Ctrl+Shift 或激活菜单。
+        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.CONTROL);
+        try
+        {
+            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.MENU);
+            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LMENU);
+            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RMENU);
+            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LWIN);
+            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RWIN);
 
-        if (isCopy)
-            _inputSimulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_C);
-        else
-            _inputSimulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
+            _inputSimulator.Keyboard.KeyPress(isCopy ? VirtualKeyCode.VK_C : VirtualKeyCode.VK_V);
+        }
+        finally
+        {
+            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.CONTROL);
+        }
     }
 
     /// <summary>
