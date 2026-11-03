@@ -23,7 +23,7 @@ public class Main : TranslatePluginBase
     {
         LangEnum.Auto => null,
         LangEnum.ChineseSimplified => "zh",
-        LangEnum.ChineseTraditional => null,
+        LangEnum.ChineseTraditional => "zh-Hant",
         LangEnum.Cantonese => null,
         LangEnum.English => "en",
         LangEnum.Japanese => "ja",
@@ -61,7 +61,7 @@ public class Main : TranslatePluginBase
     {
         LangEnum.Auto => null,
         LangEnum.ChineseSimplified => "zh",
-        LangEnum.ChineseTraditional => null,
+        LangEnum.ChineseTraditional => "zh-Hant",
         LangEnum.Cantonese => null,
         LangEnum.English => "en",
         LangEnum.Japanese => "ja",
