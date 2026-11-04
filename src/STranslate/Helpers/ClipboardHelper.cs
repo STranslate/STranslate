@@ -11,6 +11,7 @@ namespace STranslate.Helpers;
 public class ClipboardHelper
 {
     private static readonly InputSimulator _inputSimulator = new();
+    private static readonly UiaTextReader _uiaTextReader = new();
 
     /// <summary>
     ///     使用 SendInput API 模拟 Ctrl+C 或 Ctrl+V 键盘输入。
@@ -38,44 +39,52 @@ public class ClipboardHelper
     }
 
     /// <summary>
-    ///     获取当前选中的文本。
+    ///     优先通过 UI Automation 获取选中文本，失败时回退到模拟复制。
     /// </summary>
-    /// <param name="timeout">超时时间（以毫秒为单位），默认500ms</param>
+    /// <param name="timeout">剪贴板取词超时（毫秒），默认500ms；UIA 额外最多等待250ms且不超过此值</param>
     /// <param name="cancellation">可以用来取消工作的取消标记</param>
     /// <returns>返回当前选中的文本。</returns>
     public static async Task<string?> GetSelectedTextAsync(int timeout = 500, CancellationToken cancellation = default)
     {
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
-        cts.CancelAfter(timeout);
+        cancellation.ThrowIfCancellationRequested();
+        var foregroundWindow = Win32Helper.GetForegroundWindow();
+        if (foregroundWindow == 0)
+            return null;
 
-        try
-        {
-            return await GetSelectedTextImplAsync(timeout);
-        }
-        catch (OperationCanceledException)
-        {
-            return GetText()?.Trim(); // 超时时返回当前剪贴板内容
-        }
+        var text = await _uiaTextReader.TryGetSelectedTextAsync(timeout, cancellation);
+        cancellation.ThrowIfCancellationRequested();
+
+        // 等待 UIA 时用户可能切换窗口，不向新的前台窗口发送复制按键。
+        if (Win32Helper.GetForegroundWindow() != foregroundWindow)
+            return null;
+
+        if (!string.IsNullOrEmpty(text))
+            return text;
+
+        return await GetSelectedTextFromClipboardAsync(timeout, cancellation);
     }
 
     /// <summary>
-    ///     获取选中文本实现
+    ///     模拟复制并读取选中文本。
     /// </summary>
     /// <param name="timeout">超时时间（毫秒）</param>
     /// <returns>返回当前选中的文本</returns>
-    private static async Task<string?> GetSelectedTextImplAsync(int timeout = 500)
+    private static async Task<string?> GetSelectedTextFromClipboardAsync(int timeout, CancellationToken cancellation)
     {
+        cancellation.ThrowIfCancellationRequested();
         var originalText = GetText();
         uint originalSequence = PInvoke.GetClipboardSequenceNumber();
 
         // 发送复制命令
+        cancellation.ThrowIfCancellationRequested();
         SendCtrlCV();
 
-        var startTime = Environment.TickCount;
+        var startTime = Environment.TickCount64;
         var hasSequenceChanged = false;
 
-        while (Environment.TickCount - startTime < timeout)
+        while (Environment.TickCount64 - startTime < timeout)
         {
+            cancellation.ThrowIfCancellationRequested();
             uint currentSequence = PInvoke.GetClipboardSequenceNumber();
 
             // 检查序列号是否变化
@@ -83,13 +92,14 @@ public class ClipboardHelper
             {
                 hasSequenceChanged = true;
                 // 序列号变化后，等待一段时间确保内容完全更新
-                await Task.Delay(30);
+                await Task.Delay(30, cancellation);
                 break;
             }
 
-            await Task.Delay(10);
+            await Task.Delay(10, cancellation);
         }
 
+        cancellation.ThrowIfCancellationRequested();
         var currentText = GetText();
 
         // 如果序列号变化了，或者内容发生了变化，或者原本就没有内容
