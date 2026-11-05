@@ -196,8 +196,6 @@
     <sys:String x:Key="Hotkey_MouseSelectionTranslation">Mouse Selection Translation</sys:String>
     <sys:String x:Key="Hotkey_MouseSelectionTranslationDescription">Enable or disable immediate mouse selection translation.</sys:String>
     <sys:String x:Key="CrosswordTranslateFetchFailedNotifyOnly">Could not capture the selected text. Please select text and try again.</sys:String>
-    <sys:String x:Key="Hotkey_MouseSelectionTranslation">Mouse Selection Translation</sys:String>
-    <sys:String x:Key="Hotkey_MouseSelectionTranslationDescription">Enable or disable immediate mouse selection translation.</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslate">Replace Translation</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslateDescription">Shortcut key to translate the selected text and replace the original text.</sys:String>
     <sys:String x:Key="Hotkey_ScreenshotTranslate">Screenshot Translation</sys:String>

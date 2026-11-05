@@ -196,8 +196,6 @@
     <sys:String x:Key="Hotkey_MouseSelectionTranslation">鼠标划词直接翻译</sys:String>
     <sys:String x:Key="Hotkey_MouseSelectionTranslationDescription">开启或关闭鼠标划词直接翻译。</sys:String>
     <sys:String x:Key="CrosswordTranslateFetchFailedNotifyOnly">划词取词失败，请选中文本后重试。</sys:String>
-    <sys:String x:Key="Hotkey_MouseSelectionTranslation">鼠标划词直接翻译</sys:String>
-    <sys:String x:Key="Hotkey_MouseSelectionTranslationDescription">开启或关闭鼠标划词直接翻译。</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslate">替换翻译</sys:String>
     <sys:String x:Key="Hotkey_ReplaceTranslateDescription">鼠标选中文本触发翻译并替换原文本的快捷键。</sys:String>
     <sys:String x:Key="Hotkey_ScreenshotTranslate">截图翻译</sys:String>
