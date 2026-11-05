@@ -102,6 +102,11 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial int HttpTimeout { get; set; } = 30;
 
+    /// <summary>
+    /// 音频播放前的静音预热时长，单位：毫秒。0 表示关闭。
+    /// </summary>
+    [ObservableProperty] public partial int AudioPlaybackWarmupMs { get; set; } = 0;
+
     [ObservableProperty] public partial LangEnum SourceLang { get; set; } = LangEnum.Auto;
 
     [ObservableProperty] public partial LangEnum TargetLang { get; set; } = LangEnum.Auto;
@@ -391,6 +396,15 @@ public partial class Settings : ObservableObject
         }
     }
 
+    partial void OnAudioPlaybackWarmupMsChanged(int value)
+    {
+        var normalized = Math.Clamp(value, 0, 5000);
+        if (normalized != value)
+        {
+            AudioPlaybackWarmupMs = normalized;
+        }
+    }
+
     #endregion
 
     #region Public Methods
@@ -410,7 +424,8 @@ public partial class Settings : ObservableObject
                 e.PropertyName == nameof(MainWindowMaxHeightRatio) ||
                 e.PropertyName == nameof(AutoTranslateDelayMs) ||
                 e.PropertyName == nameof(TopEdgeAutoHideDelayMs) ||
-                e.PropertyName == nameof(SelectedTextFetchTimeoutMs))
+                e.PropertyName == nameof(SelectedTextFetchTimeoutMs) ||
+                e.PropertyName == nameof(AudioPlaybackWarmupMs))
                 SaveWithDebounce();
             else
                 Save();

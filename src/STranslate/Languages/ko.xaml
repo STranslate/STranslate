@@ -84,6 +84,8 @@
     <sys:String x:Key="General_SelectedTextFetchTimeout">텍스트 가져오기 시간 초과</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">복사 시뮬레이션 후 새 클립보드 텍스트를 폴링하는 시간 초과 값입니다. 단위: 밀리초. 텍스트가 업데이트되면 즉시 반환되며, 일부 PDF 앱의 업데이트가 느리면 값을 높이세요.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmup">오디오 재생 예열(밀리초)</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmupDescription">출력 장치 시작으로 인한 음성 앞부분 누락을 줄이기 위해 재생 전에 무음을 출력합니다. 0이면 비활성화됩니다. 필요하면 500–2000밀리초를 시도하세요. 재생할 때마다 지연이 추가됩니다.</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTarget">드래그 번역 실패 시 복귀 대상</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTargetDescription">선택한 텍스트를 가져오지 못했을 때 입력 번역 열기, 메인 창 표시 또는 트레이 알림만 보내기 중에서 선택합니다.</sys:String>
     <sys:String x:Key="General_ImageQuality">이미지 품질</sys:String>

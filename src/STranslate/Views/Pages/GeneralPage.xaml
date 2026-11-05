@@ -661,6 +661,21 @@
                     </ui:SettingsCard>
                 </control:CardGroup>
 
+                <ui:SettingsCard Description="{DynamicResource General_AudioPlaybackWarmupDescription}" Header="{DynamicResource General_AudioPlaybackWarmup}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Timer_24_Regular}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ui:NumberBox
+                        MinWidth="120"
+                        LargeChange="500"
+                        Maximum="5000"
+                        Minimum="0"
+                        SmallChange="100"
+                        SpinButtonPlacementMode="Inline"
+                        ValidationMode="InvalidInputOverwritten"
+                        Value="{Binding Settings.AudioPlaybackWarmupMs}" />
+                </ui:SettingsCard>
+
                 <ui:SettingsCard Description="{DynamicResource General_ImageQualityDescription}" Header="{DynamicResource General_ImageQuality}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.ImageTable_20_Regular}" />

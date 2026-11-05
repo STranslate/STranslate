@@ -88,6 +88,8 @@
     <sys:String x:Key="General_SelectedTextFetchTimeout">زمان مهلت دریافت متن انتخابی</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">زمان مهلت برای استعلام متن جدید از حافظه موقت پس از کپی شبیه‌سازی‌شده، بر حسب میلی‌ثانیه. به محض به‌روزرسانی متن بازمی‌گردد؛ برای برنامه‌های PDF کند این مقدار را افزایش دهید.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmup">آماده‌سازی پخش صدا (میلی‌ثانیه)</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmupDescription">پیش از صدا، سکوت پخش می‌شود تا حذف ابتدای صدا هنگام راه‌اندازی دستگاه خروجی کاهش یابد. ۰ غیرفعال می‌کند؛ در صورت نیاز ۵۰۰ تا ۲۰۰۰ میلی‌ثانیه را امتحان کنید. به هر پخش تأخیر اضافه می‌شود.</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTarget">جایگزین عدم موفقیت در دریافت متن انتخابی</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTargetDescription">انتخاب کنید در صورت ناموفق بودن دریافت متن انتخاب‌شده، ترجمه ورودی باز شود، پنجره اصلی نمایش داده شود یا فقط اعلان سینی سیستم ارسال شود.</sys:String>
     <sys:String x:Key="General_ImageQuality">کیفیت تصویر</sys:String>

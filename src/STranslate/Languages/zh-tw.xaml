@@ -87,6 +87,8 @@
     <sys:String x:Key="General_SelectedTextFetchTimeout">取詞逾時時間</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">模擬複製後輪詢剪貼簿新文字的逾時時間，單位：毫秒。寫入成功會立即返回；部分 PDF 軟體寫入較慢時可適當調高。</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmup">音訊播放預熱（毫秒）</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmupDescription">播放正文前先輸出靜音，緩解輸出裝置啟動導致的開頭丟音。0 表示關閉；需要時可嘗試 500–2000 毫秒。每次播放都會增加相應延遲。</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTarget">劃詞取詞失敗回退目標</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTargetDescription">劃詞取詞失敗後，選擇輸入翻譯、顯示主介面或僅傳送系統匣通知。</sys:String>
     <sys:String x:Key="General_ImageQuality">圖片品質</sys:String>

@@ -87,6 +87,8 @@
     <sys:String x:Key="General_SelectedTextFetchTimeout">Metin Yakalama Zaman Aşımı</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">Simüle edilmiş kopyalamadan sonra yeni pano metnini yoklama zaman aşımı, milisaniye cinsinden. Metin güncellenir güncellenmez geri döner; yavaş güncellenen PDF uygulamaları için bu değeri artırın.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmup">Ses Oynatma Isınması (ms)</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmupDescription">Çıkış aygıtının başlatılması nedeniyle sesin başının kaybolmasını azaltmak için önce sessizlik çalar. 0 devre dışı bırakır; gerekirse 500–2000 ms deneyin. Her oynatmaya gecikme ekler.</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTarget">Kelime Seçimi Başarısızlık Yedeklemesi</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTargetDescription">Seçili metin alınamadığında giriş çevirisini açmayı, ana pencereyi göstermeyi veya yalnızca sistem tepsisi bildirimi göndermeyi seçin.</sys:String>
     <sys:String x:Key="General_ImageQuality">Görüntü Kalitesi</sys:String>

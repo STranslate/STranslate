@@ -9,6 +9,7 @@ public class AudioPlayer : IAudioPlayer
 {
     private readonly ILogger<AudioPlayer> _logger;
     private readonly IHttpService _httpService;
+    private readonly Settings _settings;
     private WaveOutEvent? _waveOut;
     private MemoryStream? _audioStream;
     private WaveStream? _audioReader;
@@ -16,10 +17,11 @@ public class AudioPlayer : IAudioPlayer
     private int _stopping;
     private bool _disposed;
 
-    public AudioPlayer(ILogger<AudioPlayer> logger, IHttpService httpService)
+    public AudioPlayer(ILogger<AudioPlayer> logger, IHttpService httpService, Settings settings)
     {
         _logger = logger;
         _httpService = httpService;
+        _settings = settings;
     }
 
     /// <summary>
@@ -67,7 +69,9 @@ public class AudioPlayer : IAudioPlayer
             _audioReader = AudioReaderFactory.Create(audioData, _audioStream);
             // 创建播放设备
             _waveOut = new WaveOutEvent();
-            _waveOut.Init(_audioReader);
+            // 在同一次设备播放中先输出静音，避免预热后重新打开设备。
+            var playbackProvider = AudioPlaybackWarmupProvider.Create(_audioReader, _settings.AudioPlaybackWarmupMs);
+            _waveOut.Init(playbackProvider);
             // 注册事件
             _waveOut.PlaybackStopped += OnPlaybackStopped;
             // 开始播放

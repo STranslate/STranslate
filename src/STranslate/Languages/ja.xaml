@@ -84,6 +84,8 @@
     <sys:String x:Key="General_SelectedTextFetchTimeout">テキスト取得タイムアウト</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">コピー操作後、新しいクリップボードテキストをポーリングするタイムアウトです。単位：ミリ秒。更新されるとすぐに戻ります。PDFアプリの更新が遅い場合は値を上げてください。</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmup">音声再生のウォームアップ（ミリ秒）</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmupDescription">再生前に無音を出力し、出力デバイスの起動による冒頭の音切れを軽減します。0 で無効。必要に応じて 500～2000 ミリ秒をお試しください。再生ごとに待ち時間が増えます。</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTarget">選択テキスト取得失敗時の戻り先</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTargetDescription">選択テキストの取得に失敗したとき、入力翻訳を開くか、メイン画面を表示するか、トレイ通知のみを送るかを選択します。</sys:String>
     <sys:String x:Key="General_ImageQuality">画質</sys:String>

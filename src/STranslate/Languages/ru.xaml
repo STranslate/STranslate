@@ -87,6 +87,8 @@
     <sys:String x:Key="General_SelectedTextFetchTimeout">Таймаут получения текста</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">Сколько ждать появления нового текста в буфере обмена после эмуляции копирования, в миллисекундах. Как только текст обновится, ожидание прекращается; для медленных PDF-программ значение стоит увеличить.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmup">Прогрев воспроизведения (мс)</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmupDescription">Перед звуком воспроизводится тишина, чтобы уменьшить потерю начала при запуске устройства вывода. 0 отключает прогрев; при необходимости попробуйте 500–2000 мс. Каждое воспроизведение начнётся с задержкой.</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTarget">Если не удалось получить выделенный текст</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTargetDescription">Выберите действие при ошибке получения выделенного текста: открыть поле ввода для перевода, показать главное окно или только отправить уведомление в трее.</sys:String>
     <sys:String x:Key="General_ImageQuality">Качество изображения</sys:String>

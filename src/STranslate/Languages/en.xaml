@@ -87,6 +87,8 @@
     <sys:String x:Key="General_SelectedTextFetchTimeout">Text Capture Timeout</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">Timeout for polling new clipboard text after simulated copy, in milliseconds. Returns as soon as text is updated; increase this for PDF apps that update slowly.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmup">Audio Playback Warm-up (ms)</sys:String>
+    <sys:String x:Key="General_AudioPlaybackWarmupDescription">Play silence before audio to help with missing beginnings caused by output-device startup. 0 disables warm-up; try 500–2000 ms if needed. Adds a delay to each playback.</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTarget">Word Selection Failure Fallback</sys:String>
     <sys:String x:Key="General_CrosswordFetchFailedFallbackTargetDescription">Choose whether to open input translation, show the main window, or only send a tray notification when selected text capture fails.</sys:String>
     <sys:String x:Key="General_ImageQuality">Image Quality</sys:String>
