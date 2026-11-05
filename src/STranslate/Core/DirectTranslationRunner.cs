@@ -4,7 +4,7 @@ namespace STranslate.Core;
 
 internal static class DirectTranslationRunner
 {
-    internal static async Task<TranslateResult?> TranslateAsync(
+    internal static async Task<TranslateResult> TranslateAsync(
         string text,
         TextPreprocessingSettings? settings,
         TextPreprocessingService preprocessing,
@@ -17,10 +17,9 @@ internal static class DirectTranslationRunner
             throw new TextPreprocessingException(string.Empty, string.Empty,
                 "替换后没有可翻译内容。", errorKind: "EmptyResult");
         cancellationToken.ThrowIfCancellationRequested();
-        var (success, source, target) = await detectLanguage(prepared.RequestText, cancellationToken).ConfigureAwait(false);
+        // 检测失败时返回的是配置的回退语种，仍应继续翻译。
+        var (_, source, target) = await detectLanguage(prepared.RequestText, cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        if (!success)
-            return null;
         var result = new TranslateResult();
         await plugin.TranslateAsync(new(prepared.RequestText, source, target), result, cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();

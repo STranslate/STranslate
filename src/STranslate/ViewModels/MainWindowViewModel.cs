@@ -2007,12 +2007,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
             var result = await DirectTranslationRunner.TranslateAsync(text, Settings.TextPreprocessing,
                 _textPreprocessingService, transPlugin,
-                (requestText, token) => LanguageDetector.GetLanguageAsync(requestText, token), cancellationToken).ConfigureAwait(false);
-            if (result is null)
-            {
-                _snackbar.ShowWarning(_i18n.GetTranslation("LanguageDetectionFailed"));
-                return;
-            }
+                (requestText, token) => LanguageDetector.GetLanguageAsync(requestText, token,
+                    onCompleted: (isSuccess, _) =>
+                    {
+                        if (!isSuccess)
+                            _snackbar.ShowWarning(_i18n.GetTranslation("LanguageDetectionFailed"));
+                    }), cancellationToken).ConfigureAwait(false);
 
             if (result.IsSuccess && !string.IsNullOrEmpty(result.Text))
                 InputHelper.PrintText(result.Text);

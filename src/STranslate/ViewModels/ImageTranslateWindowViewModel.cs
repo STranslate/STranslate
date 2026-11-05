@@ -247,13 +247,18 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
                     Settings.ImageTranslateSourceLangIfAuto,
                     Settings.ImageTranslateFirstLanguage,
                     Settings.ImageTranslateSecondLanguage);
-                TranslateResult? result;
+                TranslateResult result;
                 try
                 {
                     result = await DirectTranslationRunner.TranslateAsync(block.Text, preprocessingSettings,
                         _textPreprocessingService, tranSvc,
                         (text, token) => LanguageDetector.GetLanguageAsync(text,
                             Settings.ImageTranslateSourceLang, Settings.ImageTranslateTargetLang, token,
+                            onCompleted: (isSuccess, _) =>
+                            {
+                                if (!isSuccess)
+                                    _snackbar.ShowWarning(_i18n.GetTranslation("LanguageDetectionFailed"));
+                            },
                             options: detectOptions), cancellationToken).ConfigureAwait(false);
                 }
                 catch (TextPreprocessingException ex)

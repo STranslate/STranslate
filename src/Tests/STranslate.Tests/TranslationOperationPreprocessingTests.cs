@@ -174,8 +174,42 @@ public class TranslationOperationPreprocessingTests
         Assert.Equal(["one", "second", "one"], received);
     }
 
-    [Fact]
-    public async Task CancellationDuringLanguageDetectionPreventsPluginCall()
+    [Theory]
+    [InlineData(true, "public")]
+    [InlineData(false, "secret")]
+    public async Task FailedLanguageDetectionContinuesTranslationWithFallbackLanguages(
+        bool preprocessingEnabled, string expectedText)
+    {
+        var settings = new TextPreprocessingSettings { IsEnabled = preprocessingEnabled,
+            Rules = [new() { Pattern = "secret", Replacement = "public" }] };
+        var detected = new List<string>();
+        var requests = new List<TranslateRequest>();
+        var plugin = new StubTranslatePlugin((request, result, _) =>
+        {
+            requests.Add(request);
+            result.Success("translated with fallback");
+            return Task.CompletedTask;
+        });
+
+        var result = await DirectTranslationRunner.TranslateAsync("secret", settings, new(), plugin,
+            (text, _) =>
+            {
+                detected.Add(text);
+                return Task.FromResult((false, LangEnum.Japanese, LangEnum.English));
+            }, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.True(result.IsSuccess);
+        Assert.Equal("translated with fallback", result.Text);
+        Assert.Equal(expectedText, Assert.Single(detected));
+        Assert.Equal(new TranslateRequest(expectedText, LangEnum.Japanese, LangEnum.English),
+            Assert.Single(requests));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task CancellationDuringLanguageDetectionPreventsPluginCall(bool detectionSucceeded)
     {
         using var cancellation = new CancellationTokenSource();
         var count = 0;
@@ -184,7 +218,7 @@ public class TranslationOperationPreprocessingTests
             "input", new(), new(), plugin, (_, _) =>
             {
                 cancellation.Cancel();
-                return Task.FromResult((true, LangEnum.English, LangEnum.ChineseSimplified));
+                return Task.FromResult((detectionSucceeded, LangEnum.English, LangEnum.ChineseSimplified));
             }, cancellation.Token));
         Assert.Equal(0, count);
     }
