@@ -881,4 +881,10 @@
     <sys:String x:Key="ImageTranslatePinnedCopyAll">Копіювати весь текст</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowOriginal">Показати оригінал</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">Показати переклад</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnOcrServiceChanged">Переклад зображення: одразу перекладати після зміни сервісу OCR</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnTranslateServiceChanged">Переклад зображення: одразу перекладати після зміни сервісу перекладу</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnLanguageChanged">Переклад зображення: одразу перекладати після зміни мови</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnLayoutChanged">Переклад зображення: одразу перекладати після зміни розбиття тексту</sys:String>
+    <sys:String x:Key="General_OcrOnServiceChanged">Вікно OCR: одразу розпізнавати текст після зміни сервісу</sys:String>
+    <sys:String x:Key="General_OcrOnLanguageChanged">Вікно OCR: одразу розпізнавати текст після зміни мови</sys:String>
 </ResourceDictionary>
