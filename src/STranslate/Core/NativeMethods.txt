@@ -11,6 +11,8 @@ PeekMessage
 GetCursorInfo
 LoadCursor
 VIRTUAL_KEY
+SendInput
+MapVirtualKey
 
 KBDLLHOOKSTRUCT
 MSLLHOOKSTRUCT

@@ -4,45 +4,77 @@ using System.Text;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Memory;
-using WindowsInput;
+using Windows.Win32.UI.Input.KeyboardAndMouse;
 
 namespace STranslate.Helpers;
 
 public class ClipboardHelper
 {
-    private static readonly InputSimulator _inputSimulator = new();
     private static readonly UiaTextReader _uiaTextReader = new();
 
     /// <summary>
     ///     使用 SendInput API 模拟 Ctrl+C 或 Ctrl+V 键盘输入。
     /// </summary>
     /// <param name="isCopy">如果为 true，则模拟 Ctrl+C；否则模拟 Ctrl+V。</param>
-    public static void SendCtrlCV(bool isCopy = true)
+    public static void SendCtrlCV(bool isCopy = true) => SendCtrlCV(isCopy, SendKeyboardInputs);
+
+    internal static void SendCtrlCV(bool isCopy, Func<INPUT[], uint> sendInput)
     {
-        // 先清理可能存在的按键状态 ！！！很重要否则模拟复制会失败
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.CONTROL);
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LCONTROL);
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RCONTROL);
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.SHIFT);
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LSHIFT);
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RSHIFT);
-        // 先释放 Shift，再按住 Ctrl 松开 Alt/Win，避免额外组成 Ctrl+Shift 或激活菜单。
-        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.CONTROL);
+        var key = isCopy ? VIRTUAL_KEY.VK_C : VIRTUAL_KEY.VK_V;
+        // 清理修饰键、抑制 Alt/Win 菜单和复制/粘贴必须在同一批次中发送，
+        // 避免用户松开 Ctrl 或其他模拟输入插入组合键中间。
+        INPUT[] inputs =
+        [
+            CreateKeyboardInput(VIRTUAL_KEY.VK_CONTROL, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_LCONTROL, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_RCONTROL, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_SHIFT, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_LSHIFT, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_RSHIFT, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_CONTROL),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_MENU, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_LMENU, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_RMENU, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_LWIN, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_RWIN, keyUp: true),
+            CreateKeyboardInput(key),
+            CreateKeyboardInput(key, keyUp: true),
+            CreateKeyboardInput(VIRTUAL_KEY.VK_CONTROL, keyUp: true)
+        ];
         try
         {
-            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.MENU);
-            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LMENU);
-            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RMENU);
-            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LWIN);
-            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.RWIN);
-
-            _inputSimulator.Keyboard.KeyPress(isCopy ? VirtualKeyCode.VK_C : VirtualKeyCode.VK_V);
+            if (sendInput(inputs) != inputs.Length)
+                throw new InvalidOperationException("模拟复制或粘贴的按键未能全部发送，请检查目标程序的权限级别。");
         }
-        finally
+        catch
         {
-            _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.CONTROL);
+            // 部分发送可能留下按住的 C/V 或 Ctrl；尽力释放，并保留原始异常。
+            try
+            {
+                sendInput([CreateKeyboardInput(key, keyUp: true), CreateKeyboardInput(VIRTUAL_KEY.VK_CONTROL, keyUp: true)]);
+            }
+            catch
+            {
+                // 目标权限等原因也可能阻止清理输入。
+            }
+            throw;
         }
     }
+
+    private static INPUT CreateKeyboardInput(VIRTUAL_KEY key, bool keyUp = false)
+    {
+        var flags = keyUp ? KEYBD_EVENT_FLAGS.KEYEVENTF_KEYUP : 0;
+        if (key is VIRTUAL_KEY.VK_RCONTROL or VIRTUAL_KEY.VK_RMENU or VIRTUAL_KEY.VK_LWIN or VIRTUAL_KEY.VK_RWIN)
+            flags |= KEYBD_EVENT_FLAGS.KEYEVENTF_EXTENDEDKEY;
+
+        var input = new INPUT { type = INPUT_TYPE.INPUT_KEYBOARD };
+        input.Anonymous.ki.wVk = key;
+        input.Anonymous.ki.wScan = (ushort)(PInvoke.MapVirtualKey((uint)key, 0) & 0xFF);
+        input.Anonymous.ki.dwFlags = flags;
+        return input;
+    }
+
+    private static uint SendKeyboardInputs(INPUT[] inputs) => PInvoke.SendInput(inputs, Marshal.SizeOf<INPUT>());
 
     /// <summary>
     ///     优先通过 UI Automation 获取选中文本，失败时回退到模拟复制。
