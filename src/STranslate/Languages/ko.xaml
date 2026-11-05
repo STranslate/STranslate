@@ -38,6 +38,10 @@
     <sys:String x:Key="General_HideOnStartup">시작 시 메인 창 숨기기</sys:String>
     <sys:String x:Key="General_HideOnStartupDescription">STranslate 실행 후 검색 창을 트레이로 숨깁니다.</sys:String>
     <sys:String x:Key="General_HideWhenDeactivated">포커스 해제 시 자동 숨김</sys:String>
+    <sys:String x:Key="General_AutoHideAtTopEdge">상단 가장자리에서 자동으로 접기</sys:String>
+    <sys:String x:Key="General_AutoHideAtTopEdgeDescription">창을 화면 상단으로 끌어다 놓으면 마우스 포인터가 벗어날 때 자동으로 접히고, 상단 표시줄에 포인터를 올리면 펼쳐집니다. 상단에 붙어 있을 때는 포커스를 잃으면 숨기는 설정보다 우선합니다.</sys:String>
+    <sys:String x:Key="General_TopEdgeAutoHideDelay">접기 대기 시간(밀리초)</sys:String>
+    <sys:String x:Key="General_TopEdgeAutoHideDelayDescription">포인터가 창 밖에 있을 때 자동으로 접기 전 대기 시간입니다. 기본값: 600밀리초.</sys:String>
     <sys:String x:Key="General_WindowPosition">메인 창 위치</sys:String>
     <sys:String x:Key="General_WindowAlign">모니터상 위치</sys:String>
     <sys:String x:Key="General_MainWindowMaxHeightRatio">메인 창 최대 높이(화면 비율)</sys:String>
@@ -216,6 +220,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">OCR | 이미지 번역 창 단축키</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">텍스트 인식 | 이미지 번역 재실행</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">렌더링 이미지/마킹 이미지 전환</sys:String>
+    <sys:String x:Key="Hotkey_SwitchImageDescription">고정된 창에서도 원본 이미지와 번역 이미지를 전환할 수 있습니다.</sys:String>
     <sys:String x:Key="Hotkey_PinImageTranslate">이미지 번역 고정 (간소화 창)</sys:String>
     <sys:String x:Key="Hotkey_QrCode">QR 코드 인식</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">이 단축키는 OCR 창에서만 지원됩니다.</sys:String>

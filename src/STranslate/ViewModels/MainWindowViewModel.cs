@@ -173,7 +173,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     #region Properties
 
     private MainWindow MainWindow => (Application.Current.MainWindow as MainWindow)!;
-    private bool IsMainWindowVisible => MainWindow.Visibility == Visibility.Visible;
+    private bool IsMainWindowVisible => MainWindow.Visibility == Visibility.Visible && !MainWindow.IsTopEdgeCollapsed;
 
     public DataProvider DataProvider { get; }
 
@@ -1962,6 +1962,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     public void Show()
     {
+        MainWindow.PrepareShowAnimation();
+        var expandedFromTopEdge = MainWindow.ExpandFromTopEdge();
         if (Settings.MainWindowLeft <= -18000 && Settings.MainWindowTop <= -18000)
         {
             Settings.MainWindowLeft = _cacheLeft;
@@ -1969,9 +1971,14 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
         MainWindow.Visibility = Visibility.Visible;
         UpdateMainWindowMaxHeightConstraint();
-        UpdatePosition();
+        if (!expandedFromTopEdge) UpdatePosition();
         UpdateMainWindowMaxHeightConstraint();
 
+        MainWindow.StartShowAnimation(ActivateMainWindow);
+    }
+
+    private void ActivateMainWindow()
+    {
         Win32Helper.ActivateForegroundWindow(MainWindow);
 
         MainWindow.Activate();
@@ -1987,6 +1994,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         ExitInputTranslateMode();
         MainWindow.Visibility = Visibility.Collapsed;
+        MainWindow.StopShowAnimation();
     }
 
     [RelayCommand]
@@ -2444,7 +2452,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void AdjustPositionForContentSizeChanged()
     {
-        if (_isAdjustingWindowPositionForContent || !IsMainWindowVisible || MainWindow.WindowState == WindowState.Minimized)
+        if (_isAdjustingWindowPositionForContent || !IsMainWindowVisible || MainWindow.IsTopEdgeDocked || MainWindow.WindowState == WindowState.Minimized)
             return;
 
         var windowHeight = MainWindow.ActualHeight > 0 ? MainWindow.ActualHeight : MainWindow.MinHeight;

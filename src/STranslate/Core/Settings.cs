@@ -38,6 +38,10 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial bool HideWhenDeactivated { get; set; } = true;
 
+    [ObservableProperty] public partial bool AutoHideAtTopEdge { get; set; } = true;
+
+    [ObservableProperty] public partial int TopEdgeAutoHideDelayMs { get; set; } = 600;
+
     [ObservableProperty] public partial bool DisableGlobalHotkeys { get; set; } = false;
 
     [ObservableProperty] public partial bool IgnoreHotkeysOnFullscreen { get; set; } = false;
@@ -144,7 +148,14 @@ public partial class Settings : ObservableObject
     /// <summary>
     /// 切换提示词后自动翻译
     /// </summary>
-    [ObservableProperty] public partial bool AutoTranslateOnPromptChanged { get; set; } = false;
+    [ObservableProperty] public partial bool AutoTranslateOnPromptChanged { get; set; } = true;
+
+    [ObservableProperty] public partial bool ImageTranslateOnOcrServiceChanged { get; set; } = true;
+    [ObservableProperty] public partial bool ImageTranslateOnTranslateServiceChanged { get; set; } = true;
+    [ObservableProperty] public partial bool ImageTranslateOnLanguageChanged { get; set; } = true;
+    [ObservableProperty] public partial bool ImageTranslateOnLayoutChanged { get; set; } = true;
+    [ObservableProperty] public partial bool OcrOnServiceChanged { get; set; } = true;
+    [ObservableProperty] public partial bool OcrOnLanguageChanged { get; set; } = true;
 
     [ObservableProperty] public partial bool IsAutoTranslateVisible { get; set; } = true;
 
@@ -362,6 +373,15 @@ public partial class Settings : ObservableObject
         }
     }
 
+    partial void OnTopEdgeAutoHideDelayMsChanged(int value)
+    {
+        var normalized = Math.Clamp(value, 100, 10000);
+        if (normalized != value)
+        {
+            TopEdgeAutoHideDelayMs = normalized;
+        }
+    }
+
     partial void OnSelectedTextFetchTimeoutMsChanged(int value)
     {
         var normalized = Math.Clamp(value, 50, 5000);
@@ -389,6 +409,7 @@ public partial class Settings : ObservableObject
                 e.PropertyName == nameof(MainWindowWidth) ||
                 e.PropertyName == nameof(MainWindowMaxHeightRatio) ||
                 e.PropertyName == nameof(AutoTranslateDelayMs) ||
+                e.PropertyName == nameof(TopEdgeAutoHideDelayMs) ||
                 e.PropertyName == nameof(SelectedTextFetchTimeoutMs))
                 SaveWithDebounce();
             else

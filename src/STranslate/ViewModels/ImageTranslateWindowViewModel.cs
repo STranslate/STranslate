@@ -562,6 +562,9 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
         {
             _isUpdatingTranslateEngine = false;
         }
+
+        if (value != null)
+            ReExecuteIfEnabled(Settings.ImageTranslateOnTranslateServiceChanged);
     }
 
     private bool _isUpdatingOcrEngine = false;
@@ -639,7 +642,27 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
         else
         {
             if (_ocrService.IsImageTranslateOcrService(newValue))
+            {
                 _ocrService.ActiveImTranOcr(newValue);
+                ReExecuteIfEnabled(Settings.ImageTranslateOnOcrServiceChanged);
+            }
+        }
+    }
+
+    // 属性回调共用重新执行入口，避免初始化、关闭后或执行中重复请求。
+    private async void ReExecuteIfEnabled(bool enabled)
+    {
+        if (!enabled || _disposed || _sourceImage == null || IsExecuting)
+            return;
+
+        try
+        {
+            await ReExecuteAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "图片翻译选项切换后重新执行失败");
+            _snackbar.ShowError($"{_i18n.GetTranslation("ImtransFailed")}\n{ex.Message}");
         }
     }
 
@@ -647,6 +670,14 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
     {
         switch (e.PropertyName)
         {
+            case nameof(Settings.ImageTranslateOcrLanguage):
+            case nameof(Settings.ImageTranslateSourceLang):
+            case nameof(Settings.ImageTranslateTargetLang):
+                ReExecuteIfEnabled(Settings.ImageTranslateOnLanguageChanged);
+                break;
+            case nameof(Settings.LayoutAnalysisMode):
+                ReExecuteIfEnabled(Settings.ImageTranslateOnLayoutChanged);
+                break;
             case nameof(Settings.IsImTranShowingTextControl):
                 Settings.ImTranWindowWidth = Settings.IsImTranShowingTextControl
                         ? Settings.ImTranWindowWidth * WidthMultiplier - WidthAdjustment

@@ -79,13 +79,13 @@ public class PinnedImageTranslateTests
     }
 
     [Fact]
-    public void PinShortcutIsOptionalAndScopedToImageTranslationWindows()
+    public void PinShortcutDefaultsToCtrlTAndIsScopedToImageTranslationWindows()
     {
         var settings = new HotkeySettings();
         settings.Initialize();
 
-        Assert.Equal(Constant.EmptyHotkey, settings.PinImageTranslateHotkey.Key);
-        Assert.Equal(Constant.EmptyHotkey, settings.PinImageTranslateHotkey.Default);
+        Assert.Equal("Ctrl + T", settings.PinImageTranslateHotkey.Key);
+        Assert.Equal("Ctrl + T", settings.PinImageTranslateHotkey.Default);
 
         var registration = Assert.Single(settings.RegisteredHotkeys,
             item => item.ResourceKey == "Hotkey_PinImageTranslate");

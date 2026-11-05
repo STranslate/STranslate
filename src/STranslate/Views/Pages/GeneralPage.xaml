@@ -464,9 +464,44 @@
                                 OnContent="{DynamicResource Enable}" />
                         </ui:SettingsCard>
 
-                        <ui:SettingsCard Description="{DynamicResource General_IncrementalClearInputDescription}" Header="{DynamicResource General_IncrementalClearInput}">
+                        <ui:SettingsCard Header="{DynamicResource General_ImageTranslateOnOcrServiceChanged}">
                             <ui:ToggleSwitch
-                                IsOn="{Binding Settings.IncrementalClearInput}"
+                                IsOn="{Binding Settings.ImageTranslateOnOcrServiceChanged}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+
+                        <ui:SettingsCard Header="{DynamicResource General_ImageTranslateOnTranslateServiceChanged}">
+                            <ui:ToggleSwitch
+                                IsOn="{Binding Settings.ImageTranslateOnTranslateServiceChanged}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+
+                        <ui:SettingsCard Header="{DynamicResource General_ImageTranslateOnLanguageChanged}">
+                            <ui:ToggleSwitch
+                                IsOn="{Binding Settings.ImageTranslateOnLanguageChanged}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+
+                        <ui:SettingsCard Header="{DynamicResource General_ImageTranslateOnLayoutChanged}">
+                            <ui:ToggleSwitch
+                                IsOn="{Binding Settings.ImageTranslateOnLayoutChanged}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+
+                        <ui:SettingsCard Header="{DynamicResource General_OcrOnServiceChanged}">
+                            <ui:ToggleSwitch
+                                IsOn="{Binding Settings.OcrOnServiceChanged}"
+                                OffContent="{DynamicResource Disable}"
+                                OnContent="{DynamicResource Enable}" />
+                        </ui:SettingsCard>
+
+                        <ui:SettingsCard Header="{DynamicResource General_OcrOnLanguageChanged}">
+                            <ui:ToggleSwitch
+                                IsOn="{Binding Settings.OcrOnLanguageChanged}"
                                 OffContent="{DynamicResource Disable}"
                                 OnContent="{DynamicResource Enable}" />
                         </ui:SettingsCard>
@@ -614,6 +649,16 @@
                             SelectedValue="{Binding Settings.CrosswordFetchFailedFallbackTarget}"
                             SelectedValuePath="Value" />
                     </ui:SettingsCard>
+
+                    <ui:SettingsCard Description="{DynamicResource General_IncrementalClearInputDescription}" Header="{DynamicResource General_IncrementalClearInput}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Eraser_20_Regular}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch
+                            IsOn="{Binding Settings.IncrementalClearInput}"
+                            OffContent="{DynamicResource Disable}"
+                            OnContent="{DynamicResource Enable}" />
+                    </ui:SettingsCard>
                 </control:CardGroup>
 
                 <ui:SettingsCard Description="{DynamicResource General_ImageQualityDescription}" Header="{DynamicResource General_ImageQuality}">
@@ -656,6 +701,32 @@
                         OffContent="{DynamicResource Show}"
                         OnContent="{DynamicResource Hide}" />
                 </ui:SettingsCard>
+
+                <ui:SettingsExpander Header="{DynamicResource General_AutoHideAtTopEdge}" Description="{DynamicResource General_AutoHideAtTopEdgeDescription}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PanelTopGallery_20_Regular}" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:ToggleSwitch
+                        IsOn="{Binding Settings.AutoHideAtTopEdge}"
+                        OffContent="{DynamicResource Disable}"
+                        OnContent="{DynamicResource Enable}" />
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard
+                            Header="{DynamicResource General_TopEdgeAutoHideDelay}"
+                            Description="{DynamicResource General_TopEdgeAutoHideDelayDescription}"
+                            IsEnabled="{Binding Settings.AutoHideAtTopEdge}">
+                            <ui:NumberBox
+                                MinWidth="120"
+                                LargeChange="500"
+                                Maximum="10000"
+                                Minimum="100"
+                                SmallChange="100"
+                                SpinButtonPlacementMode="Inline"
+                                ValidationMode="InvalidInputOverwritten"
+                                Value="{Binding Settings.TopEdgeAutoHideDelayMs}" />
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
 
                 <ui:SettingsCard Header="{DynamicResource General_HideWhenDeactivated}">
                     <ui:SettingsCard.HeaderIcon>

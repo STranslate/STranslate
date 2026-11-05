@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using STranslate.Core;
 using STranslate.Helpers;
 using System.Collections.ObjectModel;
@@ -35,9 +37,14 @@ public partial class PinnedImageTranslateWindow : IPinnedCaptureTarget
     private bool _isClosing;
     private ContextMenu? _activeContextMenu;
 
+    public HotkeySettings HotkeySettings { get; } = Ioc.Default.GetRequiredService<HotkeySettings>();
+    public IRelayCommand SwitchImageCommand { get; }
+
     public PinnedImageTranslateWindow(PinnedWindowController controller)
     {
         _controller = controller;
+        SwitchImageCommand = new RelayCommand(SwitchImage,
+            () => !_isClosing && _snapshot != null && _activeContextMenu is not { IsOpen: true });
         InitializeComponent();
     }
 
@@ -50,6 +57,12 @@ public partial class PinnedImageTranslateWindow : IPinnedCaptureTarget
         _translatedWords = new(snapshot.TranslatedWords);
         ShowCurrentLayer();
         ApplyBounds();
+    }
+
+    private void SwitchImage()
+    {
+        _showOriginal = !_showOriginal;
+        ShowCurrentLayer();
     }
 
     private void ShowCurrentLayer()
@@ -236,11 +249,7 @@ public partial class PinnedImageTranslateWindow : IPinnedCaptureTarget
             PART_ImageZoom.OcrWords is { Count: > 0 });
         if (!string.IsNullOrEmpty(PART_ImageZoom.SelectedText))
             AddItem("Copy", () => _controller.CopyText(PART_ImageZoom.SelectedText));
-        AddItem(_showOriginal ? "ImageTranslatePinnedShowTranslation" : "ImageTranslatePinnedShowOriginal", () =>
-        {
-            _showOriginal = !_showOriginal;
-            ShowCurrentLayer();
-        });
+        AddItem(_showOriginal ? "ImageTranslatePinnedShowTranslation" : "ImageTranslatePinnedShowOriginal", SwitchImage);
         AddItem("Close", Close);
         menu.Closed += (_, _) =>
         {

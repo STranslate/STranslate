@@ -64,6 +64,50 @@ public static class Win32Helper
         SetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE, style);
     }
 
+    /// <summary>
+    /// 禁用系统最大化能力，保留窗口边缘缩放。
+    /// </summary>
+    internal static void DisableMaximize(Window window)
+    {
+        var hwnd = GetWindowHandle(window);
+        var style = GetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE);
+        SetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE, style & ~(nint)WINDOW_STYLE.WS_MAXIMIZEBOX);
+
+        const uint frameChanged = 0x0020;
+        const uint noMove = 0x0002;
+        const uint noSize = 0x0001;
+        if (!SetWindowPos(new WindowInteropHelper(window).Handle, 0, 0, 0, 0, 0,
+                frameChanged | noMove | noSize | SWP_NOZORDER | SWP_NOACTIVATE))
+        {
+            throw new Win32Exception(Marshal.GetLastPInvokeError());
+        }
+    }
+
+    internal static bool HandleMaximizeMessage(int message, nint wParam, nint lParam)
+    {
+        const int wmSysCommand = 0x0112;
+        const int scMaximize = 0xF030;
+        const int wmStyleChanging = 0x007C;
+
+        // WPF/WindowChrome 可能在显示或刷新样式时重新加入最大化权限。
+        if (message == wmStyleChanging && unchecked((int)(long)wParam) == (int)WINDOW_LONG_PTR_INDEX.GWL_STYLE)
+        {
+            var styles = Marshal.PtrToStructure<WindowStyleChange>(lParam);
+            styles.NewStyle &= ~(uint)WINDOW_STYLE.WS_MAXIMIZEBOX;
+            Marshal.StructureToPtr(styles, lParam, false);
+            return true;
+        }
+
+        return message == wmSysCommand && ((long)wParam & 0xFFF0) == scMaximize;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct WindowStyleChange
+    {
+        public uint OldStyle;
+        public uint NewStyle;
+    }
+
     private static nint GetWindowStyle(HWND hWnd, WINDOW_LONG_PTR_INDEX nIndex)
     {
         var style = PInvoke.GetWindowLongPtr(hWnd, nIndex);
@@ -229,6 +273,51 @@ public static class Win32Helper
         {
             throw new Win32Exception(Marshal.GetLastPInvokeError());
         }
+    }
+
+    /// <summary>把独立预览提升到最上层，但不激活窗口。</summary>
+    internal static void RaiseWindowWithoutActivation(Window window, bool showWindow = true)
+    {
+        const nint topMost = -1; // HWND_TOPMOST
+        uint flags = 0x0001 | 0x0002 | 0x0010; // NOSIZE | NOMOVE | NOACTIVATE
+        if (showWindow) flags |= 0x0040; // SHOWWINDOW
+        if (!SetWindowPos(new WindowInteropHelper(window).Handle, topMost,
+                0, 0, 0, 0, flags))
+            throw new Win32Exception(Marshal.GetLastPInvokeError());
+    }
+
+    internal static bool IsWindowLayered(Window window) =>
+        (GetWindowStyle(GetWindowHandle(window), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE) &
+         (nint)WINDOW_EX_STYLE.WS_EX_LAYERED) != 0;
+
+    internal static bool PreserveWindowLayeredStyle(int message, nint wParam, nint lParam)
+    {
+        if (message != 0x007C || (int)wParam != (int)WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE) return false;
+        var styles = Marshal.PtrToStructure<WindowStyleChange>(lParam);
+        styles.NewStyle |= (uint)WINDOW_EX_STYLE.WS_EX_LAYERED;
+        Marshal.StructureToPtr(styles, lParam, false);
+        return true;
+    }
+
+    internal static void SetWindowLayered(Window window, bool layered)
+    {
+        var hwnd = GetWindowHandle(window);
+        var style = GetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+        var flag = (nint)WINDOW_EX_STYLE.WS_EX_LAYERED;
+        SetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, layered ? style | flag : style & ~flag);
+    }
+
+    internal static bool SetWindowAlpha(Window window, byte alpha) =>
+        PInvoke.SetLayeredWindowAttributes(GetWindowHandle(window), default, alpha,
+            LAYERED_WINDOW_ATTRIBUTES_FLAGS.LWA_ALPHA);
+
+    /// <summary>预览层在跨屏、DPI 变化和鼠标操作时都不能成为活动窗口。</summary>
+    internal static void DisableWindowActivation(Window window)
+    {
+        var hwnd = GetWindowHandle(window);
+        var style = GetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+        SetWindowStyle(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE,
+            style | (nint)WINDOW_EX_STYLE.WS_EX_NOACTIVATE);
     }
 
     internal static unsafe bool SetWindowCloaked(Window window, bool cloaked)

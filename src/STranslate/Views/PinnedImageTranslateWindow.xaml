@@ -1,8 +1,10 @@
 <Window
     x:Class="STranslate.Views.PinnedImageTranslateWindow"
+    x:Name="PinnedWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:control="clr-namespace:STranslate.Controls"
+    xmlns:cnvt="clr-namespace:STranslate.Converters"
     Title="{DynamicResource ImageTranslate}"
     Width="600"
     Height="400"
@@ -14,6 +16,12 @@
     Topmost="True"
     WindowStartupLocation="Manual"
     WindowStyle="None">
+    <Window.InputBindings>
+        <KeyBinding
+            Key="{Binding HotkeySettings.SwitchImageHotkey.Key, ElementName=PinnedWindow, Converter={cnvt:StringToKeyBindingConverter}, ConverterParameter={x:Static cnvt:HotkeyMode.Key}}"
+            Command="{Binding SwitchImageCommand, ElementName=PinnedWindow}"
+            Modifiers="{Binding HotkeySettings.SwitchImageHotkey.Key, ElementName=PinnedWindow, Converter={cnvt:StringToKeyBindingConverter}, ConverterParameter={x:Static cnvt:HotkeyMode.Modifiers}}" />
+    </Window.InputBindings>
     <Grid>
         <Grid x:Name="PART_ImageSurface" Panel.ZIndex="5">
             <Grid.Effect>

@@ -41,6 +41,10 @@
     <sys:String x:Key="General_HideOnStartup">系統啟動時不顯示主視窗</sys:String>
     <sys:String x:Key="General_HideOnStartupDescription">STranslate 啟動後搜尋視窗隱藏在托盤中。</sys:String>
     <sys:String x:Key="General_HideWhenDeactivated">失去焦點時自動隱藏主視窗</sys:String>
+    <sys:String x:Key="General_AutoHideAtTopEdge">貼頂自動收起</sys:String>
+    <sys:String x:Key="General_AutoHideAtTopEdgeDescription">將視窗拖到螢幕頂部，滑鼠移開後自動收起，移到頂部感應條展開。貼頂時優先於失焦隱藏。</sys:String>
+    <sys:String x:Key="General_TopEdgeAutoHideDelay">收起等待時間（毫秒）</sys:String>
+    <sys:String x:Key="General_TopEdgeAutoHideDelayDescription">滑鼠位於視窗外時，自動收起前的等待時間，預設 600 毫秒。</sys:String>
     <sys:String x:Key="General_WindowPosition">主視窗位置</sys:String>
     <sys:String x:Key="General_WindowAlign">主視窗在顯示器上的位置</sys:String>
     <sys:String x:Key="General_MainWindowMaxHeightRatio">主視窗最大高度（螢幕比例）</sys:String>
@@ -220,6 +224,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">OCR | 圖片翻譯視窗快捷鍵</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">重新執行文字識別 | 圖片翻譯</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">切換渲染圖/標註圖</sys:String>
+    <sys:String x:Key="Hotkey_SwitchImageDescription">也支援在貼圖視窗中切換原圖/譯文圖。</sys:String>
     <sys:String x:Key="Hotkey_PinImageTranslate">貼圖（精簡圖片翻譯視窗）</sys:String>
     <sys:String x:Key="Hotkey_QrCode">識別二維碼</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">該熱鍵僅支援OCR視窗</sys:String>
@@ -879,4 +884,10 @@
     <sys:String x:Key="ImageTranslatePinnedCopyAll">複製全文</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowOriginal">顯示原圖</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">顯示譯文</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnOcrServiceChanged">圖片翻譯：切換 OCR 服務後立即翻譯</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnTranslateServiceChanged">圖片翻譯：切換翻譯服務後立即翻譯</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnLanguageChanged">圖片翻譯：切換語言後立即翻譯</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnLayoutChanged">圖片翻譯：切換分段後立即翻譯</sys:String>
+    <sys:String x:Key="General_OcrOnServiceChanged">OCR 介面：切換服務後立即辨識</sys:String>
+    <sys:String x:Key="General_OcrOnLanguageChanged">OCR 介面：切換語言後立即辨識</sys:String>
 </ResourceDictionary>

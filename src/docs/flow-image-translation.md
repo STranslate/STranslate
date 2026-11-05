@@ -54,6 +54,9 @@
 16. Compact 结果完成后可通过贴图按钮或可选窗口快捷键创建静态贴图；创建成功后关闭 Compact，后续截图翻译使用新的窗口和执行链路。
 
 ## 窗口模式
+- 设置 → 通用 → 立即翻译提供独立开关：切换图片翻译 OCR 服务、翻译服务、语言和分段后立即重新翻译，默认开启，关闭后沿用手动重新执行的行为。
+- 语言开关覆盖 `ImageTranslateOcrLanguage`、`ImageTranslateSourceLang` 和 `ImageTranslateTargetLang`；分段开关对应 `LayoutAnalysisMode`。独立窗口与精简窗口共用 ViewModel，因此都适用。
+- 自动重新执行复用当前原图，重新完成 OCR、分段与翻译；没有图片、正在执行或 ViewModel 已释放时不触发。切换标注/译文显示不触发请求。
 - `Standalone` 是默认模式，保留当前可缩放、可调整大小的独立窗口。
 - `Compact` 使用无标题、不可缩放、非任务栏、**完全透明**窗口，窗口本身无背景色；屏幕上只看到截图内容 + 悬浮按钮条（按钮条自带半透明胶囊背景）。
 - 精简窗口的图片始终钉在截图选区的物理屏幕位置（贴图位置不变铁律）；按钮条作为悬浮额外内容，根据空间自动选择位置：
@@ -66,10 +69,10 @@
 
 ## Compact 静态贴图
 - 只有已完成且具有有效译文 Overlay 的 Compact 结果可以贴图；执行中、失败或无覆盖结果时贴图按钮保持禁用。
-- 贴图入口包括 Compact 工具栏按钮和 `HotkeySettings.PinImageTranslateHotkey` 窗口快捷键；快捷键默认 `None`，由用户按需配置。
+- 贴图入口包括 Compact 工具栏按钮和 `HotkeySettings.PinImageTranslateHotkey` 窗口快捷键；快捷键默认 `Ctrl+T`，支持用户修改或清空。
 - 贴图快照仅保留冻结的原图、译文 Overlay、原文/译文选择数据和截图物理矩形，不保留 OCR 标注图、翻译服务或 `ImageTranslateWindowViewModel`。
 - 显示原图时使用未经标注的 `SourceImage` 且关闭 Overlay；显示译文时使用同一原图并叠加静态 `TranslationOverlay`。
-- 贴图窗口无标题栏和工具栏，右键菜单支持复制全文、复制选区、原图/译文切换和关闭；文字区域可选择复制，空白区域可拖动，方向键可微调位置，`Esc` 或空白处双击关闭。
+- 贴图窗口无标题栏和工具栏，右键菜单支持复制全文、复制选区、原图/译文切换和关闭；获得焦点后可通过 `HotkeySettings.SwitchImageHotkey`（默认 `Ctrl+/`）切换原图/译文，跟随快捷键配置实时更新；文字区域可选择复制，空白区域可拖动，方向键可微调位置，`Esc` 或空白处双击关闭。
 - 每个贴图只有一个无边框置顶 HWND；失焦时在同一透明窗口内绘制轻量阴影，获得键盘焦点后切换为蓝色辉光，明确当前接收 `Esc`、方向键和复制操作的贴图，不创建伴随窗口。
 - `PinnedCaptureCoordinator` 使用非排队门控：截图进行中再次触发会直接忽略；截图前关闭贴图右键菜单并 cloak 所有贴图，截图结束后统一恢复。
 
@@ -137,7 +140,7 @@
 - `Settings.IsImTranShowingTextControl` 控制图片翻译窗口文本区域显示。
 - `Settings.ImageTranslateOcrLanguage` 控制图片翻译 OCR 识别语言，独立于截图翻译、静默 OCR 和 OCR 窗口。
 - `Settings.IsImageTranslateCompactOcrLanguageVisible` 控制精简窗口底部工具条是否显示图片翻译 OCR 识别语言选框，默认隐藏。
-- `HotkeySettings.PinImageTranslateHotkey` 控制 Compact 窗口内的贴图快捷键，默认不分配。
+- `HotkeySettings.PinImageTranslateHotkey` 控制 Compact 窗口内的贴图快捷键，默认 `Ctrl+T`。
 - `Settings.ImageTranslateSourceLang` / `ImageTranslateTargetLang` 控制图片翻译语言。
 - `Settings.ShowImageTranslateItemInNotifyIconMenu` 控制托盘菜单是否显示图片翻译入口。
 

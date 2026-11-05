@@ -41,6 +41,10 @@
     <sys:String x:Key="General_HideOnStartup">Скрывать окно при запуске системы</sys:String>
     <sys:String x:Key="General_HideOnStartupDescription">После запуска STranslate главное окно скрывается в трее.</sys:String>
     <sys:String x:Key="General_HideWhenDeactivated">Автоматически скрывать окно при потере фокуса</sys:String>
+    <sys:String x:Key="General_AutoHideAtTopEdge">Автоматически сворачивать у верхнего края</sys:String>
+    <sys:String x:Key="General_AutoHideAtTopEdgeDescription">Перетащите окно к верхнему краю экрана. При отведении указателя окно свернётся, а при наведении на полоску сверху — развернётся. У верхнего края это поведение имеет приоритет над скрытием при потере фокуса.</sys:String>
+    <sys:String x:Key="General_TopEdgeAutoHideDelay">Задержка сворачивания (мс)</sys:String>
+    <sys:String x:Key="General_TopEdgeAutoHideDelayDescription">Время ожидания перед сворачиванием, когда указатель находится вне окна. По умолчанию: 600 мс.</sys:String>
     <sys:String x:Key="General_WindowPosition">Где открывать главное окно</sys:String>
     <sys:String x:Key="General_WindowAlign">Положение главного окна на экране</sys:String>
     <sys:String x:Key="General_MainWindowMaxHeightRatio">Максимальная высота главного окна (доля экрана)</sys:String>
@@ -220,6 +224,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">Горячие клавиши окна распознавания текста | перевода изображения</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">Повторить распознавание текста | перевод изображения</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">Переключить изображение (результат/разметка)</sys:String>
+    <sys:String x:Key="Hotkey_SwitchImageDescription">Также позволяет переключаться между исходным изображением и переводом в закреплённых окнах.</sys:String>
     <sys:String x:Key="Hotkey_PinImageTranslate">Закрепить перевод изображения (компактное окно)</sys:String>
     <sys:String x:Key="Hotkey_QrCode">Распознать QR-код</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">Работает только в окне распознавания текста</sys:String>

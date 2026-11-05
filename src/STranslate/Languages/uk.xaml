@@ -41,6 +41,10 @@
     <sys:String x:Key="General_HideOnStartup">Приховувати вікно під час запуску системи</sys:String>
     <sys:String x:Key="General_HideOnStartupDescription">Після запуску STranslate головне вікно ховається в трей.</sys:String>
     <sys:String x:Key="General_HideWhenDeactivated">Автоматично приховувати вікно при втраті фокуса</sys:String>
+    <sys:String x:Key="General_AutoHideAtTopEdge">Автоматично згортати біля верхнього краю</sys:String>
+    <sys:String x:Key="General_AutoHideAtTopEdgeDescription">Перетягніть вікно до верхнього краю екрана. Коли вказівник віддаляється, вікно згортається, а коли навести його на смужку вгорі — розгортається. Біля верхнього краю ця поведінка має пріоритет над приховуванням у разі втрати фокуса.</sys:String>
+    <sys:String x:Key="General_TopEdgeAutoHideDelay">Затримка згортання (мс)</sys:String>
+    <sys:String x:Key="General_TopEdgeAutoHideDelayDescription">Час очікування перед згортанням, коли вказівник перебуває поза вікном. Типово: 600 мс.</sys:String>
     <sys:String x:Key="General_WindowPosition">Де відкривати головне вікно</sys:String>
     <sys:String x:Key="General_WindowAlign">Розташування головного вікна на екрані</sys:String>
     <sys:String x:Key="General_MainWindowMaxHeightRatio">Максимальна висота головного вікна (частка екрана)</sys:String>
@@ -220,6 +224,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">Гарячі клавіші вікна розпізнавання тексту | перекладу зображення</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">Повторити розпізнавання тексту | переклад зображення</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">Перемкнути зображення (результат/розмітка)</sys:String>
+    <sys:String x:Key="Hotkey_SwitchImageDescription">Також дає змогу перемикатися між оригінальним зображенням і перекладом у закріплених вікнах.</sys:String>
     <sys:String x:Key="Hotkey_PinImageTranslate">Закріпити переклад зображення (компактне вікно)</sys:String>
     <sys:String x:Key="Hotkey_QrCode">Розпізнати QR-код</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">Працює лише у вікні розпізнавання тексту</sys:String>

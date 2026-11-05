@@ -44,6 +44,8 @@
 4. 运行失败时会先显示主窗口，再通过 Snackbar 提示，避免静默场景下错误不可见。
 
 ### OCR 窗口执行
+设置 → 通用 → 立即翻译提供 `OcrOnServiceChanged` 和 `OcrOnLanguageChanged`，分别控制切换 OCR 服务、`OcrWindowOcrLanguage` 后是否使用当前图片立即重新识别。两个开关默认开启；没有图片、正在执行或 ViewModel 已释放时不触发，不影响截图翻译和静默 OCR。
+
 1. `OcrWindowViewModel.ExecuteAsync(bitmap)` 设置执行态并清理旧结果。
 2. 并行执行 OCR 服务和本地二维码解码。
 3. 调用当前启用的 OCR 服务：

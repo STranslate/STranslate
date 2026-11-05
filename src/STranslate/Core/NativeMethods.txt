@@ -85,3 +85,13 @@ BringWindowToTop
 RegisterWindowMessage
 DwmSetWindowAttribute
 DwmFlush
+DwmRegisterThumbnail
+DwmUnregisterThumbnail
+DwmQueryThumbnailSourceSize
+DwmUpdateThumbnailProperties
+DwmExtendFrameIntoClientArea
+CreateRectRgn
+CreateRoundRectRgn
+SetWindowRgn
+DWM_TNP_*
+SetLayeredWindowAttributes

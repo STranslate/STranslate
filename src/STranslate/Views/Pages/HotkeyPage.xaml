@@ -345,7 +345,7 @@
                                 WindowTitle="{DynamicResource Hotkey_ReExecuteOcr}" />
                         </ui:SettingsCard>
 
-                        <ui:SettingsCard Header="{DynamicResource Hotkey_SwitchImage}">
+                        <ui:SettingsCard Description="{DynamicResource Hotkey_SwitchImageDescription}" Header="{DynamicResource Hotkey_SwitchImage}">
                             <control:HotkeyControl
                                 DefaultHotkey="{Binding HotkeySettings.SwitchImageHotkey.Default}"
                                 Hotkey="{Binding HotkeySettings.SwitchImageHotkey.Key}"

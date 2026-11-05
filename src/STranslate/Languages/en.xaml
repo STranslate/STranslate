@@ -41,6 +41,10 @@
     <sys:String x:Key="General_HideOnStartup">Hide Window on System Startup</sys:String>
     <sys:String x:Key="General_HideOnStartupDescription">The search window is hidden in the tray after STranslate starts.</sys:String>
     <sys:String x:Key="General_HideWhenDeactivated">Auto Hide Window When Loses Focus</sys:String>
+    <sys:String x:Key="General_AutoHideAtTopEdge">Auto-hide at Top Edge</sys:String>
+    <sys:String x:Key="General_AutoHideAtTopEdgeDescription">Drag the window to the top edge to dock it. Move the pointer away to collapse, and hover over the edge to expand. Docking takes priority over hiding on focus loss.</sys:String>
+    <sys:String x:Key="General_TopEdgeAutoHideDelay">Collapse delay (ms)</sys:String>
+    <sys:String x:Key="General_TopEdgeAutoHideDelayDescription">Wait time before collapsing while the pointer is outside the window. Default: 600 ms.</sys:String>
     <sys:String x:Key="General_WindowPosition">Main Window Location</sys:String>
     <sys:String x:Key="General_WindowAlign">Main Window Position on Monitor</sys:String>
     <sys:String x:Key="General_MainWindowMaxHeightRatio">Main Window Max Height (Screen Ratio)</sys:String>
@@ -220,6 +224,7 @@
     <sys:String x:Key="Hotkey_OcrImTransWindow">OCR | Image Translation Window Hotkey</sys:String>
     <sys:String x:Key="Hotkey_ReExecuteOcr">Re-execute Text Recognition | Image Translation</sys:String>
     <sys:String x:Key="Hotkey_SwitchImage">Switch Rendering/Annotation Image</sys:String>
+    <sys:String x:Key="Hotkey_SwitchImageDescription">Also supports switching between the original and translated image in pinned windows.</sys:String>
     <sys:String x:Key="Hotkey_PinImageTranslate">Pin image translation (Compact)</sys:String>
     <sys:String x:Key="Hotkey_QrCode">Recognize QR Code</sys:String>
     <sys:String x:Key="Hotkey_QrCodeDescription">This hotkey is only supported in OCR window</sys:String>
@@ -876,4 +881,10 @@
     <sys:String x:Key="ImageTranslatePinnedCopyAll">Copy all text</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowOriginal">Show original image</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">Show translation</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnOcrServiceChanged">Image translation: translate on OCR service change</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnTranslateServiceChanged">Image translation: translate on translation service change</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnLanguageChanged">Image translation: translate on language change</sys:String>
+    <sys:String x:Key="General_ImageTranslateOnLayoutChanged">Image translation: translate on segmentation change</sys:String>
+    <sys:String x:Key="General_OcrOnServiceChanged">OCR window: recognize on service change</sys:String>
+    <sys:String x:Key="General_OcrOnLanguageChanged">OCR window: recognize on language change</sys:String>
 </ResourceDictionary>

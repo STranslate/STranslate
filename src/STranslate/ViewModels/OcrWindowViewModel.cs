@@ -538,6 +538,9 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
     {
         switch (e.PropertyName)
         {
+            case nameof(Settings.OcrWindowOcrLanguage):
+                ReExecuteIfEnabled(Settings.OcrOnLanguageChanged);
+                break;
             case nameof(Settings.IsOcrShowingTextControl):
                 Settings.OcrWindowWidth = Settings.IsOcrShowingTextControl
                         ? Settings.OcrWindowWidth * WidthMultiplier - WidthAdjustment
@@ -573,6 +576,25 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
         if (newValue != null && !newValue.IsEnabled)
         {
             newValue.IsEnabled = true;
+        }
+
+        if (newValue != null)
+            ReExecuteIfEnabled(Settings.OcrOnServiceChanged);
+    }
+
+    private async void ReExecuteIfEnabled(bool enabled)
+    {
+        if (!enabled || _disposed || _sourceImage == null || IsExecuting)
+            return;
+
+        try
+        {
+            await ReExecuteAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "OCR 选项切换后重新执行失败");
+            _snackbar.ShowError($"{_i18n.GetTranslation("OperationFailed")}\n{ex.Message}");
         }
     }
 

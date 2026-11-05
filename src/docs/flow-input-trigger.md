@@ -4,7 +4,7 @@
 - 管理全局热键、软件内热键、低级键盘钩子、Ctrl+CC、鼠标划词与剪贴板监听。
 - 将触发事件统一路由到 `MainWindowViewModel` 命令。
 - 根据热键可用状态与全屏策略同步托盘图标状态。
-- 统一模拟复制后的取词超时、取词失败回退与取词文本分隔符处理。
+- 统一 UIA 优先取词、模拟复制回退、取词超时、取词失败回退与取词文本分隔符处理。
 
 ## 关键入口
 - `STranslate/Core/HotkeySettings.cs`
@@ -23,6 +23,8 @@
   - 协调直接翻译、悬浮图标与增量翻译共享 Hook，并按优先级分发划词结果。
 - `STranslate/Helpers/ClipboardMonitor.cs`
   - `AddClipboardFormatListener` 监听剪贴板变更。
+- `STranslate/Helpers/UiaTextReader.cs`
+  - 在后台读取焦点元素的 UIA `TextPattern` 选区；空结果、异常或超时返回 null，由 `ClipboardHelper` 回退到模拟复制。
 - `STranslate/ViewModels/MainWindowViewModel.cs`
   - `ExecuteTranslate()` / `InputClear()` / `Show()`：完成文本入口收敛、窗口显示与统一置前。
 - `STranslate/Core/Settings.cs`
@@ -69,8 +71,8 @@
 - 主窗口失焦时按 `HideWhenDeactivated` 自动隐藏；置顶窗口不受此逻辑影响。
 
 ### 从入口到结果：取词超时、后处理与失败回退
-1. 需要模拟复制读取选中文本的入口会调用 `ClipboardHelper.GetSelectedTextAsync(Settings.SelectedTextFetchTimeoutMs)`。
-2. `SelectedTextFetchTimeoutMs` 在 `Settings` 中限制为 50~5000 毫秒；鼠标划词监听通过委托实时读取当前配置。
+1. 快捷键划词、鼠标划词、增量翻译以及共用取词入口的操作调用 `ClipboardHelper.GetSelectedTextAsync(Settings.SelectedTextFetchTimeoutMs)`，先通过 `UiaTextReader` 读取焦点元素的 `TextPattern.GetSelection()`，取不到再执行 `GetSelectedTextFromClipboardAsync()`。只读取选区，不读取整个控件的值；UIA 成功时不访问剪贴板，也不发送复制按键。`Ctrl+C+C` 和剪贴板监听仍直接读取用户已经复制的内容。
+2. UIA 在后台 MTA 线程执行，最多等待 250 毫秒且不超过 `SelectedTextFetchTimeoutMs`；空结果、不支持 UIA、异常或超时均回退到原有模拟复制流程。UIA 跨进程调用无法强行取消，上次调用未结束时后续请求直接走剪贴板，避免堆积后台调用；迟到的 UIA 结果会被丢弃。等待期间前台窗口变化则本次取词结束，不向新窗口模拟复制。剪贴板回退仍使用完整的 `SelectedTextFetchTimeoutMs`，该值限制为 50~5000 毫秒，鼠标划词监听通过委托实时读取当前配置。取消请求会终止等待，避免继续回退或返回旧剪贴板内容。
 3. 取到文本后统一进入 `MainWindowViewModel.HandleCapturedText(text, scope)`：
    - 先执行 `LineBreakHandleType` 换行处理。
    - 再按 `TextSeparatorHandleType` 与 `TextSeparatorHandleScopes` 对 `_` / `-` 做可选分隔符处理。
