@@ -88,6 +88,20 @@ public partial class ImageTranslateCompactWindow
         }
     }
 
+    protected override void OnContentRendered(EventArgs e)
+    {
+        base.OnContentRendered(e);
+
+        // HWND 首次创建时可能沿用主屏 DPI；SourceInitialized 内的物理定位会触发
+        // WPF 随后的 DPI 尺寸调整。等首轮布局完成后，重新同步已有的物理边界，
+        // 避免低 DPI 副屏上的窗口被二次缩小，裁掉图片和工具条。
+        if (!_isClosing && _layout is not null)
+        {
+            PlaceOnPhysicalWindowBounds(_layout.WindowBounds, GetDpiScale(_layout.WindowBounds));
+            ApplyLayoutToVisualTree();
+        }
+    }
+
     protected override void OnDeactivated(EventArgs e)
     {
         base.OnDeactivated(e);
