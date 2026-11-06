@@ -37,6 +37,12 @@
 4. `StorageBase.Load()` 遇到 JSON 异常时回退 `.bak`，再失败则使用默认对象。
 5. 首次欢迎向导不使用额外完成标记：`App` 在 `Load()` 前检查 `Settings.json`、`HotkeySettings.json`、`ServiceSettings.json` 是否都不存在；都不存在才在主窗口创建前自动打开向导。向导跳过、关闭或完成时保存三类配置，生成文件后后续启动不再自动弹出。首页语言选择直接绑定 `Settings.Language`，沿用现有语言切换和保存行为。
 
+### 翻译前替换配置
+- `Settings.TextPreprocessing` 包含全局开关和有序 `TextReplacementRule` 列表，默认关闭且为空。规则 ID 持久保存；指纹只包含启用规则的顺序、表达式、替换模板、匹配选项及语义版本，显示名不影响缓存。
+- 编辑器克隆配置，保存时校验并整体替换顶层属性以触发自动保存，取消不修改持久对象。替换文本保留实际换行；不做通用反斜线解码。
+- 旧 `Settings.json` 缺少该字段时使用默认值；字段为 null、列表损坏或结构不合法时，专用 JSON converter 保留错误值并阻止翻译，不把错误配置静默当作关闭状态。
+- 配置沿用 `AppStorage` 和现有 ZIP/WebDAV 备份范围。异步 `.bak` 恢复先释放读取流再原子替换，避免 Windows 文件占用错误。
+
 ### 从入口到结果：便携/漫游路径策略
 1. `DataLocation.PortableDataLocationInUse()` 判断程序目录下是否存在便携目录。
 2. 若存在：配置、缓存、日志、插件目录全部落在 `PortableDataPath`。
@@ -52,6 +58,10 @@
 3. `HistoryModel.RawData` 负责将 `List<HistoryData>` 与 JSON 字段互转；`HistoryData.ServiceDisplayName` 保留服务显示名快照。
 4. `HistoryModel.EffectiveSourceLang` / `EffectiveTargetLang` 保存自动识别后实际参与翻译的语言。
 5. 查询路径包括：精准命中、模糊检索、分页、上一条/下一条导航。
+6. `HistoryData` 逐服务保存 `RequestText`、`PreprocessingFingerprint`、`EffectiveSourceLang`、`EffectiveTargetLang` 和 `BackTranslationSourceText`，无需新增 SQLite 列。
+7. 缓存先验证请求文本、指纹和成功状态再发布。缺字段的旧 JSON 按未预处理解释；启用规则时保守重译。更新历史的整条语种前，把旧语种和请求上下文补入各服务数据，避免混合结果互相覆盖实际语种。
+8. 手动合并新主译时一起替换其回译；仅补回译必须与原主译文本及请求上下文一致。失败回译可重试，但不能带出其他主译的旧回译。
+9. 历史详情的每个服务提供请求详情按钮，可查看当时的发送文本及实际语种。浏览历史不重新执行当前规则，重新翻译才使用当前配置。
 
 ### 从入口到结果：历史导出与删除
 1. 历史页选择部分记录时，`ExportHistoryAsync()` 只导出选中项，导出后清空选择。
