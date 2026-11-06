@@ -10,6 +10,12 @@ namespace STranslate.Plugin;
 public partial class Prompt : ObservableObject
 {
     /// <summary>
+    /// 唯一标识
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    /// <summary>
     /// 名称
     /// </summary>
     [ObservableProperty] public partial string Name { get; set; }
@@ -31,6 +37,7 @@ public partial class Prompt : ObservableObject
     {
         Name = "New Prompt";
         IsEnabled = false;
+        // Id 保持 null，等待 JSON 填充或插件迁移补齐
     }
 
     /// <summary>
@@ -41,6 +48,7 @@ public partial class Prompt : ObservableObject
     /// <param name="isEnabled"></param>
     public Prompt(string name, IEnumerable<PromptItem> prompts, bool isEnabled = false)
     {
+        Id = Guid.NewGuid().ToString("N");
         Name = name;
         IsEnabled = isEnabled;
         foreach (var prompt in prompts)
@@ -55,7 +63,9 @@ public partial class Prompt : ObservableObject
     /// <returns></returns>
     public Prompt Clone()
     {
-        return new Prompt(Name, Items.Select(p => p.Clone()), IsEnabled);
+        var clone = new Prompt(Name, Items.Select(p => p.Clone()), IsEnabled);
+        clone.Id = Id;
+        return clone;
     }
 }
 
