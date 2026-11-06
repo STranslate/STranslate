@@ -26,6 +26,7 @@
 | 运行时启动 | [docs/runtime-bootstrap.md](docs/runtime-bootstrap.md) | 单实例、DI、窗口生命周期、统一前台激活、异常与退出链路 |
 | 插件与服务运行时 | [docs/runtime-plugin-service.md](docs/runtime-plugin-service.md) | 插件发现/加载、服务实例化、PluginContext 与配置持久化 |
 | 主翻译链路 | [docs/flow-main-translation.md](docs/flow-main-translation.md) | 自动翻译、防抖、缓存命中、回译、复制与词典路径 |
+| 翻译前替换 | [docs/plan-translation-preprocessing.md](docs/plan-translation-preprocessing.md) | 正则规则、请求预处理、缓存兼容、使用示例与验收记录 |
 | OCR 链路 | [docs/flow-ocr-image.md](docs/flow-ocr-image.md) | 截图翻译、静默 OCR、OCR窗口、坐标归一化 |
 | 图片翻译链路 | [docs/flow-image-translation.md](docs/flow-image-translation.md) | 专用 OCR/翻译服务、分段逻辑、译文覆盖、插件能力 |
 | 输入与触发系统 | [docs/flow-input-trigger.md](docs/flow-input-trigger.md) | 全局/软件内热键、低级键盘钩子、Ctrl+CC、鼠标划词、剪贴板监听与触发后置前 |

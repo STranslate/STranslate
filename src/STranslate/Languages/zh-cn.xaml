@@ -234,6 +234,36 @@
     <sys:String x:Key="Hotkey_IncrementalTranslateDescription" xml:space="preserve">按住快捷键划词可持续追加内容，松开鼠标即刻翻译。&#10;仅支持单个按键，不包含 Win/Alt/Ctrl/Shift</sys:String>
     <!--  // Translation Page //  -->
     <sys:String x:Key="ReplaceService">替换翻译</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessing">翻译前替换</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingDescription">在语言识别和翻译前按顺序应用正则替换，输入框原文保持不变。</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingRuleName">规则名称</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPattern">正则表达式</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">替换文本</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">上移规则</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">下移规则</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">忽略大小写</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMultiline">多行模式</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingSingleline">单行模式</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewInput">预览输入</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewOutput">发送给提供商的文本</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMatchCount">匹配数</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingRules">规则列表</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreview">实时预览</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNoRuleSelected">请选择一条规则以编辑，或添加新规则</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCaseDescription">(?i) 匹配时忽略大小写</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMultilineDescription">(?m) 多行模式：^ 和 $ 匹配每一行的行首和行尾</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingSinglelineDescription">(?s) 单行模式：点号 (.) 匹配包含换行符在内的所有字符</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewInputPlaceholder">输入测试文本以预览替换效果...</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">翻译前替换规则执行失败：{0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">翻译前替换后没有可翻译的文本。</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">翻译前替换配置损坏，请在设置中修正后重试。</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">翻译前替换规则执行超时：{0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">翻译前替换结果超过长度限制：{0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">{0} 个图片块未能完成处理，已保留原始内容。</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">规则 {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">位置：{0}。</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingApplied">已替换 {0} 处</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingRequestDetails">请求详情</sys:String>
     <sys:String x:Key="ImTranService">图片翻译</sys:String>
     <sys:String x:Key="NoServiceEnabled">未启用服务</sys:String>
     <sys:String x:Key="SpecialServiceInfo">拖拽左侧服务至此或者右键选择以启用</sys:String>

@@ -35,6 +35,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly INotification _notification;
     private readonly MouseSelectionService _mouseSelectionService;
     private readonly MouseSelectionIconWindow _mouseSelectionIconWindow;
+    private readonly TextPreprocessingService _textPreprocessingService;
     private bool _mouseSelectionTranslationHasTopmostLease;
     private bool _incrementalHasTopmostLease;
     private int _managedTopmostLeaseCount;
@@ -63,6 +64,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     public Settings Settings { get; }
     public HotkeySettings HotkeySettings { get; }
+    private PreparedTranslationInput? _lastPreparedInput;
+    [ObservableProperty] public partial string ReplacementStatus { get; set; } = string.Empty;
+    [ObservableProperty] public partial bool HasReplacements { get; set; }
 
     public MainWindowViewModel(
         DataProvider dataProvider,
@@ -79,6 +83,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         SqlService sqlService,
         Settings settings,
         HotkeySettings hotkeySettings,
+        TextPreprocessingService textPreprocessingService,
         MouseSelectionService mouseSelectionService,
         MouseSelectionIconWindow mouseSelectionIconWindow)
     {
@@ -89,7 +94,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             .ToList();
         _logger = logger;
         _i18n = i18n;
-        _translationCoordinator = new(i18n.GetTranslation);
         _audioPlayer = audioPlayer;
         _screenshot = screenshot;
         _snackbar = snackbar;
@@ -101,6 +105,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _sqlService = sqlService;
         Settings = settings;
         HotkeySettings = hotkeySettings;
+        _textPreprocessingService = textPreprocessingService;
+        _translationCoordinator = new(i18n.GetTranslation, textPreprocessingService, settings);
         _mouseSelectionService = mouseSelectionService;
         _mouseSelectionIconWindow = mouseSelectionIconWindow;
         _mouseSelectionService.TextSelected += OnMouseSelectionTextSelected;
@@ -311,6 +317,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             // 用户取消属于正常控制流，不应让取消异常越过命令边界。
         }
+        catch (TextPreprocessingException ex)
+        {
+            _snackbar.ShowError(string.Format(
+                _i18n.GetTranslation("TranslatePreprocessingFailed"),
+                ex.RuleName));
+        }
     }
 
     private async Task ExecuteAutomaticTranslationAsync(object? force, CancellationToken cancellationToken)
@@ -328,9 +340,24 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             : null;
 
         ResetAllServices(operation);
+        ClearPreparedInputPreview();
         ApplyIdentifiedLanguageState(forcedSourceLanguage.HasValue
             ? CreateDetectedIdentifiedLanguageState(forcedSourceLanguage.Value)
             : IdentifiedLanguageState.Empty);
+
+        try
+        {
+            await operation.PrepareInputAsync();
+            if (!operation.IsLatestAutomatic)
+                return;
+            operation.EnsureNonEmptyInput();
+            PublishPreparedInputPreview(operation);
+        }
+        catch (TextPreprocessingException ex)
+        {
+            operation.TryPublishAutomatic(() => ShowPreprocessingError(ex));
+            return;
+        }
 
         // force 空则优先检查缓存
         var checkCacheFirst = force == null;
@@ -426,13 +453,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (!TryStartManualTranslation(service, out var cancellationTokenSource))
             return;
 
-        var operation = _translationCoordinator.BeginOperation(
-            InputText,
-            Settings.SourceLang,
-            Settings.TargetLang,
-            cancellationTokenSource.Token);
         try
         {
+            var operation = _translationCoordinator.BeginOperation(
+                InputText,
+                Settings.SourceLang,
+                Settings.TargetLang,
+                cancellationTokenSource.Token);
             await ExecuteSingleTranslateAsync(
                 service,
                 operation).ConfigureAwait(false);
@@ -440,6 +467,11 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         catch (OperationCanceledException) when (cancellationTokenSource.IsCancellationRequested)
         {
             // Ignore
+        }
+        catch (TextPreprocessingException ex)
+        {
+            if (!cancellationTokenSource.IsCancellationRequested)
+                ShowPreprocessingError(ex);
         }
         finally
         {
@@ -454,12 +486,31 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (string.IsNullOrWhiteSpace(operation.Text))
             return;
 
+        object channel;
+        switch (service.Plugin)
+        {
+            case ITranslatePlugin translate:
+                if (!operation.TryPrepare(translate)) return;
+                channel = translate.TransResult;
+                break;
+            case IDictionaryPlugin dictionary:
+                if (!operation.TryPrepare(dictionary)) return;
+                channel = dictionary.DictionaryResult;
+                break;
+            default:
+                return;
+        }
+        operation.ActivateIdentifiedLanguage();
+        ClearPreparedInputPreview();
+        await operation.PrepareInputAsync().ConfigureAwait(false);
+        if (!operation.IsCurrent(channel))
+            return;
+        operation.EnsureNonEmptyInput();
+        PublishPreparedInputPreview(operation);
+
         switch (service.Plugin)
         {
             case IDictionaryPlugin dictionaryPlugin:
-                if (!operation.TryPrepare(dictionaryPlugin))
-                    return;
-
                 var result = await operation.LookupAsync(dictionaryPlugin).ConfigureAwait(false);
                 if (result.ResultType == DictionaryResultType.Error ||
                     !operation.IsCurrent(dictionaryPlugin.DictionaryResult))
@@ -489,18 +540,19 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                     operation.SourceLang,
                     operation.TargetLang);
                 // 词典手动执行保持现有历史语义：仅更新内存对象，不额外落盘。
-                history.Data.Add(new(service) { DictResult = result });
+                var dictionaryHistoryData = new HistoryData(service)
+                {
+                    DictResult = result
+                };
+                dictionaryHistoryData.ApplyPreprocessingContext(operation);
+                history.Data.Add(dictionaryHistoryData);
                 return;
 
             case ITranslatePlugin plugin:
-                if (plugin.TransResult.IsProcessing)
-                    return;
-
-                operation.ActivateIdentifiedLanguage();
                 var context = await ResolveTranslationLanguageContextAsync(
                     operation,
                     null).ConfigureAwait(false);
-                if (!operation.TryPrepare(plugin))
+                if (!operation.IsCurrent(plugin.TransResult))
                     return;
 
                 var translateResult = await operation.TranslateAsync(
@@ -530,6 +582,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 {
                     TransResult = CloneTranslateResult(translateResult)
                 };
+                historyData.ApplyPreprocessingContext(operation, context.EffectiveSource, context.EffectiveTarget);
 
                 if (service.Options?.AutoBackTranslation ?? false)
                 {
@@ -542,6 +595,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                         operation.IsCurrent(plugin.TransBackResult))
                     {
                         historyData.TransBackResult = CloneTranslateResult(backResult);
+                        historyData.BackTranslationSourceText = translateResult.Text;
                     }
                 }
 
@@ -562,20 +616,28 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (!TryStartManualTranslation(service, out var cancellationTokenSource))
             return;
 
-        var operation = _translationCoordinator.BeginOperation(
-            InputText,
-            Settings.SourceLang,
-            Settings.TargetLang,
-            cancellationTokenSource.Token);
         try
         {
+            if (service.Plugin is not ITranslatePlugin plugin ||
+                _translationCoordinator.GetResultContext(plugin.TransResult) is not { } mainContext ||
+                mainContext.Input.OriginalText != InputText ||
+                mainContext.TranslatedText != plugin.TransResult.Text)
+                return;
+            var operation = _translationCoordinator.BeginBackOperation(mainContext, cancellationTokenSource.Token);
             await ExecuteSingleTransBackAsync(
                 service,
-                operation).ConfigureAwait(false);
+                operation,
+                mainContext).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationTokenSource.IsCancellationRequested)
         {
             // Ignore
+        }
+        catch (TextPreprocessingException ex)
+        {
+            _snackbar.ShowError(string.Format(
+                _i18n.GetTranslation("TranslatePreprocessingFailed"),
+                ex.RuleName));
         }
         finally
         {
@@ -585,18 +647,17 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     private async Task ExecuteSingleTransBackAsync(
         Service service,
-        TranslationOperation operation)
+        TranslationOperation operation,
+        TranslationResultContext mainContext)
     {
         if (string.IsNullOrWhiteSpace(operation.Text) ||
             service.Plugin is not ITranslatePlugin plugin ||
             plugin.TransBackResult.IsProcessing)
             return;
 
-        var sourceText = plugin.TransResult.Text;
-        operation.ActivateIdentifiedLanguage();
-        var context = await ResolveTranslationLanguageContextAsync(
-            operation,
-            null).ConfigureAwait(false);
+        var sourceText = mainContext.TranslatedText;
+        var context = CreateTranslationLanguageContext(operation.SourceLang, operation.TargetLang,
+            mainContext.EffectiveSource, mainContext.EffectiveTarget);
         if (!operation.TryPrepareBack(plugin))
             return;
 
@@ -613,6 +674,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             TransBackResult = CloneTranslateResult(backResult)
         };
+        historyData.ApplyPreprocessingContext(operation, context.EffectiveSource, context.EffectiveTarget);
+        historyData.BackTranslationSourceText = sourceText;
 
         await MergeManualHistoryDataAsync(
             operation,
@@ -778,12 +841,19 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
             if (history != null)
             {
-                operation.PublishIdentifiedLanguage(
-                    () => ApplyIdentifiedLanguageState(CreateCacheIdentifiedLanguageState(history)));
                 uncachedSvcs = PopulateResultsFromCache(
                     history,
                     enabledSvcs,
                     operation);
+                var cachedTranslation = enabledSvcs.Select(history.GetData).FirstOrDefault(data =>
+                    data?.TransResult is { IsSuccess: true } &&
+                    data.IsCompatible(operation.Text, operation.RequestText, operation.RulesFingerprint));
+                if (cachedTranslation != null)
+                {
+                    operation.PublishIdentifiedLanguage(
+                        () => ApplyIdentifiedLanguageState(new(IdentifiedLanguageStateKind.Cache,
+                            ParseHistoryLanguage(cachedTranslation.EffectiveSourceLang ?? history.EffectiveSourceLang ?? history.SourceLang))));
+                }
             }
         }
 
@@ -868,10 +938,17 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 history = CreateHistoryModel(operation.Text, context.CacheSource, context.CacheTarget);
             }
 
+            if (history.GetData(service) is { } existingData &&
+                !existingData.IsCompatible(operation.Text, operation.RequestText, operation.RulesFingerprint))
+            {
+                history.Data.Remove(existingData);
+            }
+
+            history.SnapshotLegacyContexts();
             ApplyEffectiveLanguages(history, context.EffectiveSource, context.EffectiveTarget);
 
-            var existingData = history.GetData(service);
-            if (existingData == null)
+            var currentData = history.GetData(service);
+            if (currentData == null)
             {
                 if (!createIfMissing)
                     return;
@@ -880,7 +957,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             }
             else
             {
-                MergeHistoryData(existingData, incomingData);
+                MergeHistoryData(currentData, incomingData);
             }
 
             var enabledServices = TranslateService.Services.Where(x => x.IsEnabled).ToList();
@@ -897,12 +974,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     }
 
     private static void MergeHistoryData(HistoryData existingData, HistoryData incomingData)
-    {
-        existingData.ServiceDisplayName = incomingData.ServiceDisplayName ?? existingData.ServiceDisplayName;
-        existingData.TransResult = incomingData.TransResult ?? existingData.TransResult;
-        existingData.TransBackResult = incomingData.TransBackResult ?? existingData.TransBackResult;
-        existingData.DictResult = incomingData.DictResult ?? existingData.DictResult;
-    }
+        => existingData.MergeFrom(incomingData);
 
     private static TranslateResult CloneTranslateResult(TranslateResult result) =>
         new()
@@ -915,18 +987,27 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     /// <summary>
     /// 从缓存填充翻译结果，并返回未缓存的服务列表
     /// </summary>
-    private List<Service> PopulateResultsFromCache(
+    internal static List<Service> PopulateResultsFromCache(
         HistoryModel history,
         List<Service> services,
         TranslationOperation operation)
     {
+        history.SnapshotLegacyContexts();
         var uncachedServices = new List<Service>();
         foreach (var service in services)
         {
             operation.CancellationToken.ThrowIfCancellationRequested();
             if (history.GetData(service) is { } data)
             {
-                PopulateServiceResultFromData(service, data, operation);
+                if (!data.IsCompatible(operation.Text, operation.RequestText, operation.RulesFingerprint) ||
+                    !data.HasSuccessfulMainResult(service))
+                {
+                    history.Data.Remove(data);
+                    uncachedServices.Add(service);
+                    continue;
+                }
+
+                PopulateServiceResultFromData(service, data, operation, history);
                 if (!history.HasData(service))
                     uncachedServices.Add(service);
             }
@@ -945,7 +1026,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private static void PopulateServiceResultFromData(
         Service svc,
         HistoryData data,
-        TranslationOperation operation)
+        TranslationOperation operation,
+        HistoryModel history)
     {
         if (svc.Plugin is ITranslatePlugin tPlugin)
         {
@@ -954,13 +1036,16 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 operation.TryPublish(
                     tPlugin.TransResult,
                     () => tPlugin.TransResult.Update(data.TransResult));
+                operation.BindMainResult(tPlugin, data.TransResult.Text,
+                    ParseHistoryLanguage(data.EffectiveSourceLang ?? history.EffectiveSourceLang ?? history.SourceLang) ?? operation.SourceLang,
+                    ParseHistoryLanguage(data.EffectiveTargetLang ?? history.EffectiveTargetLang ?? history.TargetLang) ?? operation.TargetLang);
             }
 
-            if ((svc.Options?.AutoBackTranslation ?? false) && data.TransBackResult != null && data.TransBackResult.IsSuccess && !string.IsNullOrWhiteSpace(data.TransBackResult.Text))
+            if ((svc.Options?.AutoBackTranslation ?? false) && data.HasSuccessfulBackResult && data.TransBackResult is { } backResult)
             {
                 operation.TryPublish(
                     tPlugin.TransBackResult,
-                    () => tPlugin.TransBackResult.Update(data.TransBackResult));
+                    () => tPlugin.TransBackResult.Update(backResult));
             }
         }
         else if (svc.Plugin is IDictionaryPlugin dPlugin)
@@ -1061,7 +1146,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 operation).ConfigureAwait(false);
         }
         // 否则，只执行反向翻译（如果需要）
-        else if ((service.Options?.AutoBackTranslation ?? false) && history.GetData(service)?.TransBackResult == null)
+        else if ((service.Options?.AutoBackTranslation ?? false) && history.GetData(service)?.HasSuccessfulBackResult == false)
         {
             await ExecuteBackTranslationOnlyAsync(
                 service,
@@ -1090,7 +1175,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             return;
 
         var historyData = new HistoryData(service);
-        history.Data.Add(historyData);
+        historyData.ApplyPreprocessingContext(operation, source, target);
+        lock (history.Data)
+            history.Data.Add(historyData);
         UpdateHistoryServiceSnapshot(historyData, service);
         historyData.TransResult = translateResult;
 
@@ -1102,7 +1189,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 target,
                 source).ConfigureAwait(false);
             if (operation.IsCurrent(plugin.TransBackResult))
+            {
                 historyData.TransBackResult = backResult;
+                historyData.BackTranslationSourceText = translateResult.Text;
+            }
         }
     }
 
@@ -1121,13 +1211,14 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         var backResult = await operation.BackTranslateAsync(
             plugin,
             historyData.TransResult.Text,
-            target,
-            source).ConfigureAwait(false);
+            ParseHistoryLanguage(historyData.EffectiveTargetLang ?? history.EffectiveTargetLang) ?? target,
+            ParseHistoryLanguage(historyData.EffectiveSourceLang ?? history.EffectiveSourceLang) ?? source).ConfigureAwait(false);
         if (!operation.IsCurrent(plugin.TransBackResult))
             return;
 
         UpdateHistoryServiceSnapshot(historyData, service);
         historyData.TransBackResult = backResult;
+        historyData.BackTranslationSourceText = historyData.TransResult.Text;
     }
 
     private async Task ProcessDictionaryPluginAsync(
@@ -1146,7 +1237,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             return;
 
         var historyData = new HistoryData(service);
-        history.Data.Add(historyData);
+        historyData.ApplyPreprocessingContext(operation);
+        lock (history.Data)
+            history.Data.Add(historyData);
         UpdateHistoryServiceSnapshot(historyData, service);
         historyData.DictResult = result;
     }
@@ -1912,14 +2005,14 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             var (success, text) = await GetTextAsync();
             if (!success || string.IsNullOrWhiteSpace(text)) return;
 
-            var (isSuccess, source, target) = await LanguageDetector.GetLanguageAsync(text, cancellationToken).ConfigureAwait(false);
-            if (!isSuccess)
-            {
-                _logger.LogWarning($"Language detection failed for text: {text}");
-                _snackbar.ShowWarning(_i18n.GetTranslation("LanguageDetectionFailed"));
-            }
-            var result = new TranslateResult();
-            await transPlugin.TranslateAsync(new TranslateRequest(text, source, target), result, cancellationToken).ConfigureAwait(false);
+            var result = await DirectTranslationRunner.TranslateAsync(text, Settings.TextPreprocessing,
+                _textPreprocessingService, transPlugin,
+                (requestText, token) => LanguageDetector.GetLanguageAsync(requestText, token,
+                    onCompleted: (isSuccess, _) =>
+                    {
+                        if (!isSuccess)
+                            _snackbar.ShowWarning(_i18n.GetTranslation("LanguageDetectionFailed"));
+                    }), cancellationToken).ConfigureAwait(false);
 
             if (result.IsSuccess && !string.IsNullOrEmpty(result.Text))
                 InputHelper.PrintText(result.Text);
@@ -1929,6 +2022,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // Ignore
+        }
+        catch (TextPreprocessingException ex)
+        {
+            ShowPreprocessingError(ex);
         }
         catch (Exception ex)
         {
@@ -2668,6 +2765,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     partial void OnInputTextChanged(string value)
     {
+        ClearPreparedInputPreview();
         ResetTranslationLanguageState();
 
         if (!Settings.AutoTranslate)
@@ -2736,6 +2834,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         TranslationOperation operation,
         LangEnum? forcedSourceLanguage)
     {
+        operation.CancellationToken.ThrowIfCancellationRequested();
+        operation.EnsureNonEmptyInput();
         if (forcedSourceLanguage is LangEnum forcedSource && forcedSource != LangEnum.Auto)
         {
             operation.PublishIdentifiedLanguage(
@@ -2749,7 +2849,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
         var (_, source, target) = await LanguageDetector
             .GetLanguageAsync(
-                operation.Text,
+                operation.RequestText,
                 operation.SourceLang,
                 operation.TargetLang,
                 operation.CancellationToken,
@@ -2764,6 +2864,36 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             operation.TargetLang,
             source,
             target);
+    }
+
+    private void ShowPreprocessingError(TextPreprocessingException exception)
+    {
+        _logger.LogWarning("Translation preprocessing failed: rule {RuleId}, kind {ErrorKind}",
+            exception.RuleId, exception.ErrorKind);
+        _snackbar.ShowWarning(TextPreprocessingErrorText.Format(exception, _i18n.GetTranslation));
+    }
+
+    private void ClearPreparedInputPreview()
+    {
+        _lastPreparedInput = null;
+        ReplacementStatus = string.Empty;
+        HasReplacements = false;
+    }
+
+    private void PublishPreparedInputPreview(TranslationOperation operation) =>
+        operation.TryPublishInputPreview(() =>
+        {
+            _lastPreparedInput = operation.PreparedInput;
+            HasReplacements = _lastPreparedInput.TotalMatchCount > 0;
+            ReplacementStatus = string.Format(_i18n.GetTranslation("Translate_TextPreprocessingApplied"),
+                _lastPreparedInput.TotalMatchCount);
+        });
+
+    [RelayCommand]
+    private async Task ShowPreparedRequestAsync(FrameworkElement element)
+    {
+        if (_lastPreparedInput is not { } input || Window.GetWindow(element) is not { } owner) return;
+        await new Controls.TranslationRequestDialog(input.RequestText).ShowAsync(owner);
     }
 
     private IdentifiedLanguageState CreateCacheIdentifiedLanguageState(HistoryModel history)

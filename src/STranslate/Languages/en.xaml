@@ -234,6 +234,36 @@
     <sys:String x:Key="Hotkey_IncrementalTranslateDescription" xml:space="preserve">Hold down the hotkey and select text to continuously append content. Release the mouse to translate immediately.&#10;Only supports single keys, excludes Win/Alt/Ctrl/Shift</sys:String>
     <!--  // Translation Page //  -->
     <sys:String x:Key="ReplaceService">Replace Trans</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessing">Translation pre-processing</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingDescription">Apply ordered regular-expression replacements before language detection and translation. The input text remains unchanged.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingRuleName">Rule name</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPattern">Regular expression pattern</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">Replacement text</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">Move rule up</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">Move rule down</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">Ignore case</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMultiline">Multiline</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingSingleline">Singleline</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewInput">Preview input</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewOutput">Text sent to the provider</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMatchCount">Matches</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingRules">Rules</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreview">Live Preview</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNoRuleSelected">Select a rule to edit, or add a new rule</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCaseDescription">(?i) Ignore case when matching</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMultilineDescription">(?m) Multiline mode: ^ and $ match line starts and ends</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingSinglelineDescription">(?s) Singleline mode: dot (.) matches all characters including newlines</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingPreviewInputPlaceholder">Type test text to preview replacements...</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">Translation pre-processing rule failed: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">Translation pre-processing produced no translatable text.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">The replacement configuration is invalid. Correct it in Settings before translating.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">Replacement rule timed out: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">Replacement output exceeded the length limit: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">{0} image blocks could not be processed. Their original content was kept.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">Rule {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">Position {0}.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingApplied">Replaced {0} matches</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingRequestDetails">Request details</sys:String>
     <sys:String x:Key="ImTranService">Image Trans</sys:String>
     <sys:String x:Key="NoServiceEnabled">No Service Enabled</sys:String>
     <sys:String x:Key="SpecialServiceInfo">Drag services from the left here, or right-click to select and enable.</sys:String>

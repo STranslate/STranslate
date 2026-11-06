@@ -108,8 +108,9 @@ public class StorageBase<T> : ISavable where T : new()
 
         try
         {
-            await using var source = File.OpenRead(BackupFilePath);
-            var data = await JsonSerializer.DeserializeAsync<T>(source, JsonOption) ?? default;
+            T? data;
+            await using (var source = File.OpenRead(BackupFilePath))
+                data = await JsonSerializer.DeserializeAsync<T>(source, JsonOption) ?? default;
 
             if (data != null)
             {
