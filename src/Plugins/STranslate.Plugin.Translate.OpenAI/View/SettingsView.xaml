@@ -128,7 +128,11 @@
             </ikw:SimpleStackPanel>
         </ui:SettingsCard>
 
-        <!--  温度控制  -->
+        <ui:SettingsCard Header="{DynamicResource STranslate_Plugin_Translate_OpenAI_SendTemperature}">
+            <ui:ToggleSwitch IsOn="{Binding SendTemperature, Mode=TwoWay}"
+                             AutomationProperties.Name="{DynamicResource STranslate_Plugin_Translate_OpenAI_SendTemperature}" />
+        </ui:SettingsCard>
+
         <ui:SettingsCard Description="{DynamicResource Temperature_Description}" Header="{DynamicResource Temperature}">
             <ui:SettingsCard.HeaderIcon>
                 <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Temperature_20_Regular}" />
@@ -137,6 +141,7 @@
             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                 <Slider
                     x:Name="PART_TempSlider"
+                    IsEnabled="{Binding SendTemperature}"
                     MinWidth="200"
                     IsSnapToTickEnabled="True"
                     Maximum="2.0"
