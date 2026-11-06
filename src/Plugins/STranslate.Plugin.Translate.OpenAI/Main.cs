@@ -169,7 +169,8 @@ public class Main : LlmTranslatePluginBase
             model,
             messages,
             temperature,
-            Settings.AdditionalParametersJson);
+            Settings.AdditionalParametersJson,
+            Settings.SendTemperature);
 
         var option = new Options
         {

@@ -9,4 +9,5 @@
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_NoTextOutput">API에서 텍스트 출력을 반환하지 않았습니다.</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_AdditionalParameters">추가 요청 매개 변수</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_AdditionalParameters_Description">요청 루트에 병합할 JSON 개체를 입력하세요. 플러그인이 생성하는 기본 필드는 재정의할 수 없습니다.</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_SendTemperature">온도 매개변수 전송</sys:String>
 </ResourceDictionary>

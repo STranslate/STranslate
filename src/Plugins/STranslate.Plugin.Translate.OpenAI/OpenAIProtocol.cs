@@ -19,7 +19,8 @@ internal static class OpenAIProtocol
         string model,
         IReadOnlyCollection<PromptItem> messages,
         double temperature,
-        string? additionalParametersJson = null)
+        string? additionalParametersJson = null,
+        bool sendTemperature = false)
     {
         JsonObject request = apiMode switch
         {
@@ -27,7 +28,6 @@ internal static class OpenAIProtocol
             {
                 ["model"] = model,
                 ["input"] = JsonSerializer.SerializeToNode(messages),
-                ["temperature"] = temperature,
                 ["stream"] = true,
                 ["store"] = false
             },
@@ -35,10 +35,12 @@ internal static class OpenAIProtocol
             {
                 ["model"] = model,
                 ["messages"] = JsonSerializer.SerializeToNode(messages),
-                ["temperature"] = temperature,
                 ["stream"] = true
             }
         };
+
+        if (sendTemperature)
+            request["temperature"] = temperature;
 
         AppendAdditionalParameters(request, additionalParametersJson);
         return request;
@@ -62,7 +64,8 @@ internal static class OpenAIProtocol
 
         foreach (var (name, value) in additionalParameters)
         {
-            if (request.Any(item => string.Equals(item.Key, name, StringComparison.OrdinalIgnoreCase)))
+            if (string.Equals(name, "temperature", StringComparison.OrdinalIgnoreCase) ||
+                request.Any(item => string.Equals(item.Key, name, StringComparison.OrdinalIgnoreCase)))
                 throw new FormatException($"附加请求参数不能覆盖内置字段“{name}”。");
 
             request[name] = value?.DeepClone();

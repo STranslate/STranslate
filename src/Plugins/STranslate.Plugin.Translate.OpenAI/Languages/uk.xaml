@@ -9,4 +9,5 @@
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_NoTextOutput">API не повернув тексту.</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_AdditionalParameters">Додаткові параметри запиту</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_AdditionalParameters_Description">Вкажіть об'єкт JSON, який буде додано до кореня запиту. Вбудовані поля, які формує плагін, перевизначити не можна.</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_SendTemperature">Надсилати параметр temperature</sys:String>
 </ResourceDictionary>

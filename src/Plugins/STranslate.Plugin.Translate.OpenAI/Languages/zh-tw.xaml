@@ -9,4 +9,5 @@
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_NoTextOutput">API 未傳回任何文字內容。</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_AdditionalParameters">附加請求參數</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_AdditionalParameters_Description">填寫要合併到請求根物件的 JSON。不能覆寫外掛程式產生的內建欄位。</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_SendTemperature">傳送溫度參數</sys:String>
 </ResourceDictionary>
