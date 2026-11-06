@@ -8,6 +8,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace STranslate.Core;
 
+public enum TextReplacementMode
+{
+    Regex,
+    PlainText
+}
+
 /// <summary>
 /// 翻译请求的文本预处理配置。
 /// </summary>
@@ -38,7 +44,7 @@ public sealed class TextPreprocessingSettings
 }
 
 /// <summary>
-/// 一条翻译前正则替换规则。
+/// 一条翻译前替换规则。
 /// </summary>
 public partial class TextReplacementRule : ObservableObject
 {
@@ -50,6 +56,10 @@ public partial class TextReplacementRule : ObservableObject
     private bool _ignoreCase;
     private bool _multiline;
     private bool _singleline;
+    private TextReplacementMode _mode;
+
+    // 旧配置缺少此字段时保留正则语义，新规则由编辑器默认选择纯文本。
+    public TextReplacementMode Mode { get => _mode; set => SetProperty(ref _mode, value); }
 
     /// <summary>
     /// 用于诊断和后续编辑定位的稳定标识。
@@ -62,7 +72,7 @@ public partial class TextReplacementRule : ObservableObject
     public string Name { get => _name; set => SetProperty(ref _name, value); }
 
     /// <summary>
-    /// .NET 正则表达式。
+    /// 查找文本；正则模式下使用 .NET 正则语法。
     /// </summary>
     public string Pattern { get => _pattern; set => SetProperty(ref _pattern, value); }
 
@@ -102,7 +112,8 @@ public partial class TextReplacementRule : ObservableObject
             IsEnabled = IsEnabled,
             IgnoreCase = IgnoreCase,
             Multiline = Multiline,
-            Singleline = Singleline
+            Singleline = Singleline,
+            Mode = Mode
         };
     }
 }
@@ -132,26 +143,12 @@ internal readonly record struct TextPreprocessingLimits(
 }
 
 /// <summary>
-/// 单条规则的命中摘要。
-/// </summary>
-internal sealed record TextReplacementMatchSummary(
-    string RuleId,
-    string RuleName,
-    int MatchCount);
-
-/// <summary>
 /// 本次翻译使用的原文和处理后请求文本。
 /// </summary>
 internal sealed record PreparedTranslationInput(
     string OriginalText,
     string RequestText,
-    string RulesFingerprint,
-    IReadOnlyList<TextReplacementMatchSummary> MatchSummaries)
-{
-    internal bool IsChanged => !string.Equals(OriginalText, RequestText, StringComparison.Ordinal);
-    internal bool IsPreprocessed => !string.IsNullOrEmpty(RulesFingerprint);
-    internal int TotalMatchCount => MatchSummaries.Sum(summary => summary.MatchCount);
-}
+    string RulesFingerprint);
 
 /// <summary>
 /// 翻译前替换失败时抛出的错误。
@@ -182,7 +179,7 @@ internal sealed class TextPreprocessingException : Exception
 /// </summary>
 public sealed class TextPreprocessingService
 {
-    private const string FingerprintVersion = "regex-v1";
+    private const string FingerprintVersion = "replacement-v2";
     private readonly TextPreprocessingLimits _limits;
     private readonly Dictionary<(string Pattern, string Replacement, RegexOptions Options), CompiledTextReplacement> _cache = [];
     private readonly object _cacheLock = new();
@@ -218,19 +215,18 @@ public sealed class TextPreprocessingService
         cancellationToken.ThrowIfCancellationRequested();
         if (enabledRules.Count == 0)
         {
-            return new PreparedTranslationInput(text, text, fingerprint, []);
+            return new PreparedTranslationInput(text, text, fingerprint);
         }
 
         var currentText = text;
-        var summaries = new List<TextReplacementMatchSummary>(enabledRules.Count);
         foreach (var rule in enabledRules)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            currentText = ApplyRule(currentText, rule, summaries, started, cancellationToken);
+            currentText = ApplyRule(currentText, rule, started, cancellationToken);
         }
 
         cancellationToken.ThrowIfCancellationRequested();
-        return new PreparedTranslationInput(text, currentText, fingerprint, summaries.AsReadOnly());
+        return new PreparedTranslationInput(text, currentText, fingerprint);
     }
 
     internal static TextPreprocessingSettings Capture(TextPreprocessingSettings? settings)
@@ -252,15 +248,18 @@ public sealed class TextPreprocessingService
     internal void Validate(TextPreprocessingSettings settings)
     {
         var snapshot = Capture(settings);
-        foreach (var rule in snapshot.Rules)
+        foreach (var rule in snapshot.Rules.Where(rule => snapshot.IsEnabled && rule.IsEnabled))
             GetCompiledRule(rule);
     }
 
     private static void ValidateRuleFields(TextReplacementRule rule)
     {
+        if (!Enum.IsDefined(rule.Mode))
+            throw new TextPreprocessingException(rule.Id, RuleName(rule),
+                "未知的替换方式。", errorKind: "InvalidConfiguration");
         if (string.IsNullOrEmpty(rule.Pattern))
             throw new TextPreprocessingException(rule.Id, RuleName(rule),
-                $"翻译前替换规则“{RuleName(rule)}”的正则表达式不能为空。");
+                $"翻译前替换规则“{RuleName(rule)}”的查找内容不能为空。");
         if (rule.Replacement is null || string.IsNullOrWhiteSpace(rule.Id))
             throw new TextPreprocessingException(rule.Id, RuleName(rule),
                 $"翻译前替换规则“{RuleName(rule)}”的配置无效。", errorKind: "InvalidConfiguration");
@@ -272,14 +271,16 @@ public sealed class TextPreprocessingService
     private CompiledTextReplacement GetCompiledRule(TextReplacementRule rule)
     {
         ValidateRuleFields(rule);
-        var key = (rule.Pattern, rule.Replacement, CreateRegexOptions(rule));
+        var key = (Pattern: rule.Mode == TextReplacementMode.PlainText ? Regex.Escape(rule.Pattern) : rule.Pattern,
+            Replacement: rule.Mode == TextReplacementMode.PlainText ? rule.Replacement.Replace("$", "$$") : rule.Replacement,
+            Options: CreateRegexOptions(rule));
         lock (_cacheLock)
         {
             if (_cache.TryGetValue(key, out var compiled))
                 return compiled;
             try
             {
-                compiled = new CompiledTextReplacement(new Regex(key.Pattern, key.Item3, _limits.RegexTimeout), key.Replacement);
+                compiled = new CompiledTextReplacement(new Regex(key.Pattern, key.Options, _limits.RegexTimeout), key.Replacement);
             }
             catch (ArgumentException ex)
             {
@@ -296,7 +297,6 @@ public sealed class TextPreprocessingService
     private string ApplyRule(
         string text,
         TextReplacementRule rule,
-        ICollection<TextReplacementMatchSummary> summaries,
         long started,
         CancellationToken cancellationToken)
     {
@@ -347,7 +347,6 @@ public sealed class TextPreprocessingService
                 ex);
         }
 
-        summaries.Add(new TextReplacementMatchSummary(rule.Id, ruleName, matchCount));
         return matchCount == 0 ? text : builder.ToString();
 
         void CheckBudget()
@@ -397,6 +396,7 @@ public sealed class TextPreprocessingService
         builder.Append('\n').Append(isEnabled ? "enabled" : "disabled");
         foreach (var rule in enabledRules)
         {
+            builder.Append('\n').Append((int)rule.Mode);
             builder.Append('\n').Append(rule.Pattern.Length).Append(':').Append(rule.Pattern);
             builder.Append('\n').Append(rule.Replacement.Length).Append(':').Append(rule.Replacement);
             builder.Append('\n').Append(rule.IgnoreCase ? '1' : '0');

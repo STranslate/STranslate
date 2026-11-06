@@ -518,6 +518,16 @@
                         OnContent="{DynamicResource Enable}" />
                 </ui:SettingsCard>
 
+                <ui:SettingsCard Header="{DynamicResource General_TextPreprocessing}"
+                    Description="{DynamicResource General_TextPreprocessingDescription}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.TextEditStyle_20_Regular}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <Button Content="{DynamicResource General_TextPreprocessingManage}"
+                        Command="{Binding EditTextPreprocessingCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource Self}}" />
+                </ui:SettingsCard>
+
                 <ui:SettingsExpander
                     d:IsExpanded="True"
                     Description="{DynamicResource General_TextSeparatorHandleTypeDescription}"

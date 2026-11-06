@@ -43,17 +43,10 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel Orientation="Horizontal">
-                            <control:IconButton
-                                Command="{Binding RelativeSource={RelativeSource AncestorType=ui:Page}, Path=DataContext.CopyCommand}"
-                                CommandParameter="{Binding TransResult.Text}"
-                                Icon="{x:Static ui:FluentSystemIcons.Copy_20_Regular}" />
-                            <control:IconButton Margin="4,0,0,0"
-                                Command="{Binding RelativeSource={RelativeSource AncestorType=ui:Page}, Path=DataContext.ShowRequestDetailsCommand}"
-                                CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
-                                Icon="{x:Static ui:FluentSystemIcons.Document_20_Regular}"
-                                ToolTip="{DynamicResource Translate_TextPreprocessingRequestDetails}" />
-                        </StackPanel>
+                        <control:IconButton
+                            Command="{Binding RelativeSource={RelativeSource AncestorType=ui:Page}, Path=DataContext.CopyCommand}"
+                            CommandParameter="{Binding TransResult.Text}"
+                            Icon="{x:Static ui:FluentSystemIcons.Copy_20_Regular}" />
                         <TextBlock
                             Grid.Column="1"
                             Margin="8,0,0,0"
@@ -304,17 +297,10 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal">
-                        <control:IconButton
-                            Command="{Binding RelativeSource={RelativeSource AncestorType=ui:Page}, Path=DataContext.CopyCommand}"
-                            CommandParameter="{Binding DictResult.Text}"
-                            Icon="{x:Static ui:FluentSystemIcons.Copy_20_Regular}" />
-                        <control:IconButton Margin="4,0,0,0"
-                            Command="{Binding RelativeSource={RelativeSource AncestorType=ui:Page}, Path=DataContext.ShowRequestDetailsCommand}"
-                            CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
-                            Icon="{x:Static ui:FluentSystemIcons.Document_20_Regular}"
-                            ToolTip="{DynamicResource Translate_TextPreprocessingRequestDetails}" />
-                    </StackPanel>
+                    <control:IconButton
+                        Command="{Binding RelativeSource={RelativeSource AncestorType=ui:Page}, Path=DataContext.CopyCommand}"
+                        CommandParameter="{Binding DictResult.Text}"
+                        Icon="{x:Static ui:FluentSystemIcons.Copy_20_Regular}" />
                     <TextBlock
                         Grid.Column="1"
                         Margin="8,0,0,0"

@@ -455,6 +455,22 @@ public class SqlService
 [Table("History")]
 public class HistoryModel
 {
+    private readonly List<HistoryData> _excludedCacheResults = [];
+
+    internal void ExcludeFromCache(HistoryData data)
+    {
+        Data.Remove(data);
+        _excludedCacheResults.Add(data);
+    }
+
+    internal void RestoreUntranslatedResults()
+    {
+        foreach (var data in _excludedCacheResults)
+            if (!Data.Any(current => current.PluginID == data.PluginID && current.ServiceID == data.ServiceID))
+                Data.Add(data);
+        _excludedCacheResults.Clear();
+    }
+
     [Key] public long Id { get; set; }
 
     /// <summary>

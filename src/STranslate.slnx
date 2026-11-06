@@ -53,7 +53,6 @@
   <Folder Name="/Plugins/ThirdPlugins/" />
 
   <!-- 测试项目 -->
-  <Project Path="Tests/STranslate.UiSmoke/STranslate.UiSmoke.csproj" />
   <Folder Name="/Tests/">
     <Project Path="Tests/STranslate.Tests/STranslate.Tests.csproj" />
   </Folder>

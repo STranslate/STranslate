@@ -159,14 +159,10 @@
                     Visibility="{Binding IsInputBoxVisible, Converter={cnvt:BoolToVisibilityConverter}}" />
 
                 <!--  // LangSelectControl //  -->
-                <DockPanel Margin="0,0,10,8" Visibility="{Binding HasReplacements, Converter={cnvt:BoolToVisibilityConverter}}">
-                    <control:IconButton DockPanel.Dock="Right" Width="28" Height="28"
-                        Command="{Binding ShowPreparedRequestCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
-                        Icon="{x:Static ui:FluentSystemIcons.Document_20_Regular}"
-                        ToolTip="{DynamicResource Translate_TextPreprocessingRequestDetails}" />
-                    <TextBlock Text="{Binding ReplacementStatus}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                </DockPanel>
+                <TextBlock Margin="0,0,10,8" TextWrapping="Wrap"
+                    Foreground="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorCautionBrushKey}}"
+                    Text="{DynamicResource General_TextPreprocessingHint}"
+                    Visibility="{Binding HasTextPreprocessingRules, Converter={cnvt:BoolToVisibilityConverter}}" />
                 <Grid
                     Margin="0,0,10,10"
                     Visibility="{Binding IsLanguageSelectControlVisible, Converter={cnvt:BoolToVisibilityConverter}}">

@@ -36,7 +36,7 @@ public class TranslationOperationPreprocessingTests
         await operation.PrepareInputAsync();
         Assert.Equal("keep secret", operation.Text);
         Assert.Equal("keep public", operation.RequestText);
-        Assert.True(operation.IsPreprocessed);
+        Assert.NotEmpty(operation.RulesFingerprint);
         Assert.True(operation.TryPrepare(plugin));
 
         var result = await operation.TranslateAsync(

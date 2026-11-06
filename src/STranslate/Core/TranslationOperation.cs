@@ -28,7 +28,7 @@ internal sealed class TranslationOperation
         OperationId = operationId;
         Text = text;
         _preparedInput = preparedInput ?? (prepareInput is null
-            ? new PreparedTranslationInput(text, text, string.Empty, []) : null);
+            ? new PreparedTranslationInput(text, text, string.Empty) : null);
         _preparation = new(prepareInput ?? (() => Task.FromResult(_preparedInput!)));
         SourceLang = sourceLang;
         TargetLang = targetLang;
@@ -40,7 +40,6 @@ internal sealed class TranslationOperation
     internal PreparedTranslationInput PreparedInput => _preparedInput ?? throw new InvalidOperationException("翻译输入尚未准备完成。");
     internal string RequestText => PreparedInput.RequestText;
     internal string RulesFingerprint => PreparedInput.RulesFingerprint;
-    internal bool IsPreprocessed => !string.IsNullOrEmpty(RulesFingerprint);
     internal LangEnum SourceLang { get; }
     internal LangEnum TargetLang { get; }
     internal CancellationToken CancellationToken { get; }
@@ -79,9 +78,6 @@ internal sealed class TranslationOperation
 
     internal bool TryPublishAutomatic(Action publish) =>
         _coordinator.TryPublishAutomatic(OperationId, publish);
-
-    internal bool TryPublishInputPreview(Action publish) =>
-        _coordinator.TryPublishInputPreview(OperationId, publish);
 
     internal void ActivateIdentifiedLanguage() =>
         _coordinator.ActivateIdentifiedLanguage(OperationId);

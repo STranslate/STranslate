@@ -7,6 +7,32 @@ namespace STranslate.Tests;
 public class TranslationCacheContextTests
 {
     [Fact]
+    public async Task FailedRetranslationKeepsOldHistoryWithoutPublishingOrRecachingIt()
+    {
+        var coordinator = CreateCoordinator("new request");
+        var operation = coordinator.BeginOperation("secret", LangEnum.Auto, LangEnum.Auto, CancellationToken.None);
+        await operation.PrepareInputAsync();
+        var failed = CreateService("failed");
+        var successful = CreateService("successful");
+        var oldFailed = new HistoryData(failed) { RequestText = "old request", PreprocessingFingerprint = "old",
+            TransResult = new() { Text = "old successful translation" } };
+        var oldSuccessful = new HistoryData(successful) { RequestText = "old request", PreprocessingFingerprint = "old",
+            TransResult = new() { Text = "old result" } };
+        var history = new HistoryModel { SourceText = "secret", Data = [oldFailed, oldSuccessful] };
+        operation.TryPrepare((ITranslatePlugin)failed.Plugin);
+        operation.TryPrepare((ITranslatePlugin)successful.Plugin);
+        Assert.Equal(2, MainWindowViewModel.PopulateResultsFromCache(history, [failed, successful], operation).Count);
+        Assert.Empty(((ITranslatePlugin)failed.Plugin).TransResult.Text);
+        var incoming = new HistoryData(successful) { TransResult = new() { Text = "new result" } };
+        incoming.ApplyPreprocessingContext(operation);
+        history.Data.Add(incoming);
+        history.RestoreUntranslatedResults();
+        Assert.Same(oldFailed, history.GetData(failed));
+        Assert.Same(incoming, history.GetData(successful));
+        Assert.False(oldFailed.IsCompatible(operation.Text, operation.RequestText, operation.RulesFingerprint));
+    }
+
+    [Fact]
     public async Task SameOriginalTextWithChangedRulesIsNotCompatible()
     {
         var firstCoordinator = CreateCoordinator("public");

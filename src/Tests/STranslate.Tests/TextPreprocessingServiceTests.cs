@@ -4,6 +4,31 @@ namespace STranslate.Tests;
 
 public class TextPreprocessingServiceTests
 {
+    [Theory]
+    [InlineData("a.b", "$1\\name", "a.b axb", "$1\\name axb")]
+    [InlineData("[", "${name}", "[x[", "${name}x${name}")]
+    public void PlainTextTreatsPatternsAndReplacementsLiterally(string pattern, string replacement, string input, string expected)
+    {
+        var result = new TextPreprocessingService().Prepare(input, new()
+        {
+            IsEnabled = true,
+            Rules = [new() { Mode = TextReplacementMode.PlainText, Pattern = pattern, Replacement = replacement }]
+        });
+        Assert.Equal(expected, result.RequestText);
+    }
+
+    [Fact]
+    public void PlainTextAndRegexCanBeChainedWithIgnoreCase()
+    {
+        var result = new TextPreprocessingService().Prepare("ACME.42", new()
+        {
+            IsEnabled = true,
+            Rules = [new() { Mode = TextReplacementMode.PlainText, Pattern = "acme.", Replacement = "product-", IgnoreCase = true },
+                new() { Pattern = "product-(\\d+)", Replacement = "item $1" }]
+        });
+        Assert.Equal("item 42", result.RequestText);
+    }
+
     [Fact]
     public void AppliesEnabledRulesInOrderAndReportsMatches()
     {
@@ -21,8 +46,6 @@ public class TextPreprocessingServiceTests
 
         Assert.Equal("Review ACME-123 today.", result.OriginalText);
         Assert.Equal("Review Product A today.", result.RequestText);
-        Assert.Equal(2, result.TotalMatchCount);
-        Assert.Equal([1, 1], result.MatchSummaries.Select(summary => summary.MatchCount));
     }
 
     [Fact]
@@ -73,8 +96,6 @@ public class TextPreprocessingServiceTests
 
         Assert.Equal("secret", enabledResult.RequestText);
         Assert.Equal("secret", disabledResult.RequestText);
-        Assert.False(enabledResult.IsChanged);
-        Assert.False(disabledResult.IsChanged);
         Assert.Equal(enabledResult.RulesFingerprint, new TextPreprocessingService()
             .Prepare("other", disabledRuleSettings).RulesFingerprint);
     }

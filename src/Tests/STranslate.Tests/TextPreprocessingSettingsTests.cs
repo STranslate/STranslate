@@ -7,6 +7,18 @@ namespace STranslate.Tests;
 public class TextPreprocessingSettingsTests
 {
     [Fact]
+    public void LegacyRulesRemainRegexAndNewModesSurviveStorageRoundTrip()
+    {
+        var legacy = JsonSerializer.Deserialize<TextPreprocessingSettings>("""{"IsEnabled":true,"Rules":[{"Pattern":"(a)","Replacement":"$1$1"}]}""")!;
+        Assert.Equal(TextReplacementMode.Regex, legacy.Rules[0].Mode);
+        Assert.Equal("aa", new TextPreprocessingService().Prepare("a", legacy).RequestText);
+        legacy.Rules[0].Mode = TextReplacementMode.PlainText;
+        var restored = JsonSerializer.Deserialize<TextPreprocessingSettings>(JsonSerializer.Serialize(legacy))!;
+        Assert.Equal(TextReplacementMode.PlainText, restored.Rules[0].Mode);
+        Assert.Equal("$1$1", new TextPreprocessingService().Prepare("(a)", restored).RequestText);
+    }
+
+    [Fact]
     public void DefaultSettingsKeepPreprocessingDisabledAndEmpty()
     {
         var settings = new Settings();

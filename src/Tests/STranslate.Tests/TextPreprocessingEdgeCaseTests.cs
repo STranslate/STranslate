@@ -116,7 +116,6 @@ public class TextPreprocessingEdgeCaseTests
             Rules = [new() { Pattern = "z", Replacement = new string('x', 9) }]
         });
         Assert.Equal("not matched", result.RequestText);
-        Assert.Equal(0, result.TotalMatchCount);
     }
 
     [Fact]

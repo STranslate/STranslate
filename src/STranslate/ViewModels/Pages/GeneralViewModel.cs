@@ -15,11 +15,14 @@ public partial class GeneralViewModel : SearchViewModelBase
     public GeneralViewModel(
         Settings settings,
         DataProvider dataProvider,
-        Internationalization i18n) : base(i18n, "General_")
+        Internationalization i18n,
+        TextPreprocessingService textPreprocessingService) : base(i18n, "General_")
     {
         Settings = settings;
         DataProvider = dataProvider;
         Languages = i18n.LoadAvailableLanguages();
+        _textPreprocessingService = textPreprocessingService;
+        _i18n = i18n;
 
         InitializeMainHeaderActions();
 
@@ -30,6 +33,16 @@ public partial class GeneralViewModel : SearchViewModelBase
 
     private bool _isSyncingMainHeaderActions;
     private bool _isMainHeaderSyncPending;
+    private readonly TextPreprocessingService _textPreprocessingService;
+    private readonly Internationalization _i18n;
+
+    [RelayCommand]
+    private async Task EditTextPreprocessingAsync(FrameworkElement element)
+    {
+        if (Window.GetWindow(element) is not { } owner) return;
+        using var draft = new TextPreprocessingEditViewModel(Settings, _textPreprocessingService, _i18n.GetTranslation);
+        await new Controls.TextPreprocessingDialog(draft).ShowAsync(owner);
+    }
 
     public ObservableCollection<string> VisibleHeaderActions { get; } = [];
 

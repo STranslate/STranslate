@@ -21,4 +21,3 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyFileVersion("1.0.0")]
 [assembly: AssemblyInformationalVersion("1.0.0")]
 [assembly: InternalsVisibleTo("STranslate.Tests")]
-[assembly: InternalsVisibleTo("STranslate.UiSmoke")]

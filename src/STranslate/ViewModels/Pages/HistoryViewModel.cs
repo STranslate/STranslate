@@ -7,7 +7,6 @@ using STranslate.Core;
 using STranslate.Helpers;
 using STranslate.Plugin;
 using System.IO;
-using System.Windows;
 
 namespace STranslate.ViewModels.Pages;
 
@@ -136,18 +135,6 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
         if (string.IsNullOrEmpty(text)) return;
         ClipboardHelper.SetText(text);
         _snackbar.ShowSuccess(_i18n.GetTranslation("CopySuccess"));
-    }
-
-    [RelayCommand]
-    private async Task ShowRequestDetailsAsync(FrameworkElement element)
-    {
-        if (element.DataContext is not HistoryData data || SelectedItem is not { } history ||
-            !history.Data.Contains(data) || Window.GetWindow(element) is not { } owner) return;
-        var source = data.EffectiveSourceLang ?? history.EffectiveSourceLang ?? history.SourceLang;
-        var target = data.EffectiveTargetLang ?? history.EffectiveTargetLang ?? history.TargetLang;
-        var languages = data.TransResult is null ? string.Empty :
-            $"{_i18n.GetTranslation("LangEnum" + source)} > {_i18n.GetTranslation("LangEnum" + target)}";
-        await new Controls.TranslationRequestDialog(data.RequestText ?? history.SourceText, languages).ShowAsync(owner);
     }
 
     [RelayCommand(CanExecute = nameof(CanLoadMore))]

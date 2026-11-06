@@ -17,6 +17,8 @@ public partial class TextPreprocessingDialog : ContentDialog
         IsPrimaryButtonEnabled = false;
         try
         {
+            RulesGrid.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Cell, true);
+            RulesGrid.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Row, true);
             if (await ((TextPreprocessingEditViewModel)DataContext).ApplyAsync())
                 Hide();
         }

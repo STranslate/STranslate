@@ -292,15 +292,7 @@
                 <control:STranslateBadge Visibility="{Binding SelectedItem, Converter={cnvt:EqualToVisibilityConverter}}" />
 
                 <ui:ScrollViewerEx Margin="0,0,-20,0">
-                    <StackPanel Margin="0,0,20,0">
-                        <Button Margin="0,0,0,12" HorizontalContentAlignment="Left"
-                            Command="{Binding EditTextPreprocessingCommand}"
-                            CommandParameter="{Binding RelativeSource={RelativeSource Self}}">
-                            <ui:IconAndText Content="{DynamicResource Translate_TextPreprocessing}"
-                                Icon="{x:Static ui:FluentSystemIcons.TextEditStyle_20_Regular}" />
-                        </Button>
-                        <ContentControl Content="{Binding SettingUI}" />
-                    </StackPanel>
+                    <ContentControl Margin="0,0,20,0" Content="{Binding SettingUI}" />
                 </ui:ScrollViewerEx>
             </Grid>
         </Grid>

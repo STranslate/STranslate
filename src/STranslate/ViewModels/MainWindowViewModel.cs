@@ -64,9 +64,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     public Settings Settings { get; }
     public HotkeySettings HotkeySettings { get; }
-    private PreparedTranslationInput? _lastPreparedInput;
-    [ObservableProperty] public partial string ReplacementStatus { get; set; } = string.Empty;
-    [ObservableProperty] public partial bool HasReplacements { get; set; }
+    public bool HasTextPreprocessingRules => IsInputBoxVisible &&
+        Settings.TextPreprocessing is { IsEnabled: true, Rules: { } rules } &&
+        rules.Any(rule => rule is { IsEnabled: true });
 
     public MainWindowViewModel(
         DataProvider dataProvider,
@@ -340,7 +340,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             : null;
 
         ResetAllServices(operation);
-        ClearPreparedInputPreview();
         ApplyIdentifiedLanguageState(forcedSourceLanguage.HasValue
             ? CreateDetectedIdentifiedLanguageState(forcedSourceLanguage.Value)
             : IdentifiedLanguageState.Empty);
@@ -351,7 +350,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             if (!operation.IsLatestAutomatic)
                 return;
             operation.EnsureNonEmptyInput();
-            PublishPreparedInputPreview(operation);
         }
         catch (TextPreprocessingException ex)
         {
@@ -411,6 +409,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 return;
 
             // 按服务启用顺序排序
+            history.RestoreUntranslatedResults();
             var enabledServices = TranslateService.Services.Where(x => x.IsEnabled).ToList();
             history.Data = [.. history.Data.OrderBy(data => enabledServices.FindIndex(svc => svc.ServiceID.Equals(data.ServiceID)))];
             await _sqlService.InsertOrUpdateDataAsync(history, (long)Settings.HistoryLimit).ConfigureAwait(false);
@@ -501,12 +500,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 return;
         }
         operation.ActivateIdentifiedLanguage();
-        ClearPreparedInputPreview();
         await operation.PrepareInputAsync().ConfigureAwait(false);
         if (!operation.IsCurrent(channel))
             return;
         operation.EnsureNonEmptyInput();
-        PublishPreparedInputPreview(operation);
 
         switch (service.Plugin)
         {
@@ -620,7 +617,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             if (service.Plugin is not ITranslatePlugin plugin ||
                 _translationCoordinator.GetResultContext(plugin.TransResult) is not { } mainContext ||
-                mainContext.Input.OriginalText != InputText ||
                 mainContext.TranslatedText != plugin.TransResult.Text)
                 return;
             var operation = _translationCoordinator.BeginBackOperation(mainContext, cancellationTokenSource.Token);
@@ -1002,7 +998,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 if (!data.IsCompatible(operation.Text, operation.RequestText, operation.RulesFingerprint) ||
                     !data.HasSuccessfulMainResult(service))
                 {
-                    history.Data.Remove(data);
+                    history.ExcludeFromCache(data);
                     uncachedServices.Add(service);
                     continue;
                 }
@@ -2347,6 +2343,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             NotifyInputVisibilityProperties();
         }
 
+        if (e.PropertyName == nameof(Settings.TextPreprocessing))
+            OnPropertyChanged(nameof(HasTextPreprocessingRules));
+
         if (e.PropertyName != nameof(Settings.MainWindowMaxHeightRatio) &&
             e.PropertyName != nameof(Settings.WindowScreen) &&
             e.PropertyName != nameof(Settings.CustomScreenNumber))
@@ -2758,6 +2757,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     private void NotifyInputVisibilityProperties()
     {
+        OnPropertyChanged(nameof(HasTextPreprocessingRules));
         OnPropertyChanged(nameof(IsInputActuallyHidden));
         OnPropertyChanged(nameof(IsInputBoxVisible));
         OnPropertyChanged(nameof(IsLanguageSelectControlVisible));
@@ -2765,7 +2765,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     partial void OnInputTextChanged(string value)
     {
-        ClearPreparedInputPreview();
         ResetTranslationLanguageState();
 
         if (!Settings.AutoTranslate)
@@ -2871,29 +2870,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _logger.LogWarning("Translation preprocessing failed: rule {RuleId}, kind {ErrorKind}",
             exception.RuleId, exception.ErrorKind);
         _snackbar.ShowWarning(TextPreprocessingErrorText.Format(exception, _i18n.GetTranslation));
-    }
-
-    private void ClearPreparedInputPreview()
-    {
-        _lastPreparedInput = null;
-        ReplacementStatus = string.Empty;
-        HasReplacements = false;
-    }
-
-    private void PublishPreparedInputPreview(TranslationOperation operation) =>
-        operation.TryPublishInputPreview(() =>
-        {
-            _lastPreparedInput = operation.PreparedInput;
-            HasReplacements = _lastPreparedInput.TotalMatchCount > 0;
-            ReplacementStatus = string.Format(_i18n.GetTranslation("Translate_TextPreprocessingApplied"),
-                _lastPreparedInput.TotalMatchCount);
-        });
-
-    [RelayCommand]
-    private async Task ShowPreparedRequestAsync(FrameworkElement element)
-    {
-        if (_lastPreparedInput is not { } input || Window.GetWindow(element) is not { } owner) return;
-        await new Controls.TranslationRequestDialog(input.RequestText).ShowAsync(owner);
     }
 
     private IdentifiedLanguageState CreateCacheIdentifiedLanguageState(HistoryModel history)
