@@ -8,4 +8,5 @@
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_NoTextOutput">پاسخ API شامل خروجی متنی نبود.</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_AdditionalParameters">پارامترهای اضافی درخواست</sys:String>
     <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_AdditionalParameters_Description">یک شیء JSON وارد کنید تا با ریشه درخواست ادغام شود. فیلدهای داخلی تولیدشده توسط افزونه قابل بازنویسی نیستند.</sys:String>
+    <sys:String x:Key="STranslate_Plugin_Translate_OpenAI_SendTemperature">ارسال پارامتر دما</sys:String>
 </ResourceDictionary>

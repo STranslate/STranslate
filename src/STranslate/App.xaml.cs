@@ -104,6 +104,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
                     services.AddSingleton<PluginManager>();
                     services.AddSingleton<ServiceManager>();
                     services.AddSingleton<PluginService>();
+                    services.AddSingleton<TextPreprocessingService>();
                     services.AddSingleton<TranslateService>();
                     services.AddSingleton<OcrService>();
                     services.AddSingleton<TtsService>();

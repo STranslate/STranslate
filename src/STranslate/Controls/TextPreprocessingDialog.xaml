@@ -1,0 +1,489 @@
+<ui:ContentDialog
+    x:Class="STranslate.Controls.TextPreprocessingDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cnvt="clr-namespace:STranslate.Converters"
+    xmlns:control="clr-namespace:STranslate.Controls"
+    xmlns:core="clr-namespace:STranslate.Core"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    Title="{DynamicResource Translate_TextPreprocessing}"
+    CloseButtonText="{DynamicResource Cancel}"
+    DefaultButton="Primary"
+    PrimaryButtonClick="OnPrimaryButtonClick"
+    PrimaryButtonStyle="{DynamicResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"
+    PrimaryButtonText="{DynamicResource Save}">
+    <ui:ContentDialog.Resources>
+        <sys:Double x:Key="ContentDialogMaxWidth">860</sys:Double>
+        <sys:Double x:Key="ContentDialogMaxHeight">720</sys:Double>
+        <sys:Double x:Key="ContentDialogMinWidth">600</sys:Double>
+        <sys:Double x:Key="ContentDialogMinHeight">500</sys:Double>
+    </ui:ContentDialog.Resources>
+    <ui:ScrollViewerEx VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="0,0,4,0">
+            <!-- 1. 顶部启用开关卡片 -->
+            <ui:SettingsCard
+                Header="{DynamicResource Translate_TextPreprocessing}"
+                Description="{DynamicResource Translate_TextPreprocessingDescription}"
+                Margin="0,0,0,12">
+                <ui:SettingsCard.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.TextEditStyle_20_Regular}" />
+                </ui:SettingsCard.HeaderIcon>
+                <ui:ToggleSwitch
+                    IsOn="{Binding IsEnabled, Mode=TwoWay}"
+                    OnContent="{DynamicResource Enable}"
+                    OffContent="{DynamicResource Disable}" />
+            </ui:SettingsCard>
+
+            <!-- 2. 规则列表与编辑区 -->
+            <Grid Height="265">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="205" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- 左侧：规则列表与操作栏 -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0" Margin="2,0,2,6">
+                        <TextBlock
+                            Text="{DynamicResource Translate_TextPreprocessingRules}"
+                            FontWeight="SemiBold"
+                            VerticalAlignment="Center" />
+                        <ikw:SimpleStackPanel
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="4">
+                            <control:IconButton
+                                Width="28"
+                                Height="28"
+                                Command="{Binding AddRuleCommand}"
+                                Icon="{x:Static ui:FluentSystemIcons.Add_20_Regular}"
+                                ToolTip="{DynamicResource Add}" />
+                            <control:IconButton
+                                Width="28"
+                                Height="28"
+                                Command="{Binding RemoveRuleCommand}"
+                                IsEnabled="{Binding SelectedRule, Converter={cnvt:NullToBoolInverseConverter}}"
+                                Icon="{x:Static ui:FluentSystemIcons.Delete_20_Regular}"
+                                ToolTip="{DynamicResource Delete}" />
+                            <control:IconButton
+                                Width="28"
+                                Height="28"
+                                Command="{Binding MoveRuleUpCommand}"
+                                IsEnabled="{Binding SelectedRule, Converter={cnvt:NullToBoolInverseConverter}}"
+                                Icon="{x:Static ui:FluentSystemIcons.ChevronUp_20_Regular}"
+                                ToolTip="{DynamicResource Translate_TextPreprocessingMoveUp}" />
+                            <control:IconButton
+                                Width="28"
+                                Height="28"
+                                Command="{Binding MoveRuleDownCommand}"
+                                IsEnabled="{Binding SelectedRule, Converter={cnvt:NullToBoolInverseConverter}}"
+                                Icon="{x:Static ui:FluentSystemIcons.ChevronDown_20_Regular}"
+                                ToolTip="{DynamicResource Translate_TextPreprocessingMoveDown}" />
+                        </ikw:SimpleStackPanel>
+                    </DockPanel>
+
+                    <Border
+                        Grid.Row="1"
+                        Background="{DynamicResource {x:Static ui:ThemeKeys.SolidBackgroundFillColorQuarternaryBrushKey}}"
+                        BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="5">
+                        <ListBox
+                            Background="Transparent"
+                            BorderThickness="0"
+                            ItemsSource="{Binding Rules}"
+                            SelectedItem="{Binding SelectedRule}"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0,2" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <ContentPresenter />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="core:TextReplacementRule">
+                                    <Border
+                                        x:Name="RuleItemBorder"
+                                        Padding="6,7,8,7"
+                                        Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorDefaultBrushKey}}"
+                                        BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        SnapsToDevicePixels="True">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="26" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border
+                                                x:Name="AccentIndicator"
+                                                Grid.Column="0"
+                                                Width="3"
+                                                Height="16"
+                                                Margin="0,0,4,0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Background="{DynamicResource {x:Static ui:ThemeKeys.SystemControlBackgroundAccentBrushKey}}"
+                                                CornerRadius="1.5"
+                                                Visibility="Collapsed" />
+                                            <CheckBox
+                                                Grid.Column="1"
+                                                MinWidth="0"
+                                                Padding="0"
+                                                IsChecked="{Binding IsEnabled}"
+                                                ToolTip="{DynamicResource Enable}"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Left" />
+                                            <TextBlock
+                                                x:Name="RuleNameText"
+                                                Grid.Column="2"
+                                                Text="{Binding Name}"
+                                                VerticalAlignment="Center"
+                                                TextWrapping="NoWrap"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip="{Binding Name}" />
+                                        </Grid>
+                                    </Border>
+                                    <DataTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="RuleItemBorder" Property="Background" Value="{DynamicResource {x:Static ui:ThemeKeys.SubtleFillColorSecondaryBrushKey}}" />
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType=ListBoxItem}}" Value="True">
+                                            <Setter TargetName="RuleItemBorder" Property="Background" Value="{DynamicResource {x:Static ui:ThemeKeys.SubtleFillColorTertiaryBrushKey}}" />
+                                            <Setter TargetName="RuleItemBorder" Property="BorderBrush" Value="{DynamicResource {x:Static ui:ThemeKeys.SystemControlBackgroundAccentBrushKey}}" />
+                                            <Setter TargetName="AccentIndicator" Property="Visibility" Value="Visible" />
+                                            <Setter TargetName="RuleNameText" Property="FontWeight" Value="SemiBold" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+                </Grid>
+
+                <!-- 右侧：选中规则编辑卡片 -->
+                <Border
+                    Grid.Column="2"
+                    Background="{DynamicResource {x:Static ui:ThemeKeys.CardBackgroundFillColorDefaultBrushKey}}"
+                    BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16,12">
+                    <Grid>
+                        <!-- 有选中规则时的编辑表单 -->
+                        <StackPanel
+                            DataContext="{Binding SelectedRule}"
+                            Visibility="{Binding Converter={cnvt:EqualToVisibilityInverseConverter}}">
+                            <!-- 规则名称 -->
+                            <TextBlock
+                                Text="{DynamicResource Translate_TextPreprocessingRuleName}"
+                                FontWeight="SemiBold"
+                                FontSize="{DynamicResource STControlFontSize12}"
+                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}"
+                                Margin="0,0,0,3" />
+                            <TextBox
+                                Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                ui:ControlHelper.CornerRadius="6"
+                                Margin="0,0,0,8" />
+
+                            <!-- 正则表达式 -->
+                            <DockPanel Margin="0,0,0,3">
+                                <TextBlock
+                                    Text="{DynamicResource Translate_TextPreprocessingPattern}"
+                                    FontWeight="SemiBold"
+                                    FontSize="{DynamicResource STControlFontSize12}"
+                                    Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}" />
+                                <TextBlock
+                                    Text="Regex"
+                                    HorizontalAlignment="Right"
+                                    FontFamily="Consolas"
+                                    FontSize="{DynamicResource STControlFontSize11}"
+                                    Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorTertiaryBrushKey}}" />
+                            </DockPanel>
+                            <TextBox
+                                Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
+                                FontFamily="Consolas, Cascadia Code, Courier New"
+                                TextWrapping="Wrap"
+                                MinHeight="32"
+                                ui:ControlHelper.CornerRadius="6"
+                                Margin="0,0,0,8" />
+
+                            <!-- 替换文本 -->
+                            <DockPanel Margin="0,0,0,3">
+                                <TextBlock
+                                    Text="{DynamicResource Translate_TextPreprocessingReplacement}"
+                                    FontWeight="SemiBold"
+                                    FontSize="{DynamicResource STControlFontSize12}"
+                                    Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}" />
+                                <TextBlock
+                                    Text="$1, $2..."
+                                    HorizontalAlignment="Right"
+                                    FontFamily="Consolas"
+                                    FontSize="{DynamicResource STControlFontSize11}"
+                                    Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorTertiaryBrushKey}}" />
+                            </DockPanel>
+                            <TextBox
+                                Text="{Binding Replacement, UpdateSourceTrigger=PropertyChanged}"
+                                FontFamily="Consolas, Cascadia Code, Courier New"
+                                AcceptsReturn="True"
+                                TextWrapping="Wrap"
+                                MinHeight="44"
+                                MaxHeight="60"
+                                VerticalScrollBarVisibility="Auto"
+                                ui:ControlHelper.CornerRadius="6"
+                                Margin="0,0,0,8" />
+
+                            <!-- 正则选项 -->
+                            <Border
+                                Background="{DynamicResource {x:Static ui:ThemeKeys.SolidBackgroundFillColorQuarternaryBrushKey}}"
+                                BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="12,6">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="14">
+                                    <CheckBox
+                                        Content="{DynamicResource Translate_TextPreprocessingIgnoreCase}"
+                                        IsChecked="{Binding IgnoreCase}"
+                                        ToolTip="{DynamicResource Translate_TextPreprocessingIgnoreCaseDescription}" />
+                                    <CheckBox
+                                        Content="{DynamicResource Translate_TextPreprocessingMultiline}"
+                                        IsChecked="{Binding Multiline}"
+                                        ToolTip="{DynamicResource Translate_TextPreprocessingMultilineDescription}" />
+                                    <CheckBox
+                                        Content="{DynamicResource Translate_TextPreprocessingSingleline}"
+                                        IsChecked="{Binding Singleline}"
+                                        ToolTip="{DynamicResource Translate_TextPreprocessingSinglelineDescription}" />
+                                </ikw:SimpleStackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- 未选中规则时的空状态引导 -->
+                        <Grid Visibility="{Binding SelectedRule, Converter={cnvt:EqualToVisibilityConverter}}">
+                            <ikw:SimpleStackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+                                <ui:FontIcon
+                                    Icon="{x:Static ui:FluentSystemIcons.DocumentBulletList_24_Regular}"
+                                    FontSize="36"
+                                    Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorTertiaryBrushKey}}" />
+                                <TextBlock
+                                    Text="{DynamicResource Translate_TextPreprocessingNoRuleSelected}"
+                                    Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}"
+                                    HorizontalAlignment="Center" />
+                                <Button
+                                    Command="{Binding AddRuleCommand}"
+                                    HorizontalAlignment="Center"
+                                    Style="{DynamicResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}">
+                                    <ui:IconAndText Content="{DynamicResource Add}" Icon="{x:Static ui:FluentSystemIcons.Add_20_Regular}" />
+                                </Button>
+                            </ikw:SimpleStackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- 3. 实时预览与测试卡片 -->
+            <Border
+                Margin="0,12,0,0"
+                Background="{DynamicResource {x:Static ui:ThemeKeys.CardBackgroundFillColorDefaultBrushKey}}"
+                BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16,11">
+                <StackPanel>
+                    <!-- 预览头部：标题、加载指示与匹配数 -->
+                    <DockPanel Margin="0,0,0,8">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <ui:FontIcon
+                                Icon="{x:Static ui:FluentSystemIcons.PreviewLink_20_Regular}"
+                                FontSize="16"
+                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.AccentTextFillColorPrimaryBrushKey}}" />
+                            <TextBlock
+                                Text="{DynamicResource Translate_TextPreprocessingPreview}"
+                                FontWeight="SemiBold"
+                                FontSize="{DynamicResource STControlFontSize14}"
+                                VerticalAlignment="Center" />
+                        </ikw:SimpleStackPanel>
+                        <ikw:SimpleStackPanel
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="8"
+                            VerticalAlignment="Center">
+                            <ui:ProgressRing
+                                Width="14"
+                                Height="14"
+                                IsActive="{Binding IsPreviewing}"
+                                Visibility="{Binding IsPreviewing, Converter={cnvt:BoolToVisibilityConverter}}" />
+                            <Border
+                                CornerRadius="10"
+                                Padding="8,2"
+                                Background="{DynamicResource {x:Static ui:ThemeKeys.SolidBackgroundFillColorTertiaryBrushKey}}"
+                                BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                                BorderThickness="1">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="4">
+                                    <ui:FontIcon
+                                        Icon="{x:Static ui:FluentSystemIcons.TextBulletListSquareSearch_20_Regular}"
+                                        FontSize="12"
+                                        VerticalAlignment="Center"
+                                        Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}" />
+                                    <TextBlock VerticalAlignment="Center" FontSize="{DynamicResource STControlFontSize12}">
+                                        <Run Text="{DynamicResource Translate_TextPreprocessingMatchCount}" /><Run Text=": " /><Run FontWeight="SemiBold" Foreground="{DynamicResource {x:Static ui:ThemeKeys.AccentTextFillColorPrimaryBrushKey}}" Text="{Binding PreviewMatchCount, Mode=OneWay}" />
+                                    </TextBlock>
+                                </ikw:SimpleStackPanel>
+                            </Border>
+                        </ikw:SimpleStackPanel>
+                    </DockPanel>
+
+                    <!-- 对比输入输出框 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="28" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 输入框 -->
+                        <Grid Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock
+                                Text="{DynamicResource Translate_TextPreprocessingPreviewInput}"
+                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}"
+                                FontSize="{DynamicResource STControlFontSize12}"
+                                Margin="0,0,0,4" />
+                            <TextBox
+                                Grid.Row="1"
+                                Height="72"
+                                AcceptsReturn="True"
+                                TextWrapping="Wrap"
+                                VerticalScrollBarVisibility="Auto"
+                                ui:ControlHelper.CornerRadius="6"
+                                ui:ControlHelper.PlaceholderText="{DynamicResource Translate_TextPreprocessingPreviewInputPlaceholder}"
+                                Text="{Binding PreviewInput, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+
+                        <!-- 转换箭头 -->
+                        <ui:FontIcon
+                            Grid.Column="1"
+                            Icon="{x:Static ui:FluentSystemIcons.ArrowRight_20_Regular}"
+                            FontSize="16"
+                            Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorTertiaryBrushKey}}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Margin="0,16,0,0" />
+
+                        <!-- 输出框 -->
+                        <Grid Grid.Column="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock
+                                Text="{DynamicResource Translate_TextPreprocessingPreviewOutput}"
+                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}"
+                                FontSize="{DynamicResource STControlFontSize12}"
+                                Margin="0,0,0,4" />
+                            <TextBox
+                                Grid.Row="1"
+                                Height="72"
+                                IsReadOnly="True"
+                                TextWrapping="Wrap"
+                                VerticalScrollBarVisibility="Auto"
+                                Background="{DynamicResource {x:Static ui:ThemeKeys.SolidBackgroundFillColorQuarternaryBrushKey}}"
+                                ui:ControlHelper.CornerRadius="6"
+                                Text="{Binding PreviewText, Mode=OneWay}" />
+                        </Grid>
+                    </Grid>
+
+                    <!-- 每条规则匹配计数标签 -->
+                    <ItemsControl ItemsSource="{Binding PreviewMatches}" Margin="0,8,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Margin="0,0,6,6"
+                                    Padding="6,3"
+                                    Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorDefaultBrushKey}}"
+                                    BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                                    BorderThickness="1"
+                                    CornerRadius="4">
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock
+                                            Text="{Binding RuleName}"
+                                            MaxWidth="140"
+                                            TextTrimming="CharacterEllipsis"
+                                            VerticalAlignment="Center"
+                                            FontSize="{DynamicResource STControlFontSize12}"
+                                            Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}" />
+                                        <Border
+                                            CornerRadius="6"
+                                            Padding="5,1"
+                                            VerticalAlignment="Center"
+                                            Background="{DynamicResource {x:Static ui:ThemeKeys.SolidBackgroundFillColorTertiaryBrushKey}}">
+                                            <TextBlock
+                                                Text="{Binding MatchCount}"
+                                                FontWeight="SemiBold"
+                                                FontSize="{DynamicResource STControlFontSize11}"
+                                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.AccentTextFillColorPrimaryBrushKey}}" />
+                                        </Border>
+                                    </ikw:SimpleStackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- 错误与警告提示条 -->
+                    <Border
+                        Margin="0,4,0,0"
+                        Padding="10,6"
+                        Background="{DynamicResource SystemFillColorAttentionBackgroundBrush}"
+                        BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorCautionBrushKey}}"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Visibility="{Binding PreviewError, Converter={cnvt:StringToVisibilityConverter}}">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <ui:FontIcon
+                                Icon="{x:Static ui:FluentSystemIcons.Warning_20_Regular}"
+                                FontSize="16"
+                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorCautionBrushKey}}"
+                                VerticalAlignment="Center" />
+                            <TextBlock
+                                Text="{Binding PreviewError}"
+                                TextWrapping="Wrap"
+                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorCautionBrushKey}}"
+                                FontSize="{DynamicResource STControlFontSize12}"
+                                VerticalAlignment="Center" />
+                        </ikw:SimpleStackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ui:ScrollViewerEx>
+</ui:ContentDialog>

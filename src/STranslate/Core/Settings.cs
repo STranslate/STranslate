@@ -112,6 +112,11 @@ public partial class Settings : ObservableObject
     [ObservableProperty] public partial LangEnum TargetLang { get; set; } = LangEnum.Auto;
 
     /// <summary>
+    /// 翻译请求发送前的文本替换配置。
+    /// </summary>
+    [ObservableProperty] public partial TextPreprocessingSettings TextPreprocessing { get; set; } = new();
+
+    /// <summary>
     ///     语种识别类型
     /// </summary>
     [ObservableProperty] public partial LanguageDetectorType LanguageDetector { get; set; } = LanguageDetectorType.Local;

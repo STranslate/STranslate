@@ -21,6 +21,11 @@
 - `STranslate/Core/TranslationOperation.cs`
   - 保存本次执行的输入、源/目标语种和取消令牌快照。
   - 使用独立临时结果执行主翻译、回译和词典查询，并把有效更新发布到界面结果。
+- `STranslate/Core/TextPreprocessing.cs`
+  - `PrepareAsync()`：捕获规则快照，在后台按顺序替换，生成 `PreparedTranslationInput`。
+  - `CompiledTextReplacement` 分段展开捕获组，在分配完整结果之前限制输出长度。
+- `STranslate/Core/DirectTranslationRunner.cs`
+  - 现有替换翻译和图片分块翻译共用的预处理、空结果检查、语言检测与插件调用入口。
 - `STranslate/Helpers/LanguageDetector.cs`
   - `GetLanguageAsync()`：源语种判定与目标语种推导。
   - `GetTargetLanguage()`：根据实际源语种推导目标语种。
@@ -39,11 +44,13 @@
    - `TranslationOperation` 快照输入文本、源/目标语种和取消令牌，内部持有递增操作标识。
    - 插件只写入本次请求独占的临时结果；主翻译、回译和词典结果仅在当前操作仍有效时发布到界面。
    - 被后续请求替代的旧任务仍可完成取消和资源清理，但不得覆盖新结果、触发自动复制或写入历史。
+   - 先登记操作所有权，再 `await operation.PrepareInputAsync()`；处理完成后检查取消、所有权和非空请求文本。
+   - `operation.Text` 始终是原文；`RequestText` 是一次性准备好的发送文本，普通、流式和同批词典共用它。
 3. 进入 `ExecuteTranslateAsync(checkCacheFirst)`：
    - 获取已启用且 `ExecMode == Automatic` 的服务。
    - 若启用历史缓存：用 `(InputText, SourceLang, TargetLang)` 查询 `SqlService`。
-   - 命中缓存后把结果注入各插件结果对象，仅保留未命中服务继续实时执行。
-4. 对未命中服务调用 `LanguageDetector.GetLanguageAsync()` 获取最终 `source/target`。
+   - 按服务校验实际发送文本、规则指纹和主结果成功状态，通过后才展示缓存；不兼容服务重新翻译。
+4. 对未命中服务以 `operation.RequestText` 调用 `LanguageDetector.GetLanguageAsync()` 获取最终 `source/target`。
    - 当用户在“识别为”快捷入口切换语言检测器时，会更新 `Settings.LanguageDetector` 并跳过缓存重新翻译；识别状态仍由本次翻译流程按实际检测结果刷新。
    - 当用户在“识别为”后面的识别结果上下拉选择语种时，本次主翻译会跳过缓存并强制以所选语种作为 `source` 执行一次。
    - 腾讯语言检测官方服务已停止，`Tencent` 不再作为可选检测器参与运行。
@@ -67,20 +74,27 @@
 4. 处理后的文本再进入 `ExecuteTranslate()` 或追加到输入框；普通键盘输入不走该取词后处理。
 
 ### 从入口到结果：缓存命中与增量补全
-1. `PopulateResultsFromCacheAsync()` 遍历目标服务。
+1. `PopulateResultsFromCache()` 遍历目标服务；旧记录缺少元数据时按未预处理解释，并在更新整条历史语种前补齐逐服务快照。
 2. 命中缓存时：
    - 翻译服务更新 `TransResult` / `TransBackResult`。
    - 词典服务更新 `DictionaryResult`。
-3. 若服务需要自动回译但缓存无回译结果，只补做回译，不重做主翻译。
+3. 若服务主译有效、需要自动回译但缓存回译缺失或失败，只补做回译；文本和语种取自该主译快照。
 
 ### 从入口到结果：手动单服务执行（词典/翻译）
 1. `TemporaryTranslate(service)` / 输出区重试先走服务级 `CanExecute`：不同服务可并发，同一服务已有手动任务时继续提示等待。
-2. `SingleTranslateAsync(service)` / `SingleTransBackAsync(service)` 启动时快照当前输入文本与源/目标语种，并用 `PluginID + ServiceID` 登记本次任务的取消令牌。
+2. `SingleTranslateAsync(service)` 启动时快照当前输入、规则与源/目标语种；`SingleTransBackAsync(service)` 使用当前主译绑定的 `TranslationResultContext`，不重新处理输入或识别语言。两者用 `PluginID + ServiceID` 登记本次任务的取消令牌。
 3. 若是 `IDictionaryPlugin`：用 `operation.LookupAsync()` 执行快照文本，失败即返回；词典手动执行仍保持现有历史语义，不额外落盘。
 4. 若是 `ITranslatePlugin`：用快照文本和语种配置识别实际语种后执行 `operation.TranslateAsync()`，按配置追加 `operation.BackTranslateAsync()`。
 5. 翻译服务成功后通过串行历史合并重新读取最新历史，只更新当前服务的 `HistoryData`，避免多个手动服务并发完成时互相覆盖。
 6. `Settings.CopyAfterTranslationNotAutomatic` 为真时，手动执行完成立即复制结果；多个并发服务仍按完成顺序更新剪贴板。
 7. ESC / 关闭窗口 / 清空输入 / 新翻译入口会通过 `CancelAllOperations()` 取消所有已登记的手动单服务任务。
+
+### 翻译前替换的编辑与查看
+1. 在“设置 → 翻译 → 翻译前替换”打开 `TextPreprocessingDialog`，显式传入所属窗口。
+2. `TextPreprocessingEditViewModel` 使用独立草稿；新增、排序、启停和编辑不会影响正在执行的请求。保存会后台校验全部规则，成功后整体替换 `Settings.TextPreprocessing`，取消即丢弃草稿。
+3. 本地预览防抖 180 ms，并取消已过期任务；显示最终请求、逐规则命中数和错误位置，不请求网络。
+4. 主窗口出现匹配时显示“已替换 N 处”，旁边的请求详情按钮展示本次准备的发送文本；输入改变或新请求开始时清除旧提示。
+5. 单规则限制 100 ms、整次处理限制 500 ms、中间输出上限 1,000,000 个 UTF-16 字符。配置损坏、规则错误、超时、输出超限和空结果都会阻止后续发送。
 
 ### 复制与历史策略
 - 自动复制：`Settings.CopyAfterTranslation` 支持第 N 个自动服务或最后一个自动服务。
@@ -111,6 +125,8 @@ var operation = _translationCoordinator.BeginAutomaticOperation(
     cancellationToken);
 
 ResetAllServices(operation);
+await operation.PrepareInputAsync();
+operation.EnsureNonEmptyInput();
 var result = await operation.TranslateAsync(plugin, source, target);
 
 if (!result.IsSuccess || !operation.IsCurrent(plugin.TransResult))
@@ -120,14 +136,14 @@ if (!result.IsSuccess || !operation.IsCurrent(plugin.TransResult))
 手动单服务执行使用 `BeginOperation()`。创建后始终向下传递整个 `TranslationOperation`，不要重新拆成 `operationId + text + language + cancellationToken`：
 
 - 主翻译：先 `operation.TryPrepare(plugin)`，再调用 `operation.TranslateAsync()`。
-- 仅回译：先 `operation.TryPrepareBack(plugin)`，再调用 `operation.BackTranslateAsync()`。
+- 仅回译：从主结果获取 `TranslationResultContext`，用 `BeginBackOperation()` 创建操作，再 `TryPrepareBack()` 和 `BackTranslateAsync()`。
 - 词典查询：先 `operation.TryPrepare(dictionaryPlugin)`，再调用 `operation.LookupAsync()`。
 - 缓存结果发布：使用 `operation.TryPublish()`；词典集合使用 `operation.PublishDictionary()`。
 - 语言识别回调：使用 `operation.PublishIdentifiedLanguage()`，避免旧检测任务更新新请求的识别状态。
 
 ### 新增或修改翻译入口 Checklist
 
-1. 在读取 `InputText` 和语言设置时立即创建 `TranslationOperation`，后续只使用 `operation.Text`、`SourceLang`、`TargetLang` 和 `CancellationToken`。
+1. 在读取 `InputText` 和语言设置时立即创建 `TranslationOperation`，先登记结果通道，再后台准备输入。展示/历史定位用 `Text`，检测/主翻译/词典用 `RequestText`。
 2. 调用插件前准备对应结果通道；不要把插件共享的 `TransResult`、`TransBackResult` 或 `DictionaryResult` 直接作为插件执行结果传入。
 3. 主翻译与回译都使用本次方法返回的临时结果；回译文本从本次主翻译返回值读取。
 4. `TranslationOperation` 会在插件返回后重新检查取消令牌；调用方仍须检查执行结果和 `operation.IsCurrent(...)`，再执行复制、历史、最近文本等非界面副作用。

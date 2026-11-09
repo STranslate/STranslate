@@ -47,8 +47,8 @@
 9. 原始 OCR 结果用于图片文本选中：`OcrWordBuilder.CreateFromOcrContents(_lastOcrResult.OcrContents)` 生成原文选中块。
 10. `ApplyLayoutAnalysis()` 生成 `OcrLayoutBlock`，并把分析后的块投影回 `OcrResult.OcrContents`，供标注图、复制和结果文本复用。
 11. 获取 `TranslateService.ImageTranslateService`，该服务必须是 `ITranslatePlugin`，词典类服务不会进入图片翻译翻译列表。
-12. 对每个 `OcrLayoutBlock.Text` 并发执行语言检测和翻译；翻译成功后用 `ImageTranslateTextOverlayLayout.NormalizeOverlayText()` 收敛空白，再回写到对应 block。
-13. 使用翻译后的分段块生成 `ImageTranslateOverlayDocument`：每个绘制项保存覆盖背景、裁剪范围、阴影和 `FormattedText`；选择框保持原图像素坐标，不再创建超采样结果位图。
+12. 整张图片在 OCR 请求前固定一份 `Settings.TextPreprocessing` 快照。布局分块后经 `DirectTranslationRunner` 各自后台替换，检查非空，再把同一请求文本交给语言检测和翻译插件；规则不会跨布局块匹配，也不会修改已经发给 OCR 的图片。成功译文经 `ImageTranslateTextOverlayLayout.NormalizeOverlayText()` 收敛空白后回写对应 block。
+13. 只用成功翻译的分段块生成 `ImageTranslateOverlayDocument`；预处理错误、空结果、检测失败或插件失败的块保留原图区域和 OCR 原文，结束后汇总一次提示。每个绘制项保存覆盖背景、裁剪范围、阴影和 `FormattedText`；选择框保持原图像素坐标，不再创建超采样结果位图。
 14. `ImageZoom` 在同一个 Viewbox 内按“原图 → 矢量译文 Overlay → 文字选择高亮”绘制，图片缩放、拖动和 DPI 变换会同步作用于三层。
 15. `Settings.IsImTranShowingAnnotated` 控制显示标注图还是原图加译文 Overlay；图片文本选中同步切换为原文块或译文块。
 16. Compact 结果完成后可通过贴图按钮或可选窗口快捷键创建静态贴图；创建成功后关闭 Compact，后续截图翻译使用新的窗口和执行链路。

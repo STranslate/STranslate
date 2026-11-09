@@ -13,12 +13,25 @@ internal sealed class TranslationResultCoordinator
     private readonly ConditionalWeakTable<object, OperationChannel> _channels = new();
     private readonly object _automaticSideEffectsChannel = new();
     private readonly object _identifiedLanguageChannel = new();
+    private readonly object _inputPreviewChannel = new();
     private readonly Func<string, string> _getTranslation;
+    private readonly TextPreprocessingService? _preprocessingService;
+    private readonly Settings? _settings;
     private long _lastOperationId;
 
     internal TranslationResultCoordinator(Func<string, string> getTranslation)
     {
         _getTranslation = getTranslation;
+    }
+
+    internal TranslationResultCoordinator(
+        Func<string, string> getTranslation,
+        TextPreprocessingService preprocessingService,
+        Settings settings)
+        : this(getTranslation)
+    {
+        _preprocessingService = preprocessingService;
+        _settings = settings;
     }
 
     internal TranslationOperation BeginOperation(
@@ -28,6 +41,8 @@ internal sealed class TranslationResultCoordinator
         CancellationToken cancellationToken)
     {
         var operationId = Interlocked.Increment(ref _lastOperationId);
+        TryActivate(_inputPreviewChannel, operationId);
+        var snapshot = _settings?.TextPreprocessing?.Clone();
         return new TranslationOperation(
             this,
             _getTranslation,
@@ -35,8 +50,24 @@ internal sealed class TranslationResultCoordinator
             text,
             sourceLang,
             targetLang,
-            cancellationToken);
+            cancellationToken,
+            prepareInput: _preprocessingService is null ? null :
+                () => _preprocessingService.PrepareAsync(text, snapshot, cancellationToken));
     }
+
+    internal TranslationOperation BeginBackOperation(TranslationResultContext context, CancellationToken cancellationToken) =>
+        new(this, _getTranslation, Interlocked.Increment(ref _lastOperationId),
+            context.Input.OriginalText, context.SourceLang, context.TargetLang, cancellationToken, context.Input);
+
+    internal TranslationResultContext? GetResultContext(TranslateResult result)
+    {
+        var state = _channels.GetOrCreateValue(result);
+        lock (state.SyncRoot)
+            return state.Context;
+    }
+
+    internal void BindResultContext(TranslateResult result, long operationId, TranslationResultContext context) =>
+        TryPublish(result, operationId, () => _channels.GetOrCreateValue(result).Context = context);
 
     internal TranslationOperation BeginAutomaticOperation(
         string text,
@@ -54,12 +85,12 @@ internal sealed class TranslationResultCoordinator
     {
         var operationId = Interlocked.Increment(ref _lastOperationId);
         TryActivate(_identifiedLanguageChannel, operationId);
+        TryActivate(_inputPreviewChannel, operationId);
         TryPublish(_identifiedLanguageChannel, operationId, reset);
     }
 
     internal bool TryResetDictionary(DictionaryResult result, long operationId) =>
-        Application.Current.Dispatcher.Invoke(
-            () => TryReset(result, operationId));
+        InvokeOnDispatcher(() => TryReset(result, operationId));
 
     internal bool IsLatestAutomatic(long operationId) =>
         IsCurrent(_automaticSideEffectsChannel, operationId);
@@ -77,7 +108,11 @@ internal sealed class TranslationResultCoordinator
         TryActivate(channel, operationId, static () => { });
 
     internal bool TryReset(TranslateResult result, long operationId) =>
-        TryActivate(result, operationId, () => Reset(result));
+        TryActivate(result, operationId, () =>
+        {
+            _channels.GetOrCreateValue(result).Context = null;
+            Reset(result);
+        });
 
     internal bool TryReset(DictionaryResult result, long operationId) =>
         TryActivate(result, operationId, () => Reset(result));
@@ -109,8 +144,18 @@ internal sealed class TranslationResultCoordinator
         DictionaryResult source,
         DictionaryResult target,
         long operationId) =>
-        Application.Current.Dispatcher.Invoke(
-            () => TryPublish(source, target, operationId));
+        InvokeOnDispatcher(() => TryPublish(source, target, operationId));
+
+    private static T InvokeOnDispatcher<T>(Func<T> callback)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        return dispatcher is null || dispatcher.CheckAccess()
+            ? callback()
+            : dispatcher.Invoke(callback);
+    }
+
+    internal bool TryPublishInputPreview(long operationId, Action publish) =>
+        TryPublish(_inputPreviewChannel, operationId, publish);
 
     internal bool TryPublish(object channel, long operationId, Action publish)
     {
@@ -227,6 +272,7 @@ internal sealed class TranslationResultCoordinator
     {
         internal object SyncRoot { get; } = new();
         internal long OperationId { get; set; }
+        internal TranslationResultContext? Context { get; set; }
     }
 
     private sealed class PropertyChangedSubscription(
