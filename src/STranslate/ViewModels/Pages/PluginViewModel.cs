@@ -143,18 +143,7 @@ public partial class PluginViewModel : ObservableObject
     /// </summary>
     private string GetPluginsJsonUrl()
     {
-        var cdnSource = _settings.PluginMarketCdnSource;
-        return cdnSource switch
-        {
-            PluginMarketCdnSourceType.JsDelivr => "https://fastly.jsdelivr.net/gh/STranslate/STranslate-doc@main/vitepress/plugins.json",
-            PluginMarketCdnSourceType.GitHubRaw => "https://raw.githubusercontent.com/STranslate/STranslate-doc/main/vitepress/plugins.json",
-            PluginMarketCdnSourceType.Custom => _settings.CustomPluginMarketCdnUrl
-                .Replace("{author}", "STranslate")
-                .Replace("{repo}", "STranslate-doc")
-                .Replace("{branch}", "main")
-                .Replace("{path}", "vitepress/plugins.json"),
-            _ => "https://fastly.jsdelivr.net/gh/STranslate/STranslate-doc@main/vitepress/plugins.json"
-        };
+        return BuildCdnUrl("STranslate", "STranslate-doc", "main", "src/data/plugins.json");
     }
 
     #endregion
