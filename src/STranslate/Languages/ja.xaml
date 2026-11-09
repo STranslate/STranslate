@@ -859,4 +859,28 @@
     <sys:String x:Key="ImageTranslatePinnedCopyAll">全文をコピー</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowOriginal">元画像を表示</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">翻訳を表示</sys:String>
+    <!-- 翻译前替换 -->
+    <sys:String x:Key="General_TextPreprocessing">翻訳前の置換</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">翻訳前に適用するプレーンテキストと正規表現の置換ルールをまとめて管理します。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingManage">ルールを管理</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEnable">翻訳前の置換を有効にする</sys:String>
+    <sys:String x:Key="General_TextPreprocessingMode">置換方法</sys:String>
+    <sys:String x:Key="General_TextPreprocessingPlainText">プレーンテキスト</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegex">正規表現</sys:String>
+    <sys:String x:Key="General_TextPreprocessingFind">検索文字列</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHint">事前置換</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHintDescription">今回の翻訳には事前置換ルールが適用されています。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHelp">ルールは上から順に実行されます。置換文字列を空にすると一致箇所を削除します。プレーンテキストは文字どおりに置換します。正規表現では $1、${name}、(?m)、(?s) などを使用できます。</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">置換文字列</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">ルールを上へ</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">ルールを下へ</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">大小文字を無視</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">翻訳前の置換ルールの実行に失敗しました：{0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">翻訳前の置換後に翻訳できるテキストがありません。</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">置換設定が破損しています。設定画面で修正してから翻訳してください。</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">置換ルールの実行がタイムアウトしました：{0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">置換結果が文字数の上限を超えました：{0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">{0} 個の画像ブロックを処理できませんでした。元の内容を保持しました。</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">ルール {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">位置：{0}。</sys:String>
 </ResourceDictionary>

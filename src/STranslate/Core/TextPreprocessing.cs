@@ -143,12 +143,18 @@ internal readonly record struct TextPreprocessingLimits(
 }
 
 /// <summary>
-/// 本次翻译使用的原文和处理后请求文本。
+/// 本次实际生效的规则快照。
+/// </summary>
+internal sealed record AppliedTextReplacement(string Pattern, string Replacement);
+
+/// <summary>
+/// 本次翻译使用的原文、处理后文本及生效规则。
 /// </summary>
 internal sealed record PreparedTranslationInput(
     string OriginalText,
     string RequestText,
-    string RulesFingerprint);
+    string RulesFingerprint,
+    IReadOnlyList<AppliedTextReplacement> AppliedRules);
 
 /// <summary>
 /// 翻译前替换失败时抛出的错误。
@@ -215,18 +221,22 @@ public sealed class TextPreprocessingService
         cancellationToken.ThrowIfCancellationRequested();
         if (enabledRules.Count == 0)
         {
-            return new PreparedTranslationInput(text, text, fingerprint);
+            return new PreparedTranslationInput(text, text, fingerprint, []);
         }
 
         var currentText = text;
+        var appliedRules = new List<AppliedTextReplacement>();
         foreach (var rule in enabledRules)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            currentText = ApplyRule(currentText, rule, started, cancellationToken);
+            var replacedText = ApplyRule(currentText, rule, started, cancellationToken);
+            if (!string.Equals(currentText, replacedText, StringComparison.Ordinal))
+                appliedRules.Add(new(rule.Pattern, rule.Replacement));
+            currentText = replacedText;
         }
 
         cancellationToken.ThrowIfCancellationRequested();
-        return new PreparedTranslationInput(text, currentText, fingerprint);
+        return new PreparedTranslationInput(text, currentText, fingerprint, appliedRules.AsReadOnly());
     }
 
     internal static TextPreprocessingSettings Capture(TextPreprocessingSettings? settings)

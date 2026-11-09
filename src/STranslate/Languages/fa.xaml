@@ -900,4 +900,28 @@ Alt+کلیک چپ -> تنظیمات ترجمه متن</sys:String>
     <sys:String x:Key="ImageTranslatePinnedCopyAll">کپی تمام متن</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowOriginal">نمایش تصویر اصلی</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">نمایش ترجمه</sys:String>
+    <!-- 翻译前替换 -->
+    <sys:String x:Key="General_TextPreprocessing">جایگزینی پیش از ترجمه</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">مدیریت قواعد سراسری جایگزینی متن ساده و عبارت منظم پیش از ترجمه.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingManage">مدیریت قواعد</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEnable">فعال‌سازی جایگزینی پیش از ترجمه</sys:String>
+    <sys:String x:Key="General_TextPreprocessingMode">روش</sys:String>
+    <sys:String x:Key="General_TextPreprocessingPlainText">متن ساده</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegex">عبارت منظم</sys:String>
+    <sys:String x:Key="General_TextPreprocessingFind">متن جستجو</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHint">جایگزینی اولیه</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHintDescription">قواعد جایگزینی پیش از این ترجمه اعمال شدند.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHelp">قواعد از بالا به پایین اجرا می‌شوند. خالی گذاشتن متن جایگزین، موارد منطبق را حذف می‌کند. متن ساده به‌صورت لفظی جایگزین می‌شود؛ عبارت منظم از $1، ${name} و گزینه‌هایی مانند (?m) و (?s) پشتیبانی می‌کند.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">متن جایگزین</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">انتقال قاعده به بالا</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">انتقال قاعده به پایین</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">نادیده گرفتن بزرگی و کوچکی حروف</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">اجرای قاعدهٔ جایگزینی پیش از ترجمه ناموفق بود: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">پس از جایگزینی، متنی برای ترجمه باقی نماند.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">پیکربندی جایگزینی خراب است. پیش از ترجمه آن را در تنظیمات اصلاح کنید.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">زمان اجرای قاعدهٔ جایگزینی تمام شد: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">نتیجهٔ جایگزینی از محدودیت طول بیشتر شد: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">پردازش {0} بلوک تصویر انجام نشد. محتوای اصلی آن‌ها حفظ شد.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">قاعدهٔ {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">موقعیت: {0}.</sys:String>
 </ResourceDictionary>

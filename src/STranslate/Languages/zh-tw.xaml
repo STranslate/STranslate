@@ -892,4 +892,28 @@
     <sys:String x:Key="General_ImageTranslateOnLayoutChanged">圖片翻譯：切換分段後立即翻譯</sys:String>
     <sys:String x:Key="General_OcrOnServiceChanged">OCR 介面：切換服務後立即辨識</sys:String>
     <sys:String x:Key="General_OcrOnLanguageChanged">OCR 介面：切換語言後立即辨識</sys:String>
+    <!-- 翻译前替换 -->
+    <sys:String x:Key="General_TextPreprocessing">翻譯前替換</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">統一管理翻譯前的純文字和正規表示式替換規則。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingManage">管理規則</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEnable">啟用翻譯前替換</sys:String>
+    <sys:String x:Key="General_TextPreprocessingMode">替換方式</sys:String>
+    <sys:String x:Key="General_TextPreprocessingPlainText">純文字</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegex">正規表示式</sys:String>
+    <sys:String x:Key="General_TextPreprocessingFind">尋找內容</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHint">前置替換</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHintDescription">本次翻譯已套用前置替換規則。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHelp">規則由上往下執行，替換文字留空表示刪除。純文字按字面替換；正規表示式支援 $1、${name} 及 (?m)、(?s) 等選項。</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">替換文字</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">上移規則</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">下移規則</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">忽略大小寫</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">翻譯前替換規則執行失敗：{0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">翻譯前替換後沒有可翻譯的文字。</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">翻譯前替換設定損毀，請先在設定中修正後再翻譯。</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">翻譯前替換規則執行逾時：{0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">翻譯前替換結果超過長度限制：{0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">{0} 個圖片區塊無法完成處理，已保留原始內容。</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">規則 {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">位置：{0}。</sys:String>
 </ResourceDictionary>

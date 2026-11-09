@@ -28,7 +28,7 @@ internal sealed class TranslationOperation
         OperationId = operationId;
         Text = text;
         _preparedInput = preparedInput ?? (prepareInput is null
-            ? new PreparedTranslationInput(text, text, string.Empty) : null);
+            ? new PreparedTranslationInput(text, text, string.Empty, []) : null);
         _preparation = new(prepareInput ?? (() => Task.FromResult(_preparedInput!)));
         SourceLang = sourceLang;
         TargetLang = targetLang;

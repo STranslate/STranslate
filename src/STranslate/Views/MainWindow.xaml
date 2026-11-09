@@ -138,6 +138,9 @@
                     ExecuteCommand="{Binding TranslateCommand}"
                     ForceExecuteCommand="{Binding TranslateCommand}"
                     HasActivedVocabulary="{Binding VocabularyService.HasActivedVocabulary}"
+                    HasTextPreprocessingRules="{Binding HasTextPreprocessingRules}"
+                    TextPreprocessingRuleCount="{Binding TextPreprocessingRuleCount}"
+                    TextPreprocessingRuleDetails="{Binding TextPreprocessingRuleDetails}"
                     CanSelectIdentifiedLanguage="{Binding CanSelectIdentifiedLanguage}"
                     IdentifiedLanguage="{Binding IdentifiedLanguage}"
                     IdentifiedLanguageItemsSource="{Binding IdentifiedLanguageOptions}"
@@ -159,10 +162,6 @@
                     Visibility="{Binding IsInputBoxVisible, Converter={cnvt:BoolToVisibilityConverter}}" />
 
                 <!--  // LangSelectControl //  -->
-                <TextBlock Margin="0,0,10,8" TextWrapping="Wrap"
-                    Foreground="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorCautionBrushKey}}"
-                    Text="{DynamicResource General_TextPreprocessingHint}"
-                    Visibility="{Binding HasTextPreprocessingRules, Converter={cnvt:BoolToVisibilityConverter}}" />
                 <Grid
                     Margin="0,0,10,10"
                     Visibility="{Binding IsLanguageSelectControlVisible, Converter={cnvt:BoolToVisibilityConverter}}">

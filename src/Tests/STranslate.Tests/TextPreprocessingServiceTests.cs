@@ -5,6 +5,51 @@ namespace STranslate.Tests;
 public class TextPreprocessingServiceTests
 {
     [Theory]
+    [InlineData(false, true, "a", "b", "a", 0)]
+    [InlineData(true, false, "a", "b", "a", 0)]
+    [InlineData(true, true, "missing", "b", "a", 0)]
+    [InlineData(true, true, "a", "a", "a", 0)]
+    [InlineData(true, true, "a", "b", "a", 1)]
+    public void ReportsOnlyEnabledRulesThatActuallyChangedText(
+        bool enabled, bool ruleEnabled, string pattern, string replacement, string input, int appliedCount)
+    {
+        var result = new TextPreprocessingService().Prepare(input, new()
+        {
+            IsEnabled = enabled,
+            Rules = [new() { Mode = TextReplacementMode.PlainText, IsEnabled = ruleEnabled,
+                Pattern = pattern, Replacement = replacement }]
+        });
+        Assert.Equal(appliedCount, result.AppliedRules.Count);
+    }
+
+    [Fact]
+    public void MarksChainedReplacementsEvenWhenFinalTextMatchesOriginal()
+    {
+        var settings = new TextPreprocessingSettings { IsEnabled = true, Rules =
+            [new() { Mode = TextReplacementMode.PlainText, Pattern = "a", Replacement = "b" },
+             new() { Pattern = "(b)", Replacement = "$1" },
+             new() { Pattern = "missing", Replacement = "x" },
+             new() { Pattern = "b", Replacement = "a" }] };
+        var result = new TextPreprocessingService().Prepare("a", settings);
+        Assert.Equal("a", result.RequestText);
+        Assert.Equal([new AppliedTextReplacement("a", "b"), new("b", "a")], result.AppliedRules);
+        settings.Rules[0].Replacement = "changed later";
+        Assert.Equal("b", result.AppliedRules[0].Replacement);
+    }
+
+    [Fact]
+    public void MultipleMatchesCountAsOneAppliedRule()
+    {
+        var result = new TextPreprocessingService().Prepare("a a a", new()
+        {
+            IsEnabled = true,
+            Rules = [new() { Mode = TextReplacementMode.PlainText, Pattern = "a", Replacement = "b" }]
+        });
+        Assert.Equal("b b b", result.RequestText);
+        Assert.Equal(new AppliedTextReplacement("a", "b"), Assert.Single(result.AppliedRules));
+    }
+
+    [Theory]
     [InlineData("a.b", "$1\\name", "a.b axb", "$1\\name axb")]
     [InlineData("[", "${name}", "[x[", "${name}x${name}")]
     public void PlainTextTreatsPatternsAndReplacementsLiterally(string pattern, string replacement, string input, string expected)

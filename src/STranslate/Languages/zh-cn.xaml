@@ -242,7 +242,8 @@
     <sys:String x:Key="General_TextPreprocessingPlainText">纯文本</sys:String>
     <sys:String x:Key="General_TextPreprocessingRegex">正则</sys:String>
     <sys:String x:Key="General_TextPreprocessingFind">查找内容</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHint">已启用翻译前替换规则。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHint">前置替换</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHintDescription">本次翻译已应用前置替换规则。</sys:String>
     <sys:String x:Key="General_TextPreprocessingHelp">规则从上到下执行，替换文本留空表示删除。纯文本按字面替换；正则支持 $1、${name}，以及 (?m)、(?s) 等选项。</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingReplacement">替换文本</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMoveUp">上移规则</sys:String>

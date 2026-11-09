@@ -889,4 +889,28 @@
     <sys:String x:Key="General_ImageTranslateOnLayoutChanged">Переклад зображення: одразу перекладати після зміни розбиття тексту</sys:String>
     <sys:String x:Key="General_OcrOnServiceChanged">Вікно OCR: одразу розпізнавати текст після зміни сервісу</sys:String>
     <sys:String x:Key="General_OcrOnLanguageChanged">Вікно OCR: одразу розпізнавати текст після зміни мови</sys:String>
+    <!-- 翻译前替换 -->
+    <sys:String x:Key="General_TextPreprocessing">Заміна перед перекладом</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">Глобальні правила заміни перед перекладом: звичайний текст і регулярні вирази.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingManage">Керувати правилами</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEnable">Увімкнути заміну перед перекладом</sys:String>
+    <sys:String x:Key="General_TextPreprocessingMode">Спосіб</sys:String>
+    <sys:String x:Key="General_TextPreprocessingPlainText">Звичайний текст</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegex">Регулярний вираз</sys:String>
+    <sys:String x:Key="General_TextPreprocessingFind">Знайти</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHint">Попередня заміна</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHintDescription">Перед цим перекладом застосовано правила заміни.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHelp">Правила виконуються згори вниз. Порожній текст заміни видаляє збіги. Звичайний текст замінюється буквально; регулярні вирази підтримують $1, ${name}, (?m), (?s) та інші параметри.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">Текст заміни</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">Перемістити правило вгору</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">Перемістити правило вниз</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">Ігнорувати регістр</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">Не вдалося виконати правило заміни перед перекладом: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">Після заміни не залишилося тексту для перекладу.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">Налаштування заміни пошкоджено. Виправте їх у налаштуваннях перед перекладом.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">Перевищено час виконання правила заміни: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">Результат заміни перевищив обмеження довжини: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">Не вдалося обробити блоки зображення: {0}. Початковий вміст збережено.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">Правило {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">Позиція: {0}.</sys:String>
 </ResourceDictionary>

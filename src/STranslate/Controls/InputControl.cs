@@ -147,6 +147,36 @@ public class InputControl : Control
                 LanguageDetectorType.Local,
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
+    public bool HasTextPreprocessingRules
+    {
+        get => (bool)GetValue(HasTextPreprocessingRulesProperty);
+        set => SetValue(HasTextPreprocessingRulesProperty, value);
+    }
+
+    public static readonly DependencyProperty HasTextPreprocessingRulesProperty =
+        DependencyProperty.Register(
+            nameof(HasTextPreprocessingRules), typeof(bool), typeof(InputControl), new PropertyMetadata(false));
+
+    public int TextPreprocessingRuleCount
+    {
+        get => (int)GetValue(TextPreprocessingRuleCountProperty);
+        set => SetValue(TextPreprocessingRuleCountProperty, value);
+    }
+
+    public static readonly DependencyProperty TextPreprocessingRuleCountProperty =
+        DependencyProperty.Register(
+            nameof(TextPreprocessingRuleCount), typeof(int), typeof(InputControl), new PropertyMetadata(0));
+
+    public string TextPreprocessingRuleDetails
+    {
+        get => (string)GetValue(TextPreprocessingRuleDetailsProperty);
+        set => SetValue(TextPreprocessingRuleDetailsProperty, value);
+    }
+
+    public static readonly DependencyProperty TextPreprocessingRuleDetailsProperty =
+        DependencyProperty.Register(
+            nameof(TextPreprocessingRuleDetails), typeof(string), typeof(InputControl), new PropertyMetadata(string.Empty));
+
     public bool IsIdentify
     {
         get => (bool)GetValue(IsIdentifyProperty);
@@ -384,6 +414,7 @@ public class InputControl : Control
 
         if (_languageDetectorComboBox != null)
             _languageDetectorComboBox.SelectionChanged += OnLanguageDetectorComboBoxSelectionChanged;
+
     }
 
     /// <summary>

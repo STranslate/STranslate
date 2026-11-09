@@ -883,4 +883,28 @@
     <sys:String x:Key="ImageTranslatePinnedCopyAll">Копировать весь текст</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowOriginal">Показать оригинал</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">Показать перевод</sys:String>
+    <!-- 翻译前替换 -->
+    <sys:String x:Key="General_TextPreprocessing">Замена перед переводом</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">Настройка общих правил замены перед переводом: обычный текст и регулярные выражения.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingManage">Настроить правила</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEnable">Включить замену перед переводом</sys:String>
+    <sys:String x:Key="General_TextPreprocessingMode">Способ</sys:String>
+    <sys:String x:Key="General_TextPreprocessingPlainText">Обычный текст</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegex">Регулярное выражение</sys:String>
+    <sys:String x:Key="General_TextPreprocessingFind">Найти</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHint">Предзамена</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHintDescription">Перед этим переводом были применены правила замены.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHelp">Правила выполняются сверху вниз. Пустая строка замены удаляет совпадения. В режиме обычного текста используется буквальная замена; регулярные выражения поддерживают $1, ${name}, (?m), (?s) и другие параметры.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">Текст замены</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">Переместить правило вверх</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">Переместить правило вниз</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">Игнорировать регистр</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">Не удалось выполнить правило замены перед переводом: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">После замены не осталось текста для перевода.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">Настройки замены повреждены. Исправьте их в настройках перед переводом.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">Превышено время выполнения правила замены: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">Результат замены превысил ограничение длины: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">Не удалось обработать блоки изображения: {0}. Сохранено исходное содержимое.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">Правило {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">Позиция: {0}.</sys:String>
 </ResourceDictionary>

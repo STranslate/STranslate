@@ -885,4 +885,28 @@
     <sys:String x:Key="ImageTranslatePinnedCopyAll">Tüm metni kopyala</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowOriginal">Orijinal resmi göster</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">Çeviriyi göster</sys:String>
+    <!-- 翻译前替换 -->
+    <sys:String x:Key="General_TextPreprocessing">Çeviri öncesi değiştirme</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">Çeviriden önce uygulanan düz metin ve düzenli ifade değiştirme kurallarını yönetin.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingManage">Kuralları yönet</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEnable">Çeviri öncesi değiştirmeyi etkinleştir</sys:String>
+    <sys:String x:Key="General_TextPreprocessingMode">Yöntem</sys:String>
+    <sys:String x:Key="General_TextPreprocessingPlainText">Düz metin</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegex">Düzenli ifade</sys:String>
+    <sys:String x:Key="General_TextPreprocessingFind">Aranacak metin</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHint">Ön değiştirme</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHintDescription">Bu çeviriden önce değiştirme kuralları uygulandı.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHelp">Kurallar yukarıdan aşağıya uygulanır. Eşleşmeleri silmek için yerine konacak metni boş bırakın. Düz metin olduğu gibi değiştirilir; düzenli ifadeler $1, ${name}, (?m) ve (?s) gibi seçenekleri destekler.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">Yerine konacak metin</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">Kuralı yukarı taşı</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">Kuralı aşağı taşı</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">Büyük/küçük harfi yoksay</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">Çeviri öncesi değiştirme kuralı başarısız oldu: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">Çeviri öncesi değiştirmeden sonra çevrilecek metin kalmadı.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">Değiştirme yapılandırması geçersiz. Çevirmeden önce Ayarlar bölümünde düzeltin.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">Değiştirme kuralı zaman aşımına uğradı: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">Değiştirme sonucu uzunluk sınırını aştı: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">{0} görüntü bloğu işlenemedi. Özgün içerikleri korundu.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">Kural {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">Konum: {0}.</sys:String>
 </ResourceDictionary>

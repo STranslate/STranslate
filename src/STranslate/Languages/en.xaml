@@ -242,7 +242,8 @@
     <sys:String x:Key="General_TextPreprocessingPlainText">Plain text</sys:String>
     <sys:String x:Key="General_TextPreprocessingRegex">Regex</sys:String>
     <sys:String x:Key="General_TextPreprocessingFind">Find</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHint">Translation replacement rules are enabled.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHint">Pre-replacement</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHintDescription">Replacement rules were applied before this translation.</sys:String>
     <sys:String x:Key="General_TextPreprocessingHelp">Rules run from top to bottom. An empty replacement deletes matches. Plain text is literal; regex supports $1, ${name}, and inline options such as (?m) and (?s).</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingReplacement">Replacement text</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMoveUp">Move rule up</sys:String>

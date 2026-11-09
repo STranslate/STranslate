@@ -64,9 +64,19 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     public Settings Settings { get; }
     public HotkeySettings HotkeySettings { get; }
-    public bool HasTextPreprocessingRules => IsInputBoxVisible &&
-        Settings.TextPreprocessing is { IsEnabled: true, Rules: { } rules } &&
-        rules.Any(rule => rule is { IsEnabled: true });
+    public bool HasTextPreprocessingRules => TextPreprocessingRuleCount > 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasTextPreprocessingRules))]
+    public partial int TextPreprocessingRuleCount { get; set; }
+
+    [ObservableProperty]
+    public partial string TextPreprocessingRuleDetails { get; set; } = string.Empty;
+
+    partial void OnTextPreprocessingRuleCountChanged(int value)
+    {
+        if (value == 0) TextPreprocessingRuleDetails = string.Empty;
+    }
 
     public MainWindowViewModel(
         DataProvider dataProvider,
@@ -327,6 +337,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     private async Task ExecuteAutomaticTranslationAsync(object? force, CancellationToken cancellationToken)
     {
+        TextPreprocessingRuleCount = 0;
+        var preprocessingSettings = Settings.TextPreprocessing;
         // 取消防抖执行器中的待执行任务
         _debounceExecutor.Cancel();
         var operation = _translationCoordinator.BeginAutomaticOperation(
@@ -368,6 +380,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         operation.CancellationToken.ThrowIfCancellationRequested();
         if (!operation.IsLatestAutomatic)
             return;
+
+        if (history is not null)
+            operation.TryPublishAutomatic(() => PublishPreprocessingHint(operation, preprocessingSettings));
 
         // 翻译后自动复制
         if (Settings.CopyAfterTranslation != CopyAfterTranslation.NoAction)
@@ -482,6 +497,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         Service service,
         TranslationOperation operation)
     {
+        TextPreprocessingRuleCount = 0;
+        var preprocessingSettings = Settings.TextPreprocessing;
         if (string.IsNullOrWhiteSpace(operation.Text))
             return;
 
@@ -543,6 +560,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 };
                 dictionaryHistoryData.ApplyPreprocessingContext(operation);
                 history.Data.Add(dictionaryHistoryData);
+                operation.TryPublish(channel, () => PublishPreprocessingHint(operation, preprocessingSettings));
                 return;
 
             case ITranslatePlugin plugin:
@@ -603,6 +621,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                     historyData,
                     plugin.TransResult,
                     createIfMissing: true).ConfigureAwait(false);
+                operation.TryPublish(channel, () => PublishPreprocessingHint(operation, preprocessingSettings));
                 return;
         }
     }
@@ -2344,7 +2363,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
 
         if (e.PropertyName == nameof(Settings.TextPreprocessing))
-            OnPropertyChanged(nameof(HasTextPreprocessingRules));
+            TextPreprocessingRuleCount = 0;
 
         if (e.PropertyName != nameof(Settings.MainWindowMaxHeightRatio) &&
             e.PropertyName != nameof(Settings.WindowScreen) &&
@@ -2757,7 +2776,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     private void NotifyInputVisibilityProperties()
     {
-        OnPropertyChanged(nameof(HasTextPreprocessingRules));
         OnPropertyChanged(nameof(IsInputActuallyHidden));
         OnPropertyChanged(nameof(IsInputBoxVisible));
         OnPropertyChanged(nameof(IsLanguageSelectControlVisible));
@@ -2765,6 +2783,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     partial void OnInputTextChanged(string value)
     {
+        TextPreprocessingRuleCount = 0;
         ResetTranslationLanguageState();
 
         if (!Settings.AutoTranslate)
@@ -2863,6 +2882,17 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             operation.TargetLang,
             source,
             target);
+    }
+
+    private void PublishPreprocessingHint(TranslationOperation operation, TextPreprocessingSettings configuration)
+    {
+        if (InputText == operation.Text && ReferenceEquals(configuration, Settings.TextPreprocessing))
+        {
+            var rules = operation.PreparedInput.AppliedRules;
+            TextPreprocessingRuleDetails = string.Join(Environment.NewLine,
+                rules.Select(rule => $"“{rule.Pattern.ReplaceLineEndings("\\n")}” → “{rule.Replacement.ReplaceLineEndings("\\n")}”"));
+            TextPreprocessingRuleCount = rules.Count;
+        }
     }
 
     private void ShowPreprocessingError(TextPreprocessingException exception)

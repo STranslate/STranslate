@@ -257,6 +257,30 @@
                                             Tag="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=IdentifiedLanguage}" />
                                     </ikw:SimpleStackPanel>
                                 </ui:ElevationBorder>
+                                <ui:ElevationBorder
+                                    x:Name="PART_TextPreprocessingHint"
+                                    Padding="5,1"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorDefaultBrushKey}}"
+                                    BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.ControlElevationBorderBrushKey}}"
+                                    BorderThickness="{DynamicResource {x:Static ui:ThemeKeys.ButtonBorderThemeThicknessKey}}"
+                                    CornerRadius="{DynamicResource {x:Static ui:ThemeKeys.ControlCornerRadiusKey}}"
+                                    AutomationProperties.HelpText="{DynamicResource General_TextPreprocessingHintDescription}"
+                                    Tag="{TemplateBinding TextPreprocessingRuleDetails}"
+                                    Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=HasTextPreprocessingRules, Converter={cnvt:BoolToVisibilityConverter}}">
+                                    <ui:ElevationBorder.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock MaxWidth="420" TextWrapping="Wrap"
+                                                Text="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ToolTip}}" />
+                                        </ToolTip>
+                                    </ui:ElevationBorder.ToolTip>
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="{DynamicResource STControlFontSize12}"
+                                        Foreground="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorCautionBrushKey}}">
+                                        <Run Text="{DynamicResource General_TextPreprocessingHint}" /><Run Text=" " /><Run Text="{Binding TextPreprocessingRuleCount, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}" />
+                                    </TextBlock>
+                                </ui:ElevationBorder>
                             </ikw:SimpleStackPanel>
 
                             <!--  字体大小调节提示  -->

@@ -859,4 +859,28 @@
     <sys:String x:Key="ImageTranslatePinnedCopyAll">전체 텍스트 복사</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowOriginal">원본 이미지 표시</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">번역 표시</sys:String>
+    <!-- 翻译前替换 -->
+    <sys:String x:Key="General_TextPreprocessing">번역 전 치환</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">번역 전에 적용할 일반 텍스트 및 정규식 치환 규칙을 관리합니다.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingManage">규칙 관리</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEnable">번역 전 치환 활성화</sys:String>
+    <sys:String x:Key="General_TextPreprocessingMode">치환 방식</sys:String>
+    <sys:String x:Key="General_TextPreprocessingPlainText">일반 텍스트</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegex">정규식</sys:String>
+    <sys:String x:Key="General_TextPreprocessingFind">찾을 내용</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHint">사전 치환</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHintDescription">이번 번역에 사전 치환 규칙이 적용되었습니다.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingHelp">규칙은 위에서 아래로 실행됩니다. 바꿀 내용을 비워 두면 일치하는 부분을 삭제합니다. 일반 텍스트는 입력한 그대로 치환하며, 정규식은 $1, ${name}, (?m), (?s) 등을 지원합니다.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingReplacement">바꿀 내용</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveUp">규칙 위로 이동</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingMoveDown">규칙 아래로 이동</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingIgnoreCase">대소문자 무시</sys:String>
+    <sys:String x:Key="TranslatePreprocessingFailed">번역 전 치환 규칙 실행 실패: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingEmpty">번역 전 치환 후 번역할 텍스트가 없습니다.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingInvalidConfiguration">치환 설정이 손상되었습니다. 설정에서 수정한 후 다시 번역하세요.</sys:String>
+    <sys:String x:Key="TranslatePreprocessingTimeout">치환 규칙 실행 시간 초과: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingOutputLimit">치환 결과가 길이 제한을 초과했습니다: {0}</sys:String>
+    <sys:String x:Key="TranslatePreprocessingBlocksFailed">이미지 블록 {0}개를 처리하지 못했습니다. 원본 내용이 유지되었습니다.</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingNewRule">규칙 {0}</sys:String>
+    <sys:String x:Key="Translate_TextPreprocessingErrorPosition">위치: {0}.</sys:String>
 </ResourceDictionary>
