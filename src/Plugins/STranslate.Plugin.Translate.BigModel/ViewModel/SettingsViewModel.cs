@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Text;
 
 namespace STranslate.Plugin.Translate.BigModel.ViewModel;
 
@@ -155,7 +154,7 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
                 }
             };
 
-            var key = string.IsNullOrWhiteSpace(_settings.ApiKey) ? Encoding.UTF8.GetString(Convert.FromBase64String(Main.GetFallbackKey())) : _settings.ApiKey;
+            var key = _settings.ApiKey;
             var option = new Options
             {
                 Headers = new Dictionary<string, string>
