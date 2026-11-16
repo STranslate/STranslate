@@ -91,7 +91,7 @@
     <sys:String x:Key="General_ImageQuality">画質</sys:String>
     <sys:String x:Key="General_ImageQualityDescription">画像処理時の画質調整。オンラインOCRサービスによっては画像サイズが制限される場合があります。</sys:String>
     <sys:String x:Key="General_DoubleClickTrayFunction">トレイアイコンのダブルクリック機能</sys:String>
-    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">「操作なし」以外を選択すると、シングクリックによるウィンドウ表示切替機能は無効になります。</sys:String>
+    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">ダブルクリックの操作を有効にすると、シングルクリックはダブルクリックの判定時間が経過してからメインウィンドウの表示を切り替えます。ダブルクリックでは選択した操作のみを実行します。</sys:String>
     <sys:String x:Key="General_Language">言語</sys:String>
     <sys:String x:Key="General_ScreenshotTranslate">スクリーンショット翻訳</sys:String>
     <sys:String x:Key="General_ImageTranslate">画像翻訳</sys:String>

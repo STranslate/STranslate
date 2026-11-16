@@ -94,7 +94,7 @@
     <sys:String x:Key="General_ImageQuality">圖片品質</sys:String>
     <sys:String x:Key="General_ImageQualityDescription">處理圖片時調整品質，線上OCR服務可能會限制圖片大小。</sys:String>
     <sys:String x:Key="General_DoubleClickTrayFunction">雙擊托盤功能</sys:String>
-    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">選擇除「無操作」的其他操作會停用托盤單擊切換主視窗顯示功能。</sys:String>
+    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">啟用雙擊功能後，單擊會等待雙擊判定結束再切換主視窗顯示；雙擊僅執行所選操作。</sys:String>
     <sys:String x:Key="General_Language">語言</sys:String>
     <sys:String x:Key="General_ScreenshotTranslate">擷圖翻譯</sys:String>
     <sys:String x:Key="General_ImageTranslate">圖片翻譯</sys:String>

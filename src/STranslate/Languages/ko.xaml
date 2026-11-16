@@ -91,7 +91,7 @@
     <sys:String x:Key="General_ImageQuality">이미지 품질</sys:String>
     <sys:String x:Key="General_ImageQualityDescription">이미지 처리 시 품질을 조정합니다. 온라인 OCR 서비스는 이미지 크기를 제한할 수 있습니다.</sys:String>
     <sys:String x:Key="General_DoubleClickTrayFunction">트레이 아이콘 더블 클릭 기능</sys:String>
-    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">「작업 없음」 이외의 작업을 선택하면 트레이 클릭 시 메인 창 표시 전환 기능이 비활성화됩니다.</sys:String>
+    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">더블 클릭 작업을 사용하면 한 번 클릭은 더블 클릭 판정 시간이 지난 후 메인 창을 표시하거나 숨깁니다. 더블 클릭은 선택한 작업만 실행합니다.</sys:String>
     <sys:String x:Key="General_Language">언어</sys:String>
     <sys:String x:Key="General_ScreenshotTranslate">스크린샷 번역</sys:String>
     <sys:String x:Key="General_ImageTranslate">이미지 번역</sys:String>

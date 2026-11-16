@@ -2141,16 +2141,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    private void LeftClick()
-    {
-        // 开启后单击托盘功能禁用
-        if (Settings.DoubleClickTrayFunction != DoubleClickTrayFunction.None)
-            return;
-
-        ToggleApp();
-    }
-
-    [RelayCommand]
     private void ToggleApp()
     {
         if (IsMainWindowVisible && !IsTopmost)

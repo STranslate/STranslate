@@ -95,7 +95,7 @@
     <sys:String x:Key="General_ImageQuality">کیفیت تصویر</sys:String>
     <sys:String x:Key="General_ImageQualityDescription">تنظیم کیفیت هنگام پردازش تصاویر. سرویس‌های آنلاین OCR ممکن است اندازه تصویر را محدود کنند.</sys:String>
     <sys:String x:Key="General_DoubleClickTrayFunction">عملکرد دوبار کلیک روی آیکون سینی</sys:String>
-    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">انتخاب هر عملی به جز "بدون عمل"، عملکرد تک‌کلیک سینی برای نمایش/پنهان پنجره اصلی را غیرفعال می‌کند.</sys:String>
+    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">با فعال شدن عملکرد دوبار کلیک، تک‌کلیک پس از پایان بازهٔ تشخیص دوبار کلیک، پنجرهٔ اصلی را نمایش می‌دهد یا پنهان می‌کند. دوبار کلیک فقط عملکرد انتخاب‌شده را اجرا می‌کند.</sys:String>
     <sys:String x:Key="General_Language">زبان</sys:String>
     <sys:String x:Key="General_ScreenshotTranslate">ترجمه اسکرین‌شات</sys:String>
     <sys:String x:Key="General_ImageTranslate">ترجمه تصویر</sys:String>
