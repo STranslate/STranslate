@@ -92,6 +92,7 @@
   - `TopEdgeAutoHideController` 独立管理感应条和临时置顶，不把主窗口移出屏幕，避免影响上方显示器和持久化位置。感应条首次创建时显式继承主窗口主题，避免错过启动初始化后主题画刷为空、整条透明；显式清空窗口 Style，避免全局现代窗口模板的标题栏把内容推到 6 DIP 窗口之外而被裁掉。贴顶期间优先于失焦隐藏，显式隐藏仍隐藏感应条；统一 `Show()` 先展开并保留贴顶位置。
   - 收起和展开使用 `TopEdgeSlideAnimation` 的 180ms 缓出滑动：无激活的临时窗口通过 DWM 实时预览统一承载内容与背景，裁剪并滑动整幅画面；主窗口仅临时 Cloak，位置、布局、视觉树及原生区域不变，收起完成后才隐藏。展开前先 Cloak，再 `Show()`，等首帧布局和渲染完成后从感应条展开，避免背景先出现。反向操作从当前帧接续；关闭开关、主动隐藏、拖动、输入或点击过渡层会取消动画并清理预览、撤销 Cloak。遵循系统的客户端区域动画开关，无法创建系统预览时直接收展。
   - `OnLoaded()` 按 `HideOnStartup` 计算窗口位置，并在现代窗口模板初始化后挂接窗口过程钩子、移除 `WS_MAXIMIZEBOX`；窗口过程过滤 `WM_STYLECHANGING`，防止框架重新加入最大化权限，并拦截 `SC_MAXIMIZE`，禁止标题栏双击、顶部拖拽与系统快捷键最大化，同时保留横向缩放。
+  - 高度通过 `SizeToContentBehavior.PersistentSizeToContent="Height"` 跟随内容变化。WPF 在原生手动缩放时会切换为 `Manual`，行为监听 `HwndSource.SizeToContentChanged`，在当前消息处理完成后恢复自适应；不能依赖 `SizeChanged`，因为状态同步可能晚于尺寸事件，且缩放消息不一定产生实际尺寸变化。关闭窗口或停用行为时取消待执行恢复并解除订阅。
   - `OnContentRendered()` 决定首次显示或隐藏。
   - `OnDeactivated()` 可按 `HideWhenDeactivated` 自动隐藏，避免 Alt-Tab 残留。
   - 前台激活与失焦隐藏是两条独立链路；`HideWhenDeactivated` 决定是否隐藏，置顶窗口不会触发隐藏。
