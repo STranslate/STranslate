@@ -94,7 +94,7 @@
     <sys:String x:Key="General_ImageQuality">Görüntü Kalitesi</sys:String>
     <sys:String x:Key="General_ImageQualityDescription">Görüntüleri işlerken kaliteyi ayarlayın. Çevrimiçi OCR hizmetleri görüntü boyutunu sınırlayabilir.</sys:String>
     <sys:String x:Key="General_DoubleClickTrayFunction">Tepsi Çift Tıklama İşlevi</sys:String>
-    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">"Yok" dışında herhangi bir eylem seçmek, tepsi tek tıklama ile ana pencereyi göster/gizle işlevini devre dışı bırakır.</sys:String>
+    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">Çift tıklama eylemi etkinleştirildiğinde, tek tıklama ana pencereyi göstermeden veya gizlemeden önce çift tıklama süresinin dolmasını bekler. Çift tıklama yalnızca seçilen eylemi çalıştırır.</sys:String>
     <sys:String x:Key="General_Language">Dil</sys:String>
     <sys:String x:Key="General_ScreenshotTranslate">Ekran Görüntüsü Çevirisi</sys:String>
     <sys:String x:Key="General_ImageTranslate">Görsel Çeviri</sys:String>

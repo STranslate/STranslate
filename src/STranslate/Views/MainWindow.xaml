@@ -297,10 +297,19 @@
             x:Name="PART_NotifyIcon"
             DoubleClickCommand="{Binding DoubleClickCommand}"
             IconSource="{Binding TrayIcon}"
-            LeftClickCommand="{Binding LeftClickCommand}"
-            NoLeftClickDelay="True"
+            LeftClickCommand="{Binding ToggleAppCommand}"
             ToolTipText="{Binding TrayToolTip}"
             Visibility="{Binding Settings.HideNotifyIcon, Converter={cnvt:BoolToVisibilityInverseConverter}}">
+            <tb:TaskbarIcon.Style>
+                <Style TargetType="tb:TaskbarIcon">
+                    <Setter Property="NoLeftClickDelay" Value="False" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Settings.DoubleClickTrayFunction}" Value="{x:Static core:DoubleClickTrayFunction.None}">
+                            <Setter Property="NoLeftClickDelay" Value="True" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </tb:TaskbarIcon.Style>
             <tb:TaskbarIcon.Resources>
                 <s:BindingProxy x:Key="ViewModel" Data="{Binding}" />
             </tb:TaskbarIcon.Resources>

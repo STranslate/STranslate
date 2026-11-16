@@ -94,7 +94,7 @@
     <sys:String x:Key="General_ImageQuality">Якість зображення</sys:String>
     <sys:String x:Key="General_ImageQualityDescription">Якість обробки зображень. Онлайн-сервіси розпізнавання тексту можуть обмежувати розмір зображення.</sys:String>
     <sys:String x:Key="General_DoubleClickTrayFunction">Подвійне клацання по значку в треї</sys:String>
-    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">Будь-яка дія, крім «Немає», вимикає показ і приховування головного вікна одинарним клацанням по значку в треї.</sys:String>
+    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">Якщо ввімкнено дію за подвійним клацанням, одинарне клацання показує або приховує головне вікно після завершення інтервалу подвійного клацання. Подвійне клацання виконує лише вибрану дію.</sys:String>
     <sys:String x:Key="General_Language">Мова інтерфейсу</sys:String>
     <sys:String x:Key="General_ScreenshotTranslate">Переклад знімка екрана</sys:String>
     <sys:String x:Key="General_ImageTranslate">Переклад зображення</sys:String>

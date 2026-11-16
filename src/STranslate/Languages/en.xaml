@@ -94,7 +94,7 @@
     <sys:String x:Key="General_ImageQuality">Image Quality</sys:String>
     <sys:String x:Key="General_ImageQualityDescription">Adjust the quality when processing images. Online OCR services may limit image size.</sys:String>
     <sys:String x:Key="General_DoubleClickTrayFunction">Double-Click Tray Function</sys:String>
-    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">Selecting any action other than "None" will disable the tray single-click toggle main window display function.</sys:String>
+    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">When a double-click action is enabled, a single click waits for the double-click interval before showing or hiding the main window. A double click only runs the selected action.</sys:String>
     <sys:String x:Key="General_Language">Language</sys:String>
     <sys:String x:Key="General_ScreenshotTranslate">Screenshot Translation</sys:String>
     <sys:String x:Key="General_ImageTranslate">Image Translation</sys:String>

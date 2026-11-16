@@ -94,7 +94,7 @@
     <sys:String x:Key="General_ImageQuality">Качество изображения</sys:String>
     <sys:String x:Key="General_ImageQualityDescription">Качество обработки изображений. Онлайн-сервисы распознавания текста могут ограничивать размер изображения.</sys:String>
     <sys:String x:Key="General_DoubleClickTrayFunction">Двойной щелчок по значку в трее</sys:String>
-    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">Любое действие, кроме «Нет», отключает показ и скрытие главного окна одиночным щелчком по значку в трее.</sys:String>
+    <sys:String x:Key="General_DoubleClickTrayFunctionDescription">Если включено действие по двойному щелчку, одиночный щелчок показывает или скрывает главное окно после окончания интервала двойного щелчка. Двойной щелчок выполняет только выбранное действие.</sys:String>
     <sys:String x:Key="General_Language">Язык интерфейса</sys:String>
     <sys:String x:Key="General_ScreenshotTranslate">Перевод скриншота</sys:String>
     <sys:String x:Key="General_ImageTranslate">Перевод изображения</sys:String>
