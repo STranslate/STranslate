@@ -57,8 +57,8 @@
 - 设置 → 通用 → 立即翻译提供独立开关：切换图片翻译 OCR 服务、翻译服务、语言和分段后立即重新翻译，默认开启，关闭后沿用手动重新执行的行为。
 - 语言开关覆盖 `ImageTranslateOcrLanguage`、`ImageTranslateSourceLang` 和 `ImageTranslateTargetLang`；分段开关对应 `LayoutAnalysisMode`。独立窗口与精简窗口共用 ViewModel，因此都适用。
 - 自动重新执行复用当前原图，重新完成 OCR、分段与翻译；没有图片、正在执行或 ViewModel 已释放时不触发。切换标注/译文显示不触发请求。
-- `Standalone` 是默认模式，保留当前可缩放、可调整大小的独立窗口。
-- `Compact` 使用无标题、不可缩放、非任务栏、**完全透明**窗口，窗口本身无背景色；屏幕上只看到截图内容 + 悬浮按钮条（按钮条自带半透明胶囊背景）。
+- `Standalone` 保留可缩放、可调整大小的独立窗口，可在设置中选择。
+- `Compact` 是默认模式，使用无标题、不可缩放、非任务栏、**完全透明**窗口，窗口本身无背景色；屏幕上只看到截图内容 + 悬浮按钮条（按钮条自带半透明胶囊背景）。
 - 精简窗口的图片始终钉在截图选区的物理屏幕位置（贴图位置不变铁律）；按钮条作为悬浮额外内容，根据空间自动选择位置：
   - 横向：按钮条窄于选区时居中；宽于选区时贴左缘向右延展，右边放不下则镜像向左延展。
   - 纵向：默认在图片下方；下方放不下翻上方；上下都放不下则叠加在图片底部之上（按钮条 ZIndex 高于图片）。
@@ -134,7 +134,7 @@
 - OCR 专用绑定：`ServiceSettings.ImageTranslateOcrSvcID`，由图片翻译窗口的 OCR 选择写入。
 - 翻译专用绑定：`ServiceSettings.ImageTranslateSvcID`，由图片翻译窗口的翻译服务选择写入。
 - 服务缺失或插件被删除时，启动加载会重置失效的图片翻译服务 ID。
-- `Settings.ImageTranslateWindowMode` 控制图片翻译结果使用独立窗口或精简窗口，默认 `Standalone`。
+- `Settings.ImageTranslateWindowMode` 控制图片翻译结果使用独立窗口或精简窗口，默认 `Compact`；已有配置继续使用已保存的模式。
 - `Settings.LayoutAnalysisMode` 是分段模式配置，默认 `Auto`，序列化支持 `auto`、`provider`、`smart`、`noMerge`；旧未知值归一为 `Auto`。
 - `Settings.IsImTranShowingAnnotated` 控制标注图/原图加矢量译文 Overlay 显示。
 - `Settings.IsImTranShowingTextControl` 控制图片翻译窗口文本区域显示。
