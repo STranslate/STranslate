@@ -3,7 +3,7 @@
   "Name": "OpenAI",
   "Description": "Official OpenAI plugin for STranslate",
   "Author": "zggsong",
-  "Version": "1.0.3",
+  "Version": "1.0.4",
   "Website": "https://github.com/ZGGSONG/STranslate",
   "ExecuteFileName": "STranslate.Plugin.Translate.OpenAI.dll",
   "IconPath": "icon.png"
