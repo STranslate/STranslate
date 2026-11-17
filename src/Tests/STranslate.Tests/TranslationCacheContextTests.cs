@@ -7,7 +7,7 @@ namespace STranslate.Tests;
 public class TranslationCacheContextTests
 {
     [Fact]
-    public async Task FailedRetranslationKeepsOldHistoryWithoutPublishingOrRecachingIt()
+    public async Task CacheExclusionDoesNotPublishOldResultsOrSubmitThemAsNewUpdates()
     {
         var coordinator = CreateCoordinator("new request");
         var operation = coordinator.BeginOperation("secret", LangEnum.Auto, LangEnum.Auto, CancellationToken.None);
@@ -26,9 +26,10 @@ public class TranslationCacheContextTests
         var incoming = new HistoryData(successful) { TransResult = new() { Text = "new result" } };
         incoming.ApplyPreprocessingContext(operation);
         history.Data.Add(incoming);
-        history.RestoreUntranslatedResults();
-        Assert.Same(oldFailed, history.GetData(failed));
+        history.RecordTranslationUpdate(incoming);
+        Assert.Null(history.GetData(failed));
         Assert.Same(incoming, history.GetData(successful));
+        Assert.Same(incoming, Assert.Single(history.GetTranslationUpdates()));
         Assert.False(oldFailed.IsCompatible(operation.Text, operation.RequestText, operation.RulesFingerprint));
     }
 

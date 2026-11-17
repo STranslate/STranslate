@@ -235,15 +235,14 @@
     <!--  // Translation Page //  -->
     <sys:String x:Key="ReplaceService">替换翻译</sys:String>
     <sys:String x:Key="General_TextPreprocessing">翻译前替换</sys:String>
-    <sys:String x:Key="General_TextPreprocessingDescription">统一管理翻译前的纯文本和正则替换规则。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">发送前替换文本，适用于主窗口翻译、词典查询、替换翻译和图片翻译。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScope">适用于主窗口自动/手动翻译与词典查询（包括截图、划词、剪贴板等取词入口），以及替换翻译。图片翻译按文本块分别处理。规则仅替换发送文本，保留输入原文；OCR 识别、回译、朗读、生词本保存和历史展示不执行规则，历史详情使用当时保存的请求快照。</sys:String>
     <sys:String x:Key="General_TextPreprocessingManage">管理规则</sys:String>
     <sys:String x:Key="General_TextPreprocessingEnable">启用翻译前替换</sys:String>
     <sys:String x:Key="General_TextPreprocessingMode">替换方式</sys:String>
     <sys:String x:Key="General_TextPreprocessingPlainText">纯文本</sys:String>
     <sys:String x:Key="General_TextPreprocessingRegex">正则</sys:String>
     <sys:String x:Key="General_TextPreprocessingFind">查找内容</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHint">前置替换</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHintDescription">本次翻译已应用前置替换规则。</sys:String>
     <sys:String x:Key="General_TextPreprocessingHelp">规则从上到下执行，替换文本留空表示删除。纯文本按字面替换；正则支持 $1、${name}，以及 (?m)、(?s) 等选项。</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingReplacement">替换文本</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMoveUp">上移规则</sys:String>
@@ -913,4 +912,24 @@
     <sys:String x:Key="General_ImageTranslateOnLayoutChanged">图片翻译：切换分段后立即翻译</sys:String>
     <sys:String x:Key="General_OcrOnServiceChanged">OCR 界面：切换服务后立即识别</sys:String>
     <sys:String x:Key="General_OcrOnLanguageChanged">OCR 界面：切换语言后立即识别</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRuleName">规则名称</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEditMultiline">编辑选中规则（支持多行）</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTest">测试规则</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestInput">输入测试文本；高亮处可悬停查看替换结果</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRunTest">运行测试</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestSummary">本次有 {0} 条规则生效。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDeleted">此内容已删除</sys:String>
+    <sys:String x:Key="General_TextPreprocessingReplacementResult">实际发送文本</sys:String>
+    <sys:String x:Key="General_TextPreprocessingCopyRequest">复制实际发送文本</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusEnabled">已启用 · {0} 条规则</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusDisabled">已关闭</sys:String>
+    <sys:String x:Key="General_TextPreprocessingExportDetails">导出实际发送文本和语言</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexHint">请检查括号、转义符和捕获组写法。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexParenthesis">缺少右括号。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexBracket">字符集合缺少右方括号。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexEscape">存在无效的转义符。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingUnchanged">未替换</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRequestUnavailable">未记录请求文本</sys:String>
+    <sys:String x:Key="General_TextPreprocessingSummary">仅替换发送文本，保留原文。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScopeTitle">适用范围</sys:String>
 </ResourceDictionary>

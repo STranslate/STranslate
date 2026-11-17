@@ -2,6 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using STranslate.Core;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace STranslate.ViewModels;
 
@@ -22,20 +24,87 @@ public partial class TextPreprocessingEditViewModel : ObservableObject, IDisposa
         foreach (var rule in settings.TextPreprocessing?.Rules ?? [])
             if (rule is not null) Rules.Add(rule.Clone());
         SelectedRule = Rules.FirstOrDefault();
+        foreach (var rule in Rules) rule.PropertyChanged += OnRuleChanged;
+        Rules.CollectionChanged += OnRulesChanged;
+        if (settings.TextPreprocessing?.InvalidConfiguration is not null)
+            Error = _translate("TranslatePreprocessingInvalidConfiguration");
     }
 
     public ObservableCollection<TextReplacementRule> Rules { get; } = [];
     [ObservableProperty] public partial bool IsEnabled { get; set; }
     [ObservableProperty] public partial TextReplacementRule? SelectedRule { get; set; }
     [ObservableProperty] public partial string Error { get; set; } = string.Empty;
-    [ObservableProperty] public partial bool IsSaving { get; set; }
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(IsBusy))] public partial bool IsSaving { get; set; }
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(IsBusy))] public partial bool IsTesting { get; set; }
+    public bool IsBusy => IsSaving || IsTesting;
+    [ObservableProperty] public partial string TestText { get; set; } = string.Empty;
+    [ObservableProperty] public partial string? TestRequestText { get; set; }
+    [ObservableProperty] public partial string TestSummary { get; set; } = string.Empty;
+    private int _previewVersion;
+
+    partial void OnTestTextChanged(string value) => ClearPreview();
+    partial void OnIsEnabledChanged(bool value) => ClearPreview();
+
+    private void ClearPreview()
+    {
+        _previewVersion++;
+        TestRequestText = null;
+        TestSummary = string.Empty;
+    }
+
+    private void OnRuleChanged(object? sender, PropertyChangedEventArgs e) => ClearPreview();
+
+    private void OnRulesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems is not null)
+            foreach (TextReplacementRule rule in e.OldItems) rule.PropertyChanged -= OnRuleChanged;
+        if (e.NewItems is not null)
+            foreach (TextReplacementRule rule in e.NewItems) { rule.PropertyChanged -= OnRuleChanged; rule.PropertyChanged += OnRuleChanged; }
+        ClearPreview();
+    }
+
+    private TextPreprocessingSettings CaptureDraft() => new()
+    {
+        IsEnabled = IsEnabled,
+        Rules = Rules.Select(rule => rule.Clone()).ToList()
+    };
+
+    public async Task TestAsync()
+    {
+        if (_disposed || IsBusy) return;
+        IsTesting = true;
+        Error = string.Empty;
+        ClearPreview();
+        var version = _previewVersion;
+        var text = TestText;
+        try
+        {
+            var prepared = await _service.PrepareAsync(text, CaptureDraft(), _lifetime.Token);
+            if (_disposed || version != _previewVersion) return;
+            TestRequestText = prepared.RequestText;
+            TestSummary = string.IsNullOrWhiteSpace(prepared.RequestText)
+                ? _translate("TranslatePreprocessingEmpty")
+                : string.Format(_translate("General_TextPreprocessingTestSummary"), prepared.AppliedRules.Count);
+        }
+        catch (OperationCanceledException) when (_disposed) { }
+        catch (TextPreprocessingException ex) { ShowError(ex); }
+        finally { IsTesting = false; }
+    }
+
+    private void ShowError(TextPreprocessingException ex)
+    {
+        Error = TextPreprocessingErrorText.Format(ex, _translate);
+        SelectedRule = Rules.FirstOrDefault(rule => rule.Id == ex.RuleId) ?? SelectedRule;
+    }
 
     [RelayCommand]
     private void AddRule()
     {
+        var number = 1;
+        while (Rules.Any(rule => rule.Name == string.Format(_translate("Translate_TextPreprocessingNewRule"), number))) number++;
         var rule = new TextReplacementRule
         {
-            Name = string.Format(_translate("Translate_TextPreprocessingNewRule"), Rules.Count + 1),
+            Name = string.Format(_translate("Translate_TextPreprocessingNewRule"), number),
             Mode = TextReplacementMode.PlainText
         };
         Rules.Add(rule);
@@ -63,14 +132,10 @@ public partial class TextPreprocessingEditViewModel : ObservableObject, IDisposa
 
     public async Task<bool> ApplyAsync()
     {
-        if (_disposed || IsSaving) return false;
+        if (_disposed || IsBusy) return false;
         IsSaving = true;
         Error = string.Empty;
-        var configuration = new TextPreprocessingSettings
-        {
-            IsEnabled = IsEnabled,
-            Rules = Rules.Select(rule => rule.Clone()).ToList()
-        };
+        var configuration = CaptureDraft();
         try
         {
             await Task.Run(() => _service.Validate(configuration), _lifetime.Token);
@@ -81,8 +146,7 @@ public partial class TextPreprocessingEditViewModel : ObservableObject, IDisposa
         catch (OperationCanceledException) when (_disposed) { return false; }
         catch (TextPreprocessingException ex)
         {
-            Error = TextPreprocessingErrorText.Format(ex, _translate);
-            SelectedRule = Rules.FirstOrDefault(rule => rule.Id == ex.RuleId) ?? SelectedRule;
+            ShowError(ex);
             return false;
         }
         finally { IsSaving = false; }
@@ -92,6 +156,8 @@ public partial class TextPreprocessingEditViewModel : ObservableObject, IDisposa
     {
         if (_disposed) return;
         _disposed = true;
+        Rules.CollectionChanged -= OnRulesChanged;
+        foreach (var rule in Rules) rule.PropertyChanged -= OnRuleChanged;
         _lifetime.Cancel();
         _lifetime.Dispose();
     }

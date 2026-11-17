@@ -2,7 +2,6 @@ using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Controls;
 using iNKORE.UI.WPF.Modern.Controls.Helpers;
 using STranslate.Controls;
-using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +10,7 @@ using System.Windows.Threading;
 
 namespace STranslate.Tests;
 
+[Collection("WPF UI")]
 public class SizeToContentBehaviorTests
 {
     [Theory]
@@ -131,19 +131,7 @@ public class SizeToContentBehaviorTests
     }
 
     private static void RunOnStaThread(Action action)
-    {
-        Exception? error = null;
-        var thread = new Thread(() =>
-        {
-            try { action(); }
-            catch (Exception exception) { error = exception; }
-        });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
-        if (error != null)
-            ExceptionDispatchInfo.Capture(error).Throw();
-    }
+        => WpfUiCollection.Run(action);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct NativeRect

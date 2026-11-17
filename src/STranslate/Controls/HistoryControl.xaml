@@ -16,6 +16,20 @@
             ClipToBounds="True"
             CornerRadius="4">
             <ikw:SimpleStackPanel Spacing="3">
+                <StackPanel Orientation="Horizontal" Margin="8,4,8,0" Opacity="0.7"
+                    Visibility="{Binding EffectiveSourceLang, Converter={cnvt:EqualToVisibilityInverseConverter}}">
+                    <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{cnvt:HistoryLanguageDisplayConverter}"><Binding Path="EffectiveSourceLang" /></MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <TextBlock Text=" → " />
+                    <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{cnvt:HistoryLanguageDisplayConverter}"><Binding Path="EffectiveTargetLang" /></MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
@@ -23,6 +37,7 @@
                     </Grid.RowDefinitions>
                     <TextBox
                         Background="Transparent"
+                        Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextControlForegroundKey}}"
                         BorderBrush="{x:Null}"
                         BorderThickness="0"
                         IsReadOnly="True"
@@ -67,7 +82,7 @@
                     x:Name="PART_TransBackPanel"
                     Spacing="3"
                     Visibility="{Binding TransBackResult, Converter={cnvt:EqualToVisibilityInverseConverter}}">
-                    <Separator Background="{StaticResource {x:Static ui:ThemeKeys.ContentDialogSeparatorBorderBrushKey}}" />
+                    <Separator Background="{DynamicResource {x:Static ui:ThemeKeys.ContentDialogSeparatorBorderBrushKey}}" />
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
@@ -75,6 +90,7 @@
                         </Grid.RowDefinitions>
                         <TextBox
                             Background="Transparent"
+                            Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextControlForegroundKey}}"
                             BorderBrush="{x:Null}"
                             BorderThickness="0"
                             IsReadOnly="True"
@@ -375,7 +391,7 @@
                                             <RowDefinition Height="*" />
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
-                                        <TextBox
+                                        <control:ReplacementTextBox
                                             MinHeight="50"
                                             Background="Transparent"
                                             BorderBrush="{x:Null}"
@@ -383,13 +399,14 @@
                                             IsReadOnly="True"
                                             SnapsToDevicePixels="True"
                                             Text="{Binding SourceText, Mode=OneWay}"
+                                            Requests="{Binding ReplacementRequests}"
                                             TextWrapping="Wrap">
-                                            <TextBox.FlowDirection>
+                                            <control:ReplacementTextBox.FlowDirection>
                                                 <MultiBinding Converter="{cnvt:TextAndLanguageToFlowDirectionConverter}">
                                                     <Binding Path="SourceText" />
                                                 </MultiBinding>
-                                            </TextBox.FlowDirection>
-                                        </TextBox>
+                                            </control:ReplacementTextBox.FlowDirection>
+                                        </control:ReplacementTextBox>
                                         <ikw:SimpleStackPanel
                                             Grid.Row="1"
                                             Margin="6,2"

@@ -6,14 +6,13 @@ using STranslate.Helpers;
 using System.Collections;
 using System.ComponentModel;
 using System.Reflection;
-using System.Runtime.ExceptionServices;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace STranslate.Tests;
 
+[Collection("WPF UI")]
 public class ModernWindowLifecycleTests
 {
     [Fact]
@@ -81,9 +80,10 @@ public class ModernWindowLifecycleTests
     private static bool IsTrackedByDescriptor(Window window, DependencyProperty property)
     {
         var descriptor = DependencyPropertyDescriptor.FromProperty(property, typeof(Window));
-        var propertyField = typeof(DependencyPropertyDescriptor)
-            .GetField("_property", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        var innerDescriptor = propertyField.GetValue(descriptor)!;
+        // Property 会按需初始化底层描述符；直接读取 _property 可能尚未初始化。
+        var descriptorProperty = typeof(DependencyPropertyDescriptor)
+            .GetProperty("Property", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var innerDescriptor = descriptorProperty.GetValue(descriptor)!;
         var trackersField = innerDescriptor.GetType()
             .GetField("_trackers", BindingFlags.Instance | BindingFlags.NonPublic)!;
         var trackers = (IDictionary)trackersField.GetValue(innerDescriptor)!;
@@ -107,26 +107,7 @@ public class ModernWindowLifecycleTests
     }
 
     private static void RunOnStaThread(Action action)
-    {
-        Exception? exception = null;
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                action();
-            }
-            catch (Exception ex)
-            {
-                exception = ex;
-            }
-        });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
-
-        if (exception != null)
-            ExceptionDispatchInfo.Capture(exception).Throw();
-    }
+        => WpfUiCollection.Run(action);
 
     private sealed class LifecycleTestWindow : Window
     {

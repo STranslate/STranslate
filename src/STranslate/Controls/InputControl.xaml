@@ -131,8 +131,9 @@
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" MinHeight="30" />
                             </Grid.RowDefinitions>
-                            <TextBox
+                            <control:ReplacementTextBox
                                 x:Name="PART_TextBox"
+                                Requests="{TemplateBinding PreparedRequests}"
                                 MinHeight="{TemplateBinding MinHeight}"
                                 MaxHeight="{TemplateBinding MaxHeight}"
                                 Margin="{TemplateBinding Margin}"
@@ -143,22 +144,22 @@
                                 BorderThickness="0"
                                 Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Text, UpdateSourceTrigger=PropertyChanged}"
                                 TextWrapping="Wrap">
-                                <TextBox.FlowDirection>
+                                <control:ReplacementTextBox.FlowDirection>
                                     <MultiBinding Converter="{cnvt:TextAndLanguageToFlowDirectionConverter}">
                                         <Binding RelativeSource="{RelativeSource Mode=TemplatedParent}" Path="Text" />
                                         <Binding RelativeSource="{RelativeSource Mode=TemplatedParent}" Path="SourceLanguage" />
                                         <Binding RelativeSource="{RelativeSource Mode=TemplatedParent}" Path="SelectedIdentifiedLanguage" />
                                     </MultiBinding>
-                                </TextBox.FlowDirection>
-                                <TextBox.InputBindings>
+                                </control:ReplacementTextBox.FlowDirection>
+                                <control:ReplacementTextBox.InputBindings>
                                     <KeyBinding Key="Enter" Command="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ExecuteCommand}" />
                                     <KeyBinding
                                         Key="Enter"
                                         Command="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ForceExecuteCommand}"
                                         CommandParameter="force"
                                         Modifiers="Ctrl" />
-                                </TextBox.InputBindings>
-                            </TextBox>
+                                </control:ReplacementTextBox.InputBindings>
+                            </control:ReplacementTextBox>
 
                             <ikw:SimpleStackPanel
                                 Grid.Row="1"
@@ -256,30 +257,6 @@
                                             Style="{StaticResource IdentifiedLanguageComboBoxStyle}"
                                             Tag="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=IdentifiedLanguage}" />
                                     </ikw:SimpleStackPanel>
-                                </ui:ElevationBorder>
-                                <ui:ElevationBorder
-                                    x:Name="PART_TextPreprocessingHint"
-                                    Padding="5,1"
-                                    VerticalAlignment="Center"
-                                    Background="{DynamicResource {x:Static ui:ThemeKeys.ControlFillColorDefaultBrushKey}}"
-                                    BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.ControlElevationBorderBrushKey}}"
-                                    BorderThickness="{DynamicResource {x:Static ui:ThemeKeys.ButtonBorderThemeThicknessKey}}"
-                                    CornerRadius="{DynamicResource {x:Static ui:ThemeKeys.ControlCornerRadiusKey}}"
-                                    AutomationProperties.HelpText="{DynamicResource General_TextPreprocessingHintDescription}"
-                                    Tag="{TemplateBinding TextPreprocessingRuleDetails}"
-                                    Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=HasTextPreprocessingRules, Converter={cnvt:BoolToVisibilityConverter}}">
-                                    <ui:ElevationBorder.ToolTip>
-                                        <ToolTip>
-                                            <TextBlock MaxWidth="420" TextWrapping="Wrap"
-                                                Text="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ToolTip}}" />
-                                        </ToolTip>
-                                    </ui:ElevationBorder.ToolTip>
-                                    <TextBlock
-                                        VerticalAlignment="Center"
-                                        FontSize="{DynamicResource STControlFontSize12}"
-                                        Foreground="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorCautionBrushKey}}">
-                                        <Run Text="{DynamicResource General_TextPreprocessingHint}" /><Run Text=" " /><Run Text="{Binding TextPreprocessingRuleCount, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}" />
-                                    </TextBlock>
                                 </ui:ElevationBorder>
                             </ikw:SimpleStackPanel>
 

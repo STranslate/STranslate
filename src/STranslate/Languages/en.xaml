@@ -235,15 +235,14 @@
     <!--  // Translation Page //  -->
     <sys:String x:Key="ReplaceService">Replace Trans</sys:String>
     <sys:String x:Key="General_TextPreprocessing">Translation replacements</sys:String>
-    <sys:String x:Key="General_TextPreprocessingDescription">Manage global plain-text and regular-expression replacements before translation.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">Replace text before main-window translation, dictionary lookups, replace translation, and image translation.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScope">Applies to automatic/manual translation and dictionary lookups in the main window (including text captured by screenshots, text selection and clipboard monitoring), and replace translation. Image translation processes each text block separately. Only outgoing text is replaced; the original input is kept. OCR recognition, back translation, text-to-speech, vocabulary saving, and viewing history do not run these rules. History shows the request snapshot saved at the time.</sys:String>
     <sys:String x:Key="General_TextPreprocessingManage">Manage rules</sys:String>
     <sys:String x:Key="General_TextPreprocessingEnable">Enable translation replacements</sys:String>
     <sys:String x:Key="General_TextPreprocessingMode">Mode</sys:String>
     <sys:String x:Key="General_TextPreprocessingPlainText">Plain text</sys:String>
     <sys:String x:Key="General_TextPreprocessingRegex">Regex</sys:String>
     <sys:String x:Key="General_TextPreprocessingFind">Find</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHint">Pre-replacement</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHintDescription">Replacement rules were applied before this translation.</sys:String>
     <sys:String x:Key="General_TextPreprocessingHelp">Rules run from top to bottom. An empty replacement deletes matches. Plain text is literal; regex supports $1, ${name}, and inline options such as (?m) and (?s).</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingReplacement">Replacement text</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMoveUp">Move rule up</sys:String>
@@ -912,4 +911,24 @@
     <sys:String x:Key="General_ImageTranslateOnLayoutChanged">Image translation: translate on segmentation change</sys:String>
     <sys:String x:Key="General_OcrOnServiceChanged">OCR window: recognize on service change</sys:String>
     <sys:String x:Key="General_OcrOnLanguageChanged">OCR window: recognize on language change</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRuleName">Rule name</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEditMultiline">Edit selected rule (multiline)</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTest">Test rules</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestInput">Enter sample text; hover over highlights to inspect replacements</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRunTest">Run test</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestSummary">{0} rules changed the text.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDeleted">This content was deleted</sys:String>
+    <sys:String x:Key="General_TextPreprocessingReplacementResult">Text sent to the service</sys:String>
+    <sys:String x:Key="General_TextPreprocessingCopyRequest">Copy sent text</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusEnabled">Enabled · {0} rules</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusDisabled">Disabled</sys:String>
+    <sys:String x:Key="General_TextPreprocessingExportDetails">Export sent text and languages</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexHint">Check parentheses, escapes, and capture groups.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexParenthesis">A closing parenthesis is missing.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexBracket">A character class is missing its closing bracket.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexEscape">An escape sequence is invalid.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingUnchanged">Unchanged</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRequestUnavailable">Request text was not recorded</sys:String>
+    <sys:String x:Key="General_TextPreprocessingSummary">Replace outgoing text while keeping the original.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScopeTitle">Scope</sys:String>
 </ResourceDictionary>

@@ -199,6 +199,11 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             }
 
             var preprocessingSettings = Settings.TextPreprocessing?.Clone();
+            var sourceLanguage = Settings.ImageTranslateSourceLang;
+            var targetLanguage = Settings.ImageTranslateTargetLang;
+            var detectOptions = new LangDetectOptions(
+                Settings.ImageTranslateLanguageDetector, Settings.ImageTranslateLocalDetectorRate,
+                Settings.ImageTranslateSourceLangIfAuto, Settings.ImageTranslateFirstLanguage, Settings.ImageTranslateSecondLanguage);
             var data = Utilities.ToBytes(bitmap, Settings.GetImageFormat());
             _lastOcrResult = await ocrSvc.RecognizeAsync(
                 new OcrRequest(data, Settings.ImageTranslateOcrLanguage, bitmap.Width, bitmap.Height),
@@ -238,22 +243,17 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             ProcessRingText = _i18n.GetTranslation("TranslatingText");
             var failedBlocks = 0;
             var translatedBlocks = new ConcurrentBag<OcrLayoutBlock>();
+            var preprocessingErrors = new ConcurrentDictionary<(string RuleId, string ErrorKind), TextPreprocessingException>();
 
             await Parallel.ForEachAsync(layoutBlocks, cancellationToken, async (block, cancellationToken) =>
             {
-                var detectOptions = new LangDetectOptions(
-                    Settings.ImageTranslateLanguageDetector,
-                    Settings.ImageTranslateLocalDetectorRate,
-                    Settings.ImageTranslateSourceLangIfAuto,
-                    Settings.ImageTranslateFirstLanguage,
-                    Settings.ImageTranslateSecondLanguage);
                 TranslateResult result;
                 try
                 {
                     result = await DirectTranslationRunner.TranslateAsync(block.Text, preprocessingSettings,
                         _textPreprocessingService, tranSvc,
                         (text, token) => LanguageDetector.GetLanguageAsync(text,
-                            Settings.ImageTranslateSourceLang, Settings.ImageTranslateTargetLang, token,
+                            sourceLanguage, targetLanguage, token,
                             onCompleted: (isSuccess, _) =>
                             {
                                 if (!isSuccess)
@@ -264,6 +264,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
                 catch (TextPreprocessingException ex)
                 {
                     _logger.LogWarning("Image preprocessing failed: rule {RuleId}, kind {ErrorKind}", ex.RuleId, ex.ErrorKind);
+                    preprocessingErrors.TryAdd((ex.RuleId, ex.ErrorKind), ex);
                     Interlocked.Increment(ref failedBlocks);
                     return;
                 }
@@ -292,14 +293,15 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
 
             cancellationToken.ThrowIfCancellationRequested();
             if (failedBlocks > 0)
-                _snackbar.ShowWarning(string.Format(_i18n.GetTranslation("TranslatePreprocessingBlocksFailed"), failedBlocks));
+                _snackbar.ShowWarning(TextPreprocessingErrorText.FormatImageFailures(
+                    failedBlocks, preprocessingErrors.Values, _i18n.GetTranslation));
 
             _lastOcrResult.OcrContents.Clear();
             _lastOcrResult.OcrContents.AddRange(layoutBlocks.Select(x => x.ToOcrContent()));
 
             // 生成原图坐标系中的矢量译文覆盖文档，不再创建超采样结果位图。
-            _resultOverlayDocument = ImageTranslateRenderer.CreateTranslatedOverlay(
-                layoutBlocks.Where(translatedBlocks.Contains).ToList(), GetOverlayTheme());
+            _resultOverlayDocument = ImageTranslateRenderer.CreateTranslationResult(
+                layoutBlocks, translatedBlocks.ToHashSet(), GetOverlayTheme());
             _translatedSelectionWords = new ObservableCollection<OcrWord>(
                 _resultOverlayDocument.SelectableWords);
             Result = _lastOcrResult.Text;

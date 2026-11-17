@@ -7,6 +7,7 @@ using STranslate.Core;
 using STranslate.Helpers;
 using STranslate.Plugin;
 using System.IO;
+using System.Windows;
 
 namespace STranslate.ViewModels.Pages;
 
@@ -23,14 +24,17 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
     private CancellationTokenSource? _searchCts;
     private DateTime _lastCursorTime = DateTime.Now;
     private bool _disposed;
-    private bool _isLoading = false;
+    private int _pendingLoads;
+    private int _listVersion;
+    private bool _hasMore = true;
 
     private bool CanLoadMore =>
-        !_isLoading &&
+        !_disposed && _pendingLoads == 0 && _hasMore &&
         string.IsNullOrWhiteSpace(SearchText) &&
         (TotalCount == 0 || _items.Count != TotalCount);
 
     [ObservableProperty] public partial string SearchText { get; set; } = string.Empty;
+    [ObservableProperty] public partial bool ExportRequestDetails { get; set; }
 
     /// <summary>
     /// <see href="https://blog.coldwind.top/posts/more-observable-collections/"/>
@@ -68,54 +72,71 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
     partial void OnSelectedListItemChanged(HistoryModel? value) => SelectedItem = value;
 
     // 搜索文本变化时修改定时器
-    partial void OnSearchTextChanged(string value) =>
+    partial void OnSearchTextChanged(string value)
+    {
+        if (_disposed) return;
+        Interlocked.Increment(ref _listVersion);
+        _searchCts?.Cancel();
+        LoadMoreCommand.NotifyCanExecuteChanged();
         _searchDebouncer.ExecuteAsync(SearchAsync, TimeSpan.FromMilliseconds(searchDelayMilliseconds));
+    }
 
     private void OnSelectedItemsCollectionChanged(in NotifyCollectionChangedEventArgs<object> _)
         => OnPropertyChanged(nameof(CanExportHistory));
 
-    private async Task SearchAsync()
+    private Task SearchAsync()
     {
+        var dispatcher = Application.Current?.Dispatcher;
+        return dispatcher is null || dispatcher.CheckAccess()
+            ? ReloadAsync()
+            : dispatcher.InvokeAsync(ReloadAsync).Task.Unwrap();
+    }
+
+    private async Task ReloadAsync()
+    {
+        if (_disposed) return;
         _searchCts?.Cancel();
         _searchCts?.Dispose();
-        _searchCts = new CancellationTokenSource();
-
-        if (string.IsNullOrWhiteSpace(SearchText))
+        var cancellation = _searchCts = new CancellationTokenSource();
+        var token = cancellation.Token;
+        var query = SearchText;
+        var version = Interlocked.Increment(ref _listVersion);
+        Interlocked.Increment(ref _pendingLoads);
+        LoadMoreCommand.NotifyCanExecuteChanged();
+        try
         {
-            await RefreshAsync();
-            return;
+            var count = await _sqlService.GetCountAsync();
+            token.ThrowIfCancellationRequested();
+            var rows = string.IsNullOrWhiteSpace(query)
+                ? (await _sqlService.GetDataCursorPagedAsync(PageSize, DateTime.Now)).ToArray()
+                : (await _sqlService.GetDataAsync(query, token))?.ToArray() ?? [];
+            OnUi(() =>
+            {
+                if (_disposed || token.IsCancellationRequested || version != _listVersion || SearchText != query) return;
+                TotalCount = count;
+                SelectedListItem = null;
+                SelectedItem = null;
+                ClearItems();
+                AddItems(rows);
+                _lastCursorTime = rows.LastOrDefault()?.Time ?? DateTime.Now;
+                _hasMore = string.IsNullOrWhiteSpace(query) && rows.Length == PageSize;
+            });
         }
-
-        var historyItems = await _sqlService.GetDataAsync(SearchText, _searchCts.Token);
-
-        App.Current.Dispatcher.Invoke(() =>
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+        finally
         {
-            SelectedListItem = null;
-            SelectedItem = null;
-            ClearItems();
-            if (historyItems == null) return;
-
-            AddItems(historyItems);
-        });
+            Interlocked.Decrement(ref _pendingLoads);
+            OnUi(() => { if (!_disposed) LoadMoreCommand.NotifyCanExecuteChanged(); });
+        }
     }
 
     [RelayCommand]
-    private async Task RefreshAsync()
+    private Task RefreshAsync()
     {
-        TotalCount = await _sqlService.GetCountAsync();
-
-        App.Current.Dispatcher.Invoke(() =>
-        {
-            SelectedListItem = null;
-            SelectedItem = null;
-            ClearItems();
-        });
-
-        if (TotalCount == 0)
-            return;
-
-        _lastCursorTime = DateTime.Now;
-        await LoadMoreAsync();
+        if (_disposed) return Task.CompletedTask;
+        // 刷新立即重查当前输入，并取消还没触发的防抖搜索。
+        _searchDebouncer.Cancel();
+        return SearchAsync();
     }
 
     [RelayCommand]
@@ -140,15 +161,20 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
     [RelayCommand(CanExecute = nameof(CanLoadMore))]
     private async Task LoadMoreAsync()
     {
+        if (!CanLoadMore) return;
+        var version = _listVersion;
+        var cursor = _lastCursorTime;
+        Interlocked.Increment(ref _pendingLoads);
+        LoadMoreCommand.NotifyCanExecuteChanged();
         try
         {
-            _isLoading = true;
+            var historyData = (await _sqlService.GetDataCursorPagedAsync(PageSize, cursor)).ToArray();
 
-            var historyData = await _sqlService.GetDataCursorPagedAsync(PageSize, _lastCursorTime);
-            if (!historyData.Any()) return;
-
-            App.Current.Dispatcher.Invoke(() =>
+            OnUi(() =>
             {
+                if (_disposed || version != _listVersion || !string.IsNullOrWhiteSpace(SearchText)) return;
+                _hasMore = historyData.Length == PageSize;
+                if (historyData.Length == 0) return;
                 _lastCursorTime = historyData.Last().Time;
                 var uniqueHistoryItems = historyData
                     .Where(h => !_items.Any(existing => existing.Id == h.Id))
@@ -159,9 +185,16 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            _isLoading = false;
-            LoadMoreCommand.NotifyCanExecuteChanged();
+            Interlocked.Decrement(ref _pendingLoads);
+            OnUi(() => { if (!_disposed) LoadMoreCommand.NotifyCanExecuteChanged(); });
         }
+    }
+
+    private static void OnUi(Action action)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess()) action();
+        else if (!dispatcher.HasShutdownStarted) dispatcher.Invoke(action);
     }
 
     [RelayCommand]
@@ -274,7 +307,7 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
 
         try
         {
-            var csv = HistoryCsvHelper.BuildCsv(exportItems, GetLanguageDisplayName);
+            var csv = HistoryCsvHelper.BuildCsv(exportItems, GetLanguageDisplayName, ExportRequestDetails);
             await File.WriteAllTextAsync(saveFileDialog.FileName, csv, HistoryCsvHelper.Utf8BomEncoding);
 
             _snackbar.ShowSuccess(_i18n.GetTranslation("ExportSuccess"));
@@ -394,6 +427,7 @@ public partial class HistoryViewModel : ObservableObject, IDisposable
         if (disposing)
         {
             _searchDebouncer.Dispose();
+            _searchCts?.Cancel();
             _searchCts?.Dispose();
             SelectedItems.CollectionChanged -= OnSelectedItemsCollectionChanged;
         }

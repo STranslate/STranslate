@@ -1,4 +1,5 @@
 using STranslate.Plugin;
+using STranslate.Helpers;
 
 namespace STranslate.Core;
 
@@ -21,7 +22,8 @@ internal sealed class TranslationOperation
         LangEnum targetLang,
         CancellationToken cancellationToken,
         PreparedTranslationInput? preparedInput = null,
-        Func<Task<PreparedTranslationInput>>? prepareInput = null)
+        Func<Task<PreparedTranslationInput>>? prepareInput = null,
+        LangDetectOptions? detectionOptions = null)
     {
         _coordinator = coordinator;
         _getTranslation = getTranslation;
@@ -33,6 +35,7 @@ internal sealed class TranslationOperation
         SourceLang = sourceLang;
         TargetLang = targetLang;
         CancellationToken = cancellationToken;
+        DetectionOptions = detectionOptions;
     }
 
     internal long OperationId { get; }
@@ -42,6 +45,7 @@ internal sealed class TranslationOperation
     internal string RulesFingerprint => PreparedInput.RulesFingerprint;
     internal LangEnum SourceLang { get; }
     internal LangEnum TargetLang { get; }
+    internal LangDetectOptions? DetectionOptions { get; }
     internal CancellationToken CancellationToken { get; }
     internal bool IsLatestAutomatic => _coordinator.IsLatestAutomatic(OperationId);
 
@@ -56,6 +60,9 @@ internal sealed class TranslationOperation
     internal void BindMainResult(ITranslatePlugin plugin, string text, LangEnum source, LangEnum target) =>
         _coordinator.BindResultContext(plugin.TransResult, OperationId,
             new(PreparedInput, SourceLang, TargetLang, source, target, text));
+
+    internal void BindPreparedInput(object channel) =>
+        _coordinator.BindPreparedInput(channel, OperationId, PreparedInput);
 
     internal bool TryPrepare(ITranslatePlugin plugin)
     {
@@ -136,6 +143,7 @@ internal sealed class TranslationOperation
         TryPublish(
             plugin.DictionaryResult,
             () => plugin.DictionaryResult.IsProcessing = true);
+        _coordinator.NotifyProcessingStateChanged();
         result.IsProcessing = true;
         try
         {

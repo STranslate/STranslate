@@ -891,15 +891,14 @@
     <sys:String x:Key="General_OcrOnLanguageChanged">Вікно OCR: одразу розпізнавати текст після зміни мови</sys:String>
     <!-- 翻译前替换 -->
     <sys:String x:Key="General_TextPreprocessing">Заміна перед перекладом</sys:String>
-    <sys:String x:Key="General_TextPreprocessingDescription">Глобальні правила заміни перед перекладом: звичайний текст і регулярні вирази.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">Заміна тексту перед перекладом у головному вікні, пошуком у словнику, перекладом із заміною та перекладом зображень.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScope">Застосовується до автоматичного й ручного перекладу, пошуку у словнику в головному вікні (зокрема тексту зі знімків екрана, виділення та буфера обміну), а також до перекладу із заміною. Під час перекладу зображень кожен текстовий блок обробляється окремо. Замінюється лише текст запиту, початковий ввід зберігається. OCR, зворотний переклад, озвучення, збереження до словника та перегляд історії не застосовують ці правила. Історія показує запит, збережений на той момент.</sys:String>
     <sys:String x:Key="General_TextPreprocessingManage">Керувати правилами</sys:String>
     <sys:String x:Key="General_TextPreprocessingEnable">Увімкнути заміну перед перекладом</sys:String>
     <sys:String x:Key="General_TextPreprocessingMode">Спосіб</sys:String>
     <sys:String x:Key="General_TextPreprocessingPlainText">Звичайний текст</sys:String>
     <sys:String x:Key="General_TextPreprocessingRegex">Регулярний вираз</sys:String>
     <sys:String x:Key="General_TextPreprocessingFind">Знайти</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHint">Попередня заміна</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHintDescription">Перед цим перекладом застосовано правила заміни.</sys:String>
     <sys:String x:Key="General_TextPreprocessingHelp">Правила виконуються згори вниз. Порожній текст заміни видаляє збіги. Звичайний текст замінюється буквально; регулярні вирази підтримують $1, ${name}, (?m), (?s) та інші параметри.</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingReplacement">Текст заміни</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMoveUp">Перемістити правило вгору</sys:String>
@@ -913,4 +912,24 @@
     <sys:String x:Key="TranslatePreprocessingBlocksFailed">Не вдалося обробити блоки зображення: {0}. Початковий вміст збережено.</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingNewRule">Правило {0}</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingErrorPosition">Позиція: {0}.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRuleName">Назва правила</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEditMultiline">Редагувати вибране правило (кілька рядків)</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTest">Перевірка правил</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestInput">Введіть текст; наведіть вказівник на виділення, щоб переглянути заміну</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRunTest">Перевірити</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestSummary">Текст змінено правилами: {0}.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDeleted">Цей вміст видалено</sys:String>
+    <sys:String x:Key="General_TextPreprocessingReplacementResult">Надісланий текст</sys:String>
+    <sys:String x:Key="General_TextPreprocessingCopyRequest">Копіювати надісланий текст</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusEnabled">Увімкнено · правил: {0}</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusDisabled">Вимкнено</sys:String>
+    <sys:String x:Key="General_TextPreprocessingExportDetails">Експортувати надісланий текст і мови</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexHint">Перевірте дужки, екранування та групи захоплення.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexParenthesis">Відсутня закривальна кругла дужка.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexBracket">Відсутня закривальна дужка класу символів.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexEscape">Неприпустима escape-послідовність.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingUnchanged">Без змін</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRequestUnavailable">Текст запиту не збережено</sys:String>
+    <sys:String x:Key="General_TextPreprocessingSummary">Замінюється лише текст запиту, оригінал зберігається.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScopeTitle">Область застосування</sys:String>
 </ResourceDictionary>

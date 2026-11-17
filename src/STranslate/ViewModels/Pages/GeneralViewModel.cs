@@ -23,6 +23,8 @@ public partial class GeneralViewModel : SearchViewModelBase
         Languages = i18n.LoadAvailableLanguages();
         _textPreprocessingService = textPreprocessingService;
         _i18n = i18n;
+        _preprocessingLanguageChanged = () => OnPropertyChanged(nameof(TextPreprocessingStatus));
+        _i18n.OnLanguageChanged += _preprocessingLanguageChanged;
 
         InitializeMainHeaderActions();
 
@@ -35,6 +37,13 @@ public partial class GeneralViewModel : SearchViewModelBase
     private bool _isMainHeaderSyncPending;
     private readonly TextPreprocessingService _textPreprocessingService;
     private readonly Internationalization _i18n;
+    private readonly Action _preprocessingLanguageChanged;
+
+    public string TextPreprocessingStatus => Settings.TextPreprocessing is { InvalidConfiguration: not null }
+        ? _i18n.GetTranslation("TranslatePreprocessingInvalidConfiguration")
+        : Settings.TextPreprocessing is { IsEnabled: true } configuration
+            ? string.Format(_i18n.GetTranslation("General_TextPreprocessingStatusEnabled"), configuration.Rules.Count(rule => rule.IsEnabled))
+            : _i18n.GetTranslation("General_TextPreprocessingStatusDisabled");
 
     [RelayCommand]
     private async Task EditTextPreprocessingAsync(FrameworkElement element)
@@ -164,6 +173,7 @@ public partial class GeneralViewModel : SearchViewModelBase
 
     private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(Settings.TextPreprocessing)) OnPropertyChanged(nameof(TextPreprocessingStatus));
         if (e.PropertyName == nameof(Settings.TextSeparatorHandleScopes))
         {
             OnTextSeparatorScopePropertiesChanged();
@@ -281,6 +291,7 @@ public partial class GeneralViewModel : SearchViewModelBase
         if (disposing)
         {
             Settings.PropertyChanged -= OnSettingsPropertyChanged;
+            _i18n.OnLanguageChanged -= _preprocessingLanguageChanged;
         }
 
         base.Dispose(disposing);

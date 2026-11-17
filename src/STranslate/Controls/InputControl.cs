@@ -147,35 +147,14 @@ public class InputControl : Control
                 LanguageDetectorType.Local,
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
-    public bool HasTextPreprocessingRules
+    public IReadOnlyList<TextReplacementRequest>? PreparedRequests
     {
-        get => (bool)GetValue(HasTextPreprocessingRulesProperty);
-        set => SetValue(HasTextPreprocessingRulesProperty, value);
+        get => (IReadOnlyList<TextReplacementRequest>?)GetValue(PreparedRequestsProperty);
+        set => SetValue(PreparedRequestsProperty, value);
     }
 
-    public static readonly DependencyProperty HasTextPreprocessingRulesProperty =
-        DependencyProperty.Register(
-            nameof(HasTextPreprocessingRules), typeof(bool), typeof(InputControl), new PropertyMetadata(false));
-
-    public int TextPreprocessingRuleCount
-    {
-        get => (int)GetValue(TextPreprocessingRuleCountProperty);
-        set => SetValue(TextPreprocessingRuleCountProperty, value);
-    }
-
-    public static readonly DependencyProperty TextPreprocessingRuleCountProperty =
-        DependencyProperty.Register(
-            nameof(TextPreprocessingRuleCount), typeof(int), typeof(InputControl), new PropertyMetadata(0));
-
-    public string TextPreprocessingRuleDetails
-    {
-        get => (string)GetValue(TextPreprocessingRuleDetailsProperty);
-        set => SetValue(TextPreprocessingRuleDetailsProperty, value);
-    }
-
-    public static readonly DependencyProperty TextPreprocessingRuleDetailsProperty =
-        DependencyProperty.Register(
-            nameof(TextPreprocessingRuleDetails), typeof(string), typeof(InputControl), new PropertyMetadata(string.Empty));
+    public static readonly DependencyProperty PreparedRequestsProperty = DependencyProperty.Register(
+        nameof(PreparedRequests), typeof(IReadOnlyList<TextReplacementRequest>), typeof(InputControl), new PropertyMetadata(null));
 
     public bool IsIdentify
     {

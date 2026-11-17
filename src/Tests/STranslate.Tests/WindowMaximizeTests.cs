@@ -9,13 +9,14 @@ using System.Windows.Interop;
 
 namespace STranslate.Tests;
 
+[Collection("WPF UI")]
 public class WindowMaximizeTests
 {
     [Fact]
     public void DisablingMaximizePreservesResizeAcrossWindowVisibilityChanges()
     {
         Exception? error = null;
-        var thread = new Thread(() =>
+        WpfUiCollection.Run(() =>
         {
             Window? window = null;
             try
@@ -69,9 +70,6 @@ public class WindowMaximizeTests
                 window?.Close();
             }
         });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
         if (error != null)
             ExceptionDispatchInfo.Capture(error).Throw();
     }

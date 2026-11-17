@@ -14,27 +14,50 @@
     PrimaryButtonClick="OnPrimaryButtonClick">
     <ui:ContentDialog.Resources>
         <sys:Double x:Key="ContentDialogMaxWidth">800</sys:Double>
-        <sys:Double x:Key="ContentDialogMinWidth">580</sys:Double>
+        <sys:Double x:Key="ContentDialogMinWidth">700</sys:Double>
+        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextControlForegroundKey}}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource {x:Static ui:ThemeKeys.TextControlForegroundKey}}" />
+        </Style>
     </ui:ContentDialog.Resources>
+    <ScrollViewer MaxHeight="540" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel>
+        <TextBlock Text="{DynamicResource General_TextPreprocessingSummary}" TextWrapping="Wrap" Margin="0,0,0,12" Opacity="0.7" />
         <StackPanel Orientation="Horizontal" Margin="0,0,0,12"
-            IsEnabled="{Binding IsSaving, Converter={cnvt:BoolInverseConverter}}">
+            IsEnabled="{Binding IsBusy, Converter={cnvt:BoolInverseConverter}}">
             <TextBlock Text="{DynamicResource General_TextPreprocessingEnable}" VerticalAlignment="Center" Margin="0,0,16,0" />
             <ui:ToggleSwitch IsOn="{Binding IsEnabled, Mode=TwoWay}"
                 OnContent="{DynamicResource Enable}" OffContent="{DynamicResource Disable}" />
+            <Border Margin="16,0,0,0" Padding="4,2" VerticalAlignment="Center" Focusable="True" Cursor="Help"
+                AutomationProperties.Name="{DynamicResource General_TextPreprocessingScopeTitle}"
+                AutomationProperties.HelpText="{DynamicResource General_TextPreprocessingScope}"
+                ToolTipService.InitialShowDelay="100" ToolTipService.ShowDuration="60000" ToolTipService.ShowOnDisabled="True">
+                <Border.ToolTip>
+                    <ToolTip MaxWidth="440">
+                        <TextBlock Text="{DynamicResource General_TextPreprocessingScope}" TextWrapping="Wrap" />
+                    </ToolTip>
+                </Border.ToolTip>
+                <StackPanel Orientation="Horizontal" Opacity="0.7">
+                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Info_24_Regular}" FontSize="16" VerticalAlignment="Center" Margin="0,0,4,0" />
+                    <TextBlock Text="{DynamicResource General_TextPreprocessingScopeTitle}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
         </StackPanel>
-        <Grid IsEnabled="{Binding IsSaving, Converter={cnvt:BoolInverseConverter}}">
+        <Grid IsEnabled="{Binding IsBusy, Converter={cnvt:BoolInverseConverter}}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="240" />
+                <RowDefinition Height="152" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <DataGrid x:Name="RulesGrid" ItemsSource="{Binding Rules}" SelectedItem="{Binding SelectedRule}"
                 AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                 CanUserSortColumns="False" CanUserReorderColumns="False"
-                HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+                HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+                SelectionChanged="OnRuleSelectionChanged">
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn Header="{DynamicResource Enable}" Width="68"
                         Binding="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}" />
+                    <DataGridTextColumn Header="{DynamicResource General_TextPreprocessingRuleName}" Width="110"
+                        Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
                     <DataGridTemplateColumn Header="{DynamicResource General_TextPreprocessingMode}" Width="100">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -63,9 +86,39 @@
                     Icon="{x:Static ui:FluentSystemIcons.ChevronDown_20_Regular}" ToolTip="{DynamicResource Translate_TextPreprocessingMoveDown}" />
             </StackPanel>
         </Grid>
+        <Expander Header="{DynamicResource General_TextPreprocessingEditMultiline}" Margin="0,8,0,0">
+            <Grid IsEnabled="{Binding IsBusy, Converter={cnvt:BoolInverseConverter}}">
+                <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                <StackPanel Margin="0,4,4,0">
+                    <TextBlock Text="{DynamicResource General_TextPreprocessingFind}" />
+                    <TextBox Text="{Binding SelectedRule.Pattern, UpdateSourceTrigger=PropertyChanged}"
+                        AcceptsReturn="True" TextWrapping="Wrap" Height="80" VerticalScrollBarVisibility="Auto" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="4,4,0,0">
+                    <TextBlock Text="{DynamicResource Translate_TextPreprocessingReplacement}" />
+                    <TextBox Text="{Binding SelectedRule.Replacement, UpdateSourceTrigger=PropertyChanged}"
+                        AcceptsReturn="True" TextWrapping="Wrap" Height="80" VerticalScrollBarVisibility="Auto" />
+                </StackPanel>
+            </Grid>
+        </Expander>
         <TextBlock Text="{DynamicResource General_TextPreprocessingHelp}" TextWrapping="Wrap" Margin="0,12,0,0" Opacity="0.7" />
+        <Expander Header="{DynamicResource General_TextPreprocessingTest}" IsExpanded="True" Margin="0,12,0,0">
+            <StackPanel IsEnabled="{Binding IsBusy, Converter={cnvt:BoolInverseConverter}}">
+                <TextBlock Text="{DynamicResource General_TextPreprocessingTestInput}" Margin="0,4" />
+                <control:ReplacementTextBox Text="{Binding TestText, UpdateSourceTrigger=PropertyChanged}"
+                    RequestText="{Binding TestRequestText}" AcceptsReturn="True" Height="50"
+                    TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
+                <Button Content="{DynamicResource General_TextPreprocessingRunTest}" Click="OnTestClicked"
+                    HorizontalAlignment="Left" Margin="0,6" />
+                <TextBlock Text="{DynamicResource General_TextPreprocessingReplacementResult}" Margin="0,0,0,4" />
+                <TextBox Text="{Binding TestRequestText, Mode=OneWay}" IsReadOnly="True" Height="44"
+                    TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
+                <TextBlock Text="{Binding TestSummary}" TextWrapping="Wrap" Margin="0,4,0,0" />
+            </StackPanel>
+        </Expander>
         <TextBlock Text="{Binding Error}" TextWrapping="Wrap" Margin="0,8,0,0"
             Foreground="{DynamicResource {x:Static ui:ThemeKeys.SystemFillColorCriticalBrushKey}}"
             Visibility="{Binding Error, Converter={cnvt:EqualToVisibilityInverseConverter}}" />
     </StackPanel>
+    </ScrollViewer>
 </ui:ContentDialog>

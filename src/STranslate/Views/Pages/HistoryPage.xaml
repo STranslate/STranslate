@@ -74,6 +74,9 @@
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.MoreHorizontal_20_Regular}" />
                         <ui:FlyoutService.Flyout>
                             <ui:MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="{DynamicResource General_TextPreprocessingExportDetails}"
+                                    IsCheckable="True" IsChecked="{Binding ExportRequestDetails}" />
+                                <Separator />
                                 <MenuItem Command="{Binding DeleteAllHistoryCommand}" Header="{DynamicResource DeleteAllHistory}">
                                     <MenuItem.Icon>
                                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_20_Regular}" />

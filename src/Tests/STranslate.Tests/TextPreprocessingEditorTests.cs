@@ -67,6 +67,36 @@ public class TextPreprocessingEditorTests
         TextPreprocessing = new() { IsEnabled = true, Rules = [new() { Pattern = "secret", Replacement = "public" }] }
     };
 
+    [Fact]
+    public async Task TestingUsesTheDraftAndClearsThePreviewWhenTheDraftChanges()
+    {
+        var settings = CreateSettings();
+        using var editor = new TextPreprocessingEditViewModel(settings, new(), Translate);
+        editor.Rules[0].Replacement = "draft";
+        editor.TestText = "secret";
+        await editor.TestAsync();
+        Assert.Equal("draft", editor.TestRequestText);
+        Assert.Equal("public", settings.TextPreprocessing.Rules[0].Replacement);
+        editor.Rules[0].Replacement = "changed";
+        Assert.Null(editor.TestRequestText);
+        editor.Rules[0].Pattern = "(";
+        await editor.TestAsync();
+        Assert.Contains("TranslatePreprocessingFailed", editor.Error);
+        Assert.Null(editor.TestRequestText);
+    }
+
+    [Fact]
+    public void NewRuleNamesStayUniqueAfterDeletion()
+    {
+        using var editor = new TextPreprocessingEditViewModel(new(), new(), Translate);
+        editor.AddRuleCommand.Execute(null);
+        editor.AddRuleCommand.Execute(null);
+        editor.SelectedRule = editor.Rules[0];
+        editor.RemoveRuleCommand.Execute(null);
+        editor.AddRuleCommand.Execute(null);
+        Assert.Equal(editor.Rules.Count, editor.Rules.Select(rule => rule.Name).Distinct().Count());
+    }
+
     private static string Translate(string key) => key switch
     {
         "Translate_TextPreprocessingNewRule" => "Rule {0}",

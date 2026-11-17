@@ -24,12 +24,13 @@ public static class HistoryCsvHelper
     /// <returns>完整 CSV 字符串。</returns>
     public static string BuildCsv(
         IReadOnlyList<HistoryModel> items,
-        Func<string?, string> languageDisplayNameResolver)
+        Func<string?, string> languageDisplayNameResolver,
+        bool includeRequestDetails = false)
     {
         ArgumentNullException.ThrowIfNull(items);
         ArgumentNullException.ThrowIfNull(languageDisplayNameResolver);
 
-        var engineRows = items.Select(BuildExportEngineItems).ToList();
+        var engineRows = items.Select(item => BuildExportEngineItems(item, languageDisplayNameResolver)).ToList();
         var maxEngineCount = engineRows.Count == 0 ? 0 : engineRows.Max(row => row.Count);
 
         var headers = new List<string>
@@ -46,6 +47,12 @@ public static class HistoryCsvHelper
         {
             headers.Add($"翻译引擎{index}");
             headers.Add($"翻译结果{index}");
+            if (includeRequestDetails)
+            {
+                headers.Add($"实际发送文本{index}");
+                headers.Add($"实际源语言{index}");
+                headers.Add($"实际目标语言{index}");
+            }
         }
 
         var csvBuilder = new StringBuilder();
@@ -71,11 +78,18 @@ public static class HistoryCsvHelper
                 {
                     row.Add(engineItems[engineIndex].EngineName);
                     row.Add(engineItems[engineIndex].ResultText);
+                    if (includeRequestDetails)
+                    {
+                        row.Add(engineItems[engineIndex].RequestText);
+                        row.Add(engineItems[engineIndex].SourceLanguage);
+                        row.Add(engineItems[engineIndex].TargetLanguage);
+                    }
                 }
                 else
                 {
                     row.Add(string.Empty);
                     row.Add(string.Empty);
+                    if (includeRequestDetails) row.AddRange([string.Empty, string.Empty, string.Empty]);
                 }
             }
 
@@ -85,7 +99,7 @@ public static class HistoryCsvHelper
         return csvBuilder.ToString();
     }
 
-    private static List<ExportEngineItem> BuildExportEngineItems(HistoryModel history)
+    private static List<ExportEngineItem> BuildExportEngineItems(HistoryModel history, Func<string?, string> languageDisplayNameResolver)
     {
         var result = new List<ExportEngineItem>();
 
@@ -93,7 +107,10 @@ public static class HistoryCsvHelper
         {
             var engineName = ResolveEngineName(data);
             var resultText = BuildResultText(data);
-            result.Add(new ExportEngineItem(engineName, resultText));
+            result.Add(new ExportEngineItem(engineName, resultText,
+                data.RequestText ?? (string.IsNullOrEmpty(data.PreprocessingFingerprint) ? history.SourceText : string.Empty),
+                languageDisplayNameResolver(data.EffectiveSourceLang ?? history.EffectiveSourceLang ?? history.SourceLang),
+                languageDisplayNameResolver(data.EffectiveTargetLang ?? history.EffectiveTargetLang ?? history.TargetLang)));
         }
 
         return result;
@@ -214,5 +231,6 @@ public static class HistoryCsvHelper
         return $"\"{value.Replace("\"", "\"\"")}\"";
     }
 
-    private readonly record struct ExportEngineItem(string EngineName, string ResultText);
+    private readonly record struct ExportEngineItem(string EngineName, string ResultText,
+        string RequestText, string SourceLanguage, string TargetLanguage);
 }

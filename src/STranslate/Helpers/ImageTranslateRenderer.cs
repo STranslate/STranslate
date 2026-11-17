@@ -117,6 +117,31 @@ internal static class ImageTranslateRenderer
             selectableWords.ToArray());
     }
 
+    /// <summary>绘制仅覆盖成功块；选择数据同时保留失败块的原文和坐标。</summary>
+    internal static ImageTranslateOverlayDocument CreateTranslationResult(
+        IReadOnlyList<OcrLayoutBlock> layoutBlocks,
+        IReadOnlySet<OcrLayoutBlock> translatedBlocks,
+        ImageTranslateOverlayTheme overlayTheme)
+    {
+        var items = new List<ImageTranslateOverlayItem>();
+        var groups = new List<IEnumerable<OcrWord>>();
+        foreach (var block in layoutBlocks)
+        {
+            if (translatedBlocks.Contains(block))
+            {
+                var overlay = CreateTranslatedOverlay([block], overlayTheme);
+                items.AddRange(overlay.Items);
+                groups.Add(overlay.SelectableWords);
+            }
+            else
+            {
+                groups.Add(OcrWordBuilder.CreateFromOcrContents(
+                    block.SourceContents.Count > 0 ? block.SourceContents : [block.ToOcrContent()]));
+            }
+        }
+        return new(items, OcrWordBuilder.CreateIndexedCollectionFromGroups(groups, separateParagraphs: true));
+    }
+
     /// <summary>
     /// 生成带有 OCR 识别边框标注的图像。
     /// </summary>

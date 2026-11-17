@@ -885,15 +885,14 @@
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">Показать перевод</sys:String>
     <!-- 翻译前替换 -->
     <sys:String x:Key="General_TextPreprocessing">Замена перед переводом</sys:String>
-    <sys:String x:Key="General_TextPreprocessingDescription">Настройка общих правил замены перед переводом: обычный текст и регулярные выражения.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">Замена текста перед переводом в главном окне, поиском в словаре, переводом с заменой и переводом изображений.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScope">Применяется к автоматическому и ручному переводу, поиску в словаре в главном окне (включая текст со снимков экрана, выделения и буфера обмена), а также к переводу с заменой. При переводе изображений каждый текстовый блок обрабатывается отдельно. Заменяется только отправляемый текст, исходный ввод сохраняется. OCR, обратный перевод, озвучивание, сохранение в словарь и просмотр истории не применяют эти правила. В истории отображается сохранённый на тот момент запрос.</sys:String>
     <sys:String x:Key="General_TextPreprocessingManage">Настроить правила</sys:String>
     <sys:String x:Key="General_TextPreprocessingEnable">Включить замену перед переводом</sys:String>
     <sys:String x:Key="General_TextPreprocessingMode">Способ</sys:String>
     <sys:String x:Key="General_TextPreprocessingPlainText">Обычный текст</sys:String>
     <sys:String x:Key="General_TextPreprocessingRegex">Регулярное выражение</sys:String>
     <sys:String x:Key="General_TextPreprocessingFind">Найти</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHint">Предзамена</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHintDescription">Перед этим переводом были применены правила замены.</sys:String>
     <sys:String x:Key="General_TextPreprocessingHelp">Правила выполняются сверху вниз. Пустая строка замены удаляет совпадения. В режиме обычного текста используется буквальная замена; регулярные выражения поддерживают $1, ${name}, (?m), (?s) и другие параметры.</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingReplacement">Текст замены</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMoveUp">Переместить правило вверх</sys:String>
@@ -907,4 +906,24 @@
     <sys:String x:Key="TranslatePreprocessingBlocksFailed">Не удалось обработать блоки изображения: {0}. Сохранено исходное содержимое.</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingNewRule">Правило {0}</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingErrorPosition">Позиция: {0}.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRuleName">Имя правила</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEditMultiline">Изменить выбранное правило (несколько строк)</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTest">Проверка правил</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestInput">Введите текст; наведите указатель на выделение для просмотра замены</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRunTest">Проверить</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestSummary">Текст изменён правилами: {0}.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDeleted">Это содержимое удалено</sys:String>
+    <sys:String x:Key="General_TextPreprocessingReplacementResult">Отправленный текст</sys:String>
+    <sys:String x:Key="General_TextPreprocessingCopyRequest">Копировать отправленный текст</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusEnabled">Включено · правил: {0}</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusDisabled">Выключено</sys:String>
+    <sys:String x:Key="General_TextPreprocessingExportDetails">Экспорт отправленного текста и языков</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexHint">Проверьте скобки, экранирование и группы захвата.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexParenthesis">Отсутствует закрывающая круглая скобка.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexBracket">Отсутствует закрывающая скобка класса символов.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexEscape">Недопустимая escape-последовательность.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingUnchanged">Без изменений</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRequestUnavailable">Текст запроса не сохранён</sys:String>
+    <sys:String x:Key="General_TextPreprocessingSummary">Заменяется только отправляемый текст, оригинал сохраняется.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScopeTitle">Область применения</sys:String>
 </ResourceDictionary>

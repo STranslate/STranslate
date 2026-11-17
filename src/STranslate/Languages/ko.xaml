@@ -861,15 +861,14 @@
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">번역 표시</sys:String>
     <!-- 翻译前替换 -->
     <sys:String x:Key="General_TextPreprocessing">번역 전 치환</sys:String>
-    <sys:String x:Key="General_TextPreprocessingDescription">번역 전에 적용할 일반 텍스트 및 정규식 치환 규칙을 관리합니다.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">메인 창 번역, 사전 조회, 대체 번역 및 이미지 번역에서 전송 전에 텍스트를 치환합니다.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScope">메인 창의 자동/수동 번역과 사전 조회(스크린샷, 텍스트 선택, 클립보드 등의 입력 경로 포함), 대체 번역에 적용됩니다. 이미지 번역은 텍스트 블록별로 처리합니다. 전송할 텍스트만 치환하며 입력 원문은 유지합니다. OCR 인식, 역번역, 음성 읽기, 단어장 저장 및 기록 표시에는 규칙을 적용하지 않습니다. 기록은 당시 저장된 요청을 표시합니다.</sys:String>
     <sys:String x:Key="General_TextPreprocessingManage">규칙 관리</sys:String>
     <sys:String x:Key="General_TextPreprocessingEnable">번역 전 치환 활성화</sys:String>
     <sys:String x:Key="General_TextPreprocessingMode">치환 방식</sys:String>
     <sys:String x:Key="General_TextPreprocessingPlainText">일반 텍스트</sys:String>
     <sys:String x:Key="General_TextPreprocessingRegex">정규식</sys:String>
     <sys:String x:Key="General_TextPreprocessingFind">찾을 내용</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHint">사전 치환</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHintDescription">이번 번역에 사전 치환 규칙이 적용되었습니다.</sys:String>
     <sys:String x:Key="General_TextPreprocessingHelp">규칙은 위에서 아래로 실행됩니다. 바꿀 내용을 비워 두면 일치하는 부분을 삭제합니다. 일반 텍스트는 입력한 그대로 치환하며, 정규식은 $1, ${name}, (?m), (?s) 등을 지원합니다.</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingReplacement">바꿀 내용</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMoveUp">규칙 위로 이동</sys:String>
@@ -883,4 +882,24 @@
     <sys:String x:Key="TranslatePreprocessingBlocksFailed">이미지 블록 {0}개를 처리하지 못했습니다. 원본 내용이 유지되었습니다.</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingNewRule">규칙 {0}</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingErrorPosition">위치: {0}.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRuleName">규칙 이름</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEditMultiline">선택한 규칙 편집 (여러 줄)</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTest">규칙 테스트</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestInput">테스트 텍스트를 입력하고 강조된 부분에 마우스를 올려 결과를 확인하세요</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRunTest">테스트 실행</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestSummary">규칙 {0}개가 텍스트를 변경했습니다.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDeleted">이 내용은 삭제되었습니다</sys:String>
+    <sys:String x:Key="General_TextPreprocessingReplacementResult">실제 전송 텍스트</sys:String>
+    <sys:String x:Key="General_TextPreprocessingCopyRequest">전송 텍스트 복사</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusEnabled">사용 중 · 규칙 {0}개</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusDisabled">사용 안 함</sys:String>
+    <sys:String x:Key="General_TextPreprocessingExportDetails">전송 텍스트 및 언어 내보내기</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexHint">괄호, 이스케이프 및 캡처 그룹을 확인하세요.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexParenthesis">닫는 괄호가 없습니다.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexBracket">문자 클래스의 닫는 대괄호가 없습니다.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexEscape">잘못된 이스케이프가 있습니다.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingUnchanged">변경 없음</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRequestUnavailable">전송 텍스트가 기록되지 않았습니다</sys:String>
+    <sys:String x:Key="General_TextPreprocessingSummary">원문을 유지하고 전송할 텍스트만 치환합니다.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScopeTitle">적용 범위</sys:String>
 </ResourceDictionary>

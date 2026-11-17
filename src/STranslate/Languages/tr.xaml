@@ -887,15 +887,14 @@
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">Çeviriyi göster</sys:String>
     <!-- 翻译前替换 -->
     <sys:String x:Key="General_TextPreprocessing">Çeviri öncesi değiştirme</sys:String>
-    <sys:String x:Key="General_TextPreprocessingDescription">Çeviriden önce uygulanan düz metin ve düzenli ifade değiştirme kurallarını yönetin.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">Ana pencere çevirisi, sözlük araması, yerine çeviri ve görsel çevirisinden önce metni değiştirir.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScope">Ana penceredeki otomatik/elle çeviriye ve sözlük aramalarına (ekran görüntüsü, metin seçimi ve pano gibi kaynaklar dahil) ve yerine çeviriye uygulanır. Görsel çevirisinde her metin bloğu ayrı işlenir. Yalnızca gönderilen metin değiştirilir; özgün giriş korunur. OCR, geri çeviri, sesli okuma, sözcük kaydetme ve geçmiş görüntüleme bu kuralları uygulamaz. Geçmiş, o sırada kaydedilen isteği gösterir.</sys:String>
     <sys:String x:Key="General_TextPreprocessingManage">Kuralları yönet</sys:String>
     <sys:String x:Key="General_TextPreprocessingEnable">Çeviri öncesi değiştirmeyi etkinleştir</sys:String>
     <sys:String x:Key="General_TextPreprocessingMode">Yöntem</sys:String>
     <sys:String x:Key="General_TextPreprocessingPlainText">Düz metin</sys:String>
     <sys:String x:Key="General_TextPreprocessingRegex">Düzenli ifade</sys:String>
     <sys:String x:Key="General_TextPreprocessingFind">Aranacak metin</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHint">Ön değiştirme</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHintDescription">Bu çeviriden önce değiştirme kuralları uygulandı.</sys:String>
     <sys:String x:Key="General_TextPreprocessingHelp">Kurallar yukarıdan aşağıya uygulanır. Eşleşmeleri silmek için yerine konacak metni boş bırakın. Düz metin olduğu gibi değiştirilir; düzenli ifadeler $1, ${name}, (?m) ve (?s) gibi seçenekleri destekler.</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingReplacement">Yerine konacak metin</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMoveUp">Kuralı yukarı taşı</sys:String>
@@ -909,4 +908,24 @@
     <sys:String x:Key="TranslatePreprocessingBlocksFailed">{0} görüntü bloğu işlenemedi. Özgün içerikleri korundu.</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingNewRule">Kural {0}</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingErrorPosition">Konum: {0}.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRuleName">Kural adı</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEditMultiline">Seçili kuralı düzenle (çok satırlı)</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTest">Kuralları test et</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestInput">Örnek metin girin; sonucu görmek için vurgulanan alanın üzerine gelin</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRunTest">Testi çalıştır</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestSummary">{0} kural metni değiştirdi.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDeleted">Bu içerik silindi</sys:String>
+    <sys:String x:Key="General_TextPreprocessingReplacementResult">Gönderilen metin</sys:String>
+    <sys:String x:Key="General_TextPreprocessingCopyRequest">Gönderilen metni kopyala</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusEnabled">Etkin · {0} kural</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusDisabled">Devre dışı</sys:String>
+    <sys:String x:Key="General_TextPreprocessingExportDetails">Gönderilen metni ve dilleri dışa aktar</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexHint">Parantezleri, kaçışları ve yakalama gruplarını kontrol edin.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexParenthesis">Kapanış parantezi eksik.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexBracket">Karakter sınıfının kapanış köşeli parantezi eksik.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexEscape">Geçersiz kaçış dizisi.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingUnchanged">Değişmedi</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRequestUnavailable">İstek metni kaydedilmemiş</sys:String>
+    <sys:String x:Key="General_TextPreprocessingSummary">Özgün metni korur, yalnızca gönderilen metni değiştirir.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScopeTitle">Kapsam</sys:String>
 </ResourceDictionary>

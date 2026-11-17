@@ -894,15 +894,14 @@
     <sys:String x:Key="General_OcrOnLanguageChanged">OCR 介面：切換語言後立即辨識</sys:String>
     <!-- 翻译前替换 -->
     <sys:String x:Key="General_TextPreprocessing">翻譯前替換</sys:String>
-    <sys:String x:Key="General_TextPreprocessingDescription">統一管理翻譯前的純文字和正規表示式替換規則。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">傳送前替換文字，適用於主視窗翻譯、字典查詢、替換翻譯和圖片翻譯。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScope">適用於主視窗自動/手動翻譯與字典查詢（包括截圖、劃詞、剪貼簿等取詞入口），以及替換翻譯。圖片翻譯按文字區塊分別處理。規則僅替換傳送文字，保留輸入原文；OCR 辨識、回譯、朗讀、生詞本儲存和歷史顯示不執行規則，歷史詳情使用當時儲存的請求快照。</sys:String>
     <sys:String x:Key="General_TextPreprocessingManage">管理規則</sys:String>
     <sys:String x:Key="General_TextPreprocessingEnable">啟用翻譯前替換</sys:String>
     <sys:String x:Key="General_TextPreprocessingMode">替換方式</sys:String>
     <sys:String x:Key="General_TextPreprocessingPlainText">純文字</sys:String>
     <sys:String x:Key="General_TextPreprocessingRegex">正規表示式</sys:String>
     <sys:String x:Key="General_TextPreprocessingFind">尋找內容</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHint">前置替換</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHintDescription">本次翻譯已套用前置替換規則。</sys:String>
     <sys:String x:Key="General_TextPreprocessingHelp">規則由上往下執行，替換文字留空表示刪除。純文字按字面替換；正規表示式支援 $1、${name} 及 (?m)、(?s) 等選項。</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingReplacement">替換文字</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMoveUp">上移規則</sys:String>
@@ -916,4 +915,24 @@
     <sys:String x:Key="TranslatePreprocessingBlocksFailed">{0} 個圖片區塊無法完成處理，已保留原始內容。</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingNewRule">規則 {0}</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingErrorPosition">位置：{0}。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRuleName">規則名稱</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEditMultiline">編輯選取規則（支援多行）</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTest">測試規則</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestInput">輸入測試文字；將游標停在醒目處可查看替換結果</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRunTest">執行測試</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestSummary">本次有 {0} 條規則生效。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDeleted">此內容已刪除</sys:String>
+    <sys:String x:Key="General_TextPreprocessingReplacementResult">實際傳送文字</sys:String>
+    <sys:String x:Key="General_TextPreprocessingCopyRequest">複製實際傳送文字</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusEnabled">已啟用 · {0} 條規則</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusDisabled">已關閉</sys:String>
+    <sys:String x:Key="General_TextPreprocessingExportDetails">匯出實際傳送文字和語言</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexHint">請檢查括號、跳脫字元和擷取群組寫法。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexParenthesis">缺少右括號。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexBracket">字元集合缺少右方括號。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexEscape">存在無效的跳脫字元。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingUnchanged">未替換</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRequestUnavailable">未記錄請求文字</sys:String>
+    <sys:String x:Key="General_TextPreprocessingSummary">僅替換傳送文字，保留原文。</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScopeTitle">適用範圍</sys:String>
 </ResourceDictionary>

@@ -902,15 +902,14 @@ Alt+کلیک چپ -> تنظیمات ترجمه متن</sys:String>
     <sys:String x:Key="ImageTranslatePinnedShowTranslation">نمایش ترجمه</sys:String>
     <!-- 翻译前替换 -->
     <sys:String x:Key="General_TextPreprocessing">جایگزینی پیش از ترجمه</sys:String>
-    <sys:String x:Key="General_TextPreprocessingDescription">مدیریت قواعد سراسری جایگزینی متن ساده و عبارت منظم پیش از ترجمه.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDescription">جایگزینی متن پیش از ترجمه در پنجره اصلی، جست‌وجوی واژه‌نامه، ترجمه جایگزین و ترجمه تصویر.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScope">برای ترجمه خودکار/دستی و جست‌وجوی واژه‌نامه در پنجره اصلی (شامل متن تصویر صفحه، متن انتخاب‌شده و کلیپ‌بورد) و ترجمه جایگزین اعمال می‌شود. در ترجمه تصویر، هر بخش متن جداگانه پردازش می‌شود. فقط متن ارسالی تغییر می‌کند و ورودی اصلی حفظ می‌شود. تشخیص OCR، ترجمه معکوس، خواندن متن، ذخیره واژگان و نمایش تاریخچه این قواعد را اجرا نمی‌کنند. تاریخچه درخواست ذخیره‌شده در همان زمان را نمایش می‌دهد.</sys:String>
     <sys:String x:Key="General_TextPreprocessingManage">مدیریت قواعد</sys:String>
     <sys:String x:Key="General_TextPreprocessingEnable">فعال‌سازی جایگزینی پیش از ترجمه</sys:String>
     <sys:String x:Key="General_TextPreprocessingMode">روش</sys:String>
     <sys:String x:Key="General_TextPreprocessingPlainText">متن ساده</sys:String>
     <sys:String x:Key="General_TextPreprocessingRegex">عبارت منظم</sys:String>
     <sys:String x:Key="General_TextPreprocessingFind">متن جستجو</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHint">جایگزینی اولیه</sys:String>
-    <sys:String x:Key="General_TextPreprocessingHintDescription">قواعد جایگزینی پیش از این ترجمه اعمال شدند.</sys:String>
     <sys:String x:Key="General_TextPreprocessingHelp">قواعد از بالا به پایین اجرا می‌شوند. خالی گذاشتن متن جایگزین، موارد منطبق را حذف می‌کند. متن ساده به‌صورت لفظی جایگزین می‌شود؛ عبارت منظم از $1، ${name} و گزینه‌هایی مانند (?m) و (?s) پشتیبانی می‌کند.</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingReplacement">متن جایگزین</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingMoveUp">انتقال قاعده به بالا</sys:String>
@@ -924,4 +923,24 @@ Alt+کلیک چپ -> تنظیمات ترجمه متن</sys:String>
     <sys:String x:Key="TranslatePreprocessingBlocksFailed">پردازش {0} بلوک تصویر انجام نشد. محتوای اصلی آن‌ها حفظ شد.</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingNewRule">قاعدهٔ {0}</sys:String>
     <sys:String x:Key="Translate_TextPreprocessingErrorPosition">موقعیت: {0}.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRuleName">نام قاعده</sys:String>
+    <sys:String x:Key="General_TextPreprocessingEditMultiline">ویرایش قاعدهٔ انتخاب‌شده (چندخطی)</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTest">آزمایش قواعد</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestInput">متن نمونه را وارد کنید؛ برای دیدن نتیجه روی بخش برجسته مکث کنید</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRunTest">اجرای آزمایش</sys:String>
+    <sys:String x:Key="General_TextPreprocessingTestSummary">{0} قاعده متن را تغییر داد.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingDeleted">این محتوا حذف شده است</sys:String>
+    <sys:String x:Key="General_TextPreprocessingReplacementResult">متن ارسال‌شده</sys:String>
+    <sys:String x:Key="General_TextPreprocessingCopyRequest">کپی متن ارسال‌شده</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusEnabled">فعال · {0} قاعده</sys:String>
+    <sys:String x:Key="General_TextPreprocessingStatusDisabled">غیرفعال</sys:String>
+    <sys:String x:Key="General_TextPreprocessingExportDetails">خروجی متن ارسال‌شده و زبان‌ها</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexHint">پرانتزها، نویسه‌های گریز و گروه‌های ضبط را بررسی کنید.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexParenthesis">پرانتز بسته وجود ندارد.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexBracket">کروشهٔ بستهٔ مجموعهٔ نویسه‌ها وجود ندارد.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRegexEscape">دنبالهٔ گریز نامعتبر است.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingUnchanged">بدون تغییر</sys:String>
+    <sys:String x:Key="General_TextPreprocessingRequestUnavailable">متن درخواست ثبت نشده است</sys:String>
+    <sys:String x:Key="General_TextPreprocessingSummary">فقط متن ارسالی تغییر می‌کند؛ متن اصلی حفظ می‌شود.</sys:String>
+    <sys:String x:Key="General_TextPreprocessingScopeTitle">دامنه کاربرد</sys:String>
 </ResourceDictionary>

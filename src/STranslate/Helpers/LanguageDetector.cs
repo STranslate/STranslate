@@ -26,10 +26,11 @@ public sealed record LangDetectOptions(
 /// </summary>
 public class LanguageDetector
 {
-    private static readonly ILogger<Utilities> _logger = Ioc.Default.GetRequiredService<ILogger<Utilities>>();
-    private static readonly IHttpService _httpService = Ioc.Default.GetRequiredService<IHttpService>();
-    private static readonly Internationalization _i18n = Ioc.Default.GetRequiredService<Internationalization>();
-    private static readonly Settings _settings = Ioc.Default.GetRequiredService<Settings>();
+    // 显式传入配置快照时，不预先读取全局设置或初始化不需要的网络服务。
+    private static ILogger<Utilities> _logger => Ioc.Default.GetRequiredService<ILogger<Utilities>>();
+    private static IHttpService _httpService => Ioc.Default.GetRequiredService<IHttpService>();
+    private static Internationalization _i18n => Ioc.Default.GetRequiredService<Internationalization>();
+    private static Settings _settings => Ioc.Default.GetRequiredService<Settings>();
 
     /// <summary>
     ///     使用全局语言配置解析本次翻译实际使用的语种。
