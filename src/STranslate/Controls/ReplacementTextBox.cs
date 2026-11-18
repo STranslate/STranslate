@@ -383,14 +383,21 @@ public class ReplacementTextBox : TextBox
         protected override void OnRender(DrawingContext drawingContext)
         {
             _regions.Clear();
+            var changes = owner.Changes;
+            if (changes.Count == 0) return;
+
+            var lineCount = owner.LineCount;
+            if (lineCount <= 0) return;
+            var firstLine = owner.GetFirstVisibleLineIndex();
+            var lastLine = owner.GetLastVisibleLineIndex();
+            if (firstLine < 0 || firstLine >= lineCount || lastLine < firstLine || lastLine >= lineCount) return;
+
+            var first = owner.GetCharacterIndexFromLineIndex(firstLine);
+            var last = owner.GetCharacterIndexFromLineIndex(lastLine) + owner.GetLineLength(lastLine);
             var clip = new Rect(new Point(), owner.RenderSize);
             drawingContext.PushClip(new RectangleGeometry(clip));
             var pen = new Pen(owner.Foreground, 1);
-            var firstLine = owner.GetFirstVisibleLineIndex();
-            var lastLine = owner.GetLastVisibleLineIndex();
-            var first = firstLine < 0 ? 0 : owner.GetCharacterIndexFromLineIndex(firstLine);
-            var last = lastLine < 0 ? owner.Text.Length : owner.GetCharacterIndexFromLineIndex(lastLine) + owner.GetLineLength(lastLine);
-            foreach (var change in owner.Changes)
+            foreach (var change in changes)
             {
                 if (change.Start > last + 1 || change.Start + change.Length < first) continue;
                 if (change.Length == 0)

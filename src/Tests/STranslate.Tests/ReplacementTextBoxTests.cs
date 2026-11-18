@@ -216,6 +216,36 @@ public class ReplacementTextBoxTests
     }
 
     [Fact]
+    public void HighlightsSkipRenderingWhileTextLayoutIsUnavailable()
+    {
+        RunOnSta(() =>
+        {
+            var input = new LayoutTestTextBox { Text = "original", RequestText = "replacement",
+                TextWrapping = TextWrapping.Wrap, FontSize = 20, Background = Brushes.White, Foreground = Brushes.Black };
+            using var source = CreateSource(input, out var root);
+            PumpUntil(() => input.Changes.Count > 0);
+            Render(root);
+            var adorner = Assert.Single(AdornerLayer.GetAdornerLayer(input).GetAdorners(input));
+            var renderedBeforeTextLayout = false;
+            input.BeforeArrange = () =>
+            {
+                Assert.Equal(0, input.LineCount);
+                Assert.Equal(0, input.GetFirstVisibleLineIndex());
+                adorner.InvalidateVisual();
+                adorner.Arrange(new Rect(0, 0, 400, 120));
+                renderedBeforeTextLayout = true;
+            };
+
+            input.FontSize = 22;
+            root.UpdateLayout();
+            Assert.True(renderedBeforeTextLayout);
+            var highlighted = Render(root);
+            input.RequestText = null;
+            Assert.NotEqual(highlighted, Render(root));
+        });
+    }
+
+    [Fact]
     public void SupersededComparisonCannotRestoreOldHighlights()
     {
         RunOnSta(() =>
@@ -284,6 +314,19 @@ public class ReplacementTextBoxTests
     private sealed class FocusTestWindow : Window, IDisposable
     {
         public void Dispose() => Close();
+    }
+
+    private sealed class LayoutTestTextBox : ReplacementTextBox
+    {
+        public Action? BeforeArrange { get; set; }
+
+        protected override Size ArrangeOverride(Size arrangeBounds)
+        {
+            var beforeArrange = BeforeArrange;
+            BeforeArrange = null;
+            beforeArrange?.Invoke();
+            return base.ArrangeOverride(arrangeBounds);
+        }
     }
 
     private static Point CharacterPoint(ReplacementTextBox input, int index)
