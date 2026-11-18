@@ -14,6 +14,7 @@
 | `tr` | Türkçe | |
 | `ru` | Русский | |
 | `uk` | Українська | |
+| `fa` | فارسی | 从右向左（RTL）书写，界面布局未做镜像处理 |
 
 语言代码沿用 [VS Code 命名习惯](https://code.visualstudio.com/docs/getstarted/locales)（小写、连字符分隔，如 `zh-cn`、`pt-br`）。
 
