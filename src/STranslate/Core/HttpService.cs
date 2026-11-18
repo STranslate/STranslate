@@ -1,4 +1,3 @@
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using STranslate.Helpers;
 using STranslate.Plugin;
@@ -15,15 +14,16 @@ namespace STranslate.Core;
 
 public class HttpService : IHttpService
 {
-    private static readonly Settings _settings = Ioc.Default.GetRequiredService<Settings>();
+    private readonly Settings _settings;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<HttpService> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
 
-    public HttpService(IHttpClientFactory httpClientFactory, ILogger<HttpService> logger)
+    public HttpService(IHttpClientFactory httpClientFactory, ILogger<HttpService> logger, Settings settings)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
+        _settings = settings;
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -73,6 +73,7 @@ public class HttpService : IHttpService
 
     public async Task<string> GetAsync(string serviceName, string url, Options? options = null, CancellationToken cancellationToken = default)
     {
+        var diagnostics = new HttpLogRedactor(url, options);
         try
         {
             using var client = _httpClientFactory.CreateClient(serviceName);
@@ -83,24 +84,25 @@ public class HttpService : IHttpService
 
             AddHeaders(request, options?.Headers);
 
-            LogRequest(request, serviceName, null);
+            LogRequest(diagnostics, request, serviceName, null);
 
             using var response = await client.SendAsync(request, cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            LogResponse(request, response, serviceName, responseContent);
-            await EnsureSuccessStatusCodeAsync(response, cancellationToken);
+            LogResponse(diagnostics, request, response, serviceName, responseContent, response.Content.Headers.ContentType?.MediaType);
+            await EnsureSuccessStatusCodeAsync(response, diagnostics, cancellationToken);
 
             return responseContent;
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "GET request failed for URL: {Url}, Service: {ServiceName}", url, serviceName);
+            LogFailure(diagnostics, serviceName, "GET request failed", ex);
             throw;
         }
     }
 
     public async Task<byte[]> GetAsBytesAsync(string serviceName, string url, Options? options = null, CancellationToken cancellationToken = default)
     {
+        var diagnostics = new HttpLogRedactor(url, options);
         try
         {
             using var client = _httpClientFactory.CreateClient(serviceName);
@@ -111,24 +113,25 @@ public class HttpService : IHttpService
 
             AddHeaders(request, options?.Headers);
 
-            LogRequest(request, serviceName, null);
+            LogRequest(diagnostics, request, serviceName, null);
 
             using var response = await client.SendAsync(request, cancellationToken);
             var responseContent = await response.Content.ReadAsByteArrayAsync(cancellationToken);
-            LogResponse(request, response, serviceName, $"<binary: {responseContent.Length} bytes>");
-            await EnsureSuccessStatusCodeAsync(response, cancellationToken);
+            LogResponse(diagnostics, request, response, serviceName, $"<binary: {responseContent.Length} bytes>");
+            await EnsureSuccessStatusCodeAsync(response, diagnostics, cancellationToken);
 
             return responseContent;
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "GET request for bytes failed for URL: {Url}, Service: {ServiceName}", url, serviceName);
+            LogFailure(diagnostics, serviceName, "GET request for bytes failed", ex);
             throw;
         }
     }
 
     public async Task<Stream> GetAsStreamAsync(string serviceName, string url, Options? options = null, CancellationToken cancellationToken = default)
     {
+        var diagnostics = new HttpLogRedactor(url, options);
         try
         {
             var client = _httpClientFactory.CreateClient(serviceName);
@@ -139,17 +142,17 @@ public class HttpService : IHttpService
 
             AddHeaders(request, options?.Headers);
 
-            LogRequest(request, serviceName, null);
+            LogRequest(diagnostics, request, serviceName, null);
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            LogResponse(request, response, serviceName, "<stream>");
-            await EnsureSuccessStatusCodeAsync(response, cancellationToken);
+            LogResponse(diagnostics, request, response, serviceName, "<stream>");
+            await EnsureSuccessStatusCodeAsync(response, diagnostics, cancellationToken);
 
             return await response.Content.ReadAsStreamAsync(cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "GET stream request failed for URL: {Url}, Service: {ServiceName}", url, serviceName);
+            LogFailure(diagnostics, serviceName, "GET stream request failed", ex);
             throw;
         }
     }
@@ -184,6 +187,7 @@ public class HttpService : IHttpService
 
     private async Task<string> PostAsync(string serviceName, string url, string? content, Options? options = null, CancellationToken cancellationToken = default)
     {
+        var diagnostics = new HttpLogRedactor(url, options);
         try
         {
             using var client = _httpClientFactory.CreateClient(serviceName);
@@ -202,24 +206,25 @@ public class HttpService : IHttpService
 
             AddHeaders(request, options?.Headers);
 
-            LogRequest(request, serviceName, content);
+            LogRequest(diagnostics, request, serviceName, content);
 
             using var response = await client.SendAsync(request, cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            LogResponse(request, response, serviceName, responseContent);
-            await EnsureSuccessStatusCodeAsync(response, cancellationToken);
+            LogResponse(diagnostics, request, response, serviceName, responseContent, response.Content.Headers.ContentType?.MediaType);
+            await EnsureSuccessStatusCodeAsync(response, diagnostics, cancellationToken);
 
             return responseContent;
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "POST request failed for URL: {Url}, Service: {ServiceName}", url, serviceName);
+            LogFailure(diagnostics, serviceName, "POST request failed", ex);
             throw;
         }
     }
 
     public async Task<byte[]> PostAsBytesAsync(string serviceName, string url, object content, Options? options = null, CancellationToken cancellationToken = default)
     {
+        var diagnostics = new HttpLogRedactor(url, options);
         try
         {
             using var client = _httpClientFactory.CreateClient(serviceName);
@@ -244,18 +249,18 @@ public class HttpService : IHttpService
 
             AddHeaders(request, options?.Headers);
 
-            LogRequest(request, serviceName, requestContent);
+            LogRequest(diagnostics, request, serviceName, requestContent);
 
             using var response = await client.SendAsync(request, cancellationToken);
             var responseContent = await response.Content.ReadAsByteArrayAsync(cancellationToken);
-            LogResponse(request, response, serviceName, $"<binary: {responseContent.Length} bytes>");
-            await EnsureSuccessStatusCodeAsync(response, cancellationToken);
+            LogResponse(diagnostics, request, response, serviceName, $"<binary: {responseContent.Length} bytes>");
+            await EnsureSuccessStatusCodeAsync(response, diagnostics, cancellationToken);
 
             return responseContent;
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "POST request for bytes failed for URL: {Url}, Service: {ServiceName}", url, serviceName);
+            LogFailure(diagnostics, serviceName, "POST request for bytes failed", ex);
             throw;
         }
     }
@@ -271,6 +276,7 @@ public class HttpService : IHttpService
 
     public async Task<string> PostFormAsync(string serviceName, string url, Dictionary<string, string> formData, Options? options = null, CancellationToken cancellationToken = default)
     {
+        var diagnostics = new HttpLogRedactor(url, options);
         try
         {
             using var client = _httpClientFactory.CreateClient(serviceName);
@@ -279,23 +285,24 @@ public class HttpService : IHttpService
             var finalUrl = BuildUrlWithQuery(url, options?.QueryParams);
             using var request = new HttpRequestMessage(HttpMethod.Post, finalUrl);
             request.Content = new FormUrlEncodedContent(formData);
+            diagnostics.RegisterFormCredentials(formData);
 
             AddHeaders(request, options?.Headers);
 
-            LogRequest(request, serviceName, _logger.IsEnabled(LogLevel.Trace)
+            LogRequest(diagnostics, request, serviceName, _logger.IsEnabled(LogLevel.Trace)
                 ? await request.Content.ReadAsStringAsync(cancellationToken)
                 : null);
 
             using var response = await client.SendAsync(request, cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            LogResponse(request, response, serviceName, responseContent);
-            await EnsureSuccessStatusCodeAsync(response, cancellationToken);
+            LogResponse(diagnostics, request, response, serviceName, responseContent, response.Content.Headers.ContentType?.MediaType);
+            await EnsureSuccessStatusCodeAsync(response, diagnostics, cancellationToken);
 
             return responseContent;
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "POST form request failed for URL: {Url}, Service: {ServiceName}", url, serviceName);
+            LogFailure(diagnostics, serviceName, "POST form request failed", ex);
             throw;
         }
     }
@@ -311,6 +318,7 @@ public class HttpService : IHttpService
 
     public async Task StreamPostAsync(string serviceName, string url, object content, Action<string> onDataReceived, Options? options = null, CancellationToken cancellationToken = default)
     {
+        var diagnostics = new HttpLogRedactor(url, options);
         try
         {
             using var client = _httpClientFactory.CreateClient(serviceName);
@@ -322,11 +330,11 @@ public class HttpService : IHttpService
 
             AddHeaders(request, options?.Headers);
 
-            LogRequest(request, serviceName, jsonContent);
+            LogRequest(diagnostics, request, serviceName, jsonContent);
 
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            LogResponse(request, response, serviceName, "<stream started>");
-            await EnsureSuccessStatusCodeAsync(response, cancellationToken);
+            LogResponse(diagnostics, request, response, serviceName, "<stream started>");
+            await EnsureSuccessStatusCodeAsync(response, diagnostics, cancellationToken);
 
             await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var reader = new StreamReader(stream);
@@ -335,21 +343,19 @@ public class HttpService : IHttpService
             string? line;
             while (!cancellationToken.IsCancellationRequested && (line = await reader.ReadLineAsync(cancellationToken)) != null)
             {
+                LogStreamResponse(diagnostics, request, response, serviceName, line);
                 if (!string.IsNullOrEmpty(line))
-                {
-                    LogStreamResponse(request, response, serviceName, line);
                     onDataReceived(line);
-                }
             }
         }
         catch (OperationCanceledException)
         {
-            _logger?.LogInformation("Stream POST request was canceled for URL: {Url}, Service: {ServiceName}", url, serviceName);
+            _logger?.LogInformation("Stream POST request was canceled for URL: {Url}, Service: {ServiceName}", diagnostics.Url, serviceName);
             throw;
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "Stream POST request failed for URL: {Url}, Service: {ServiceName}", url, serviceName);
+            LogFailure(diagnostics, serviceName, "Stream POST request failed", ex);
             throw;
         }
     }
@@ -364,6 +370,7 @@ public class HttpService : IHttpService
 
     public async IAsyncEnumerable<string> StreamPostAsyncEnumerable(string serviceName, string url, object content, Options? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        var diagnostics = new HttpLogRedactor(url, options);
         using var client = _httpClientFactory.CreateClient(serviceName);
         ConfigureClientTimeout(client, options?.Timeout);
 
@@ -373,11 +380,11 @@ public class HttpService : IHttpService
 
         AddHeaders(request, options?.Headers);
 
-        LogRequest(request, serviceName, jsonContent);
+        LogRequest(diagnostics, request, serviceName, jsonContent);
 
         using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        LogResponse(request, response, serviceName, "<stream started>");
-        await EnsureSuccessStatusCodeAsync(response, cancellationToken);
+        LogResponse(diagnostics, request, response, serviceName, "<stream started>");
+        await EnsureSuccessStatusCodeAsync(response, diagnostics, cancellationToken);
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var reader = new StreamReader(stream);
@@ -386,11 +393,9 @@ public class HttpService : IHttpService
         string? line;
         while (!cancellationToken.IsCancellationRequested && (line = await reader.ReadLineAsync(cancellationToken)) != null)
         {
+            LogStreamResponse(diagnostics, request, response, serviceName, line);
             if (!string.IsNullOrEmpty(line))
-            {
-                LogStreamResponse(request, response, serviceName, line);
                 yield return line;
-            }
         }
     }
 
@@ -410,6 +415,7 @@ public class HttpService : IHttpService
 
     public async Task<string> DownloadFileAsync(string serviceName, string url, string savePath, string fileName, Options? options = null, IProgress<DownloadProgress>? progress = null, CancellationToken cancellationToken = default)
     {
+        var diagnostics = new HttpLogRedactor(url, options);
         try
         {
             if (!Directory.Exists(savePath))
@@ -423,11 +429,11 @@ public class HttpService : IHttpService
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             AddHeaders(request, options?.Headers);
 
-            LogRequest(request, serviceName, null);
+            LogRequest(diagnostics, request, serviceName, null);
 
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            LogResponse(request, response, serviceName, $"<file: {response.Content.Headers.ContentLength?.ToString() ?? "unknown"} bytes>");
-            await EnsureSuccessStatusCodeAsync(response, cancellationToken);
+            LogResponse(diagnostics, request, response, serviceName, $"<file: {response.Content.Headers.ContentLength?.ToString() ?? "unknown"} bytes>");
+            await EnsureSuccessStatusCodeAsync(response, diagnostics, cancellationToken);
 
             var totalBytes = response.Content.Headers.ContentLength ?? -1;
 
@@ -448,13 +454,14 @@ public class HttpService : IHttpService
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "File download failed for URL: {Url}, Service: {ServiceName}", url, serviceName);
+            LogFailure(diagnostics, serviceName, "File download failed", ex);
             throw;
         }
     }
 
     public async Task<string> DownloadFileAsync(string serviceName, string url, object content, string savePath, string fileName, Options? options = null, IProgress<DownloadProgress>? progress = null, CancellationToken cancellationToken = default)
     {
+        var diagnostics = new HttpLogRedactor(url, options);
         try
         {
             if (!Directory.Exists(savePath))
@@ -471,11 +478,11 @@ public class HttpService : IHttpService
 
             AddHeaders(request, options?.Headers);
 
-            LogRequest(request, serviceName, jsonContent);
+            LogRequest(diagnostics, request, serviceName, jsonContent);
 
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            LogResponse(request, response, serviceName, $"<file: {response.Content.Headers.ContentLength?.ToString() ?? "unknown"} bytes>");
-            await EnsureSuccessStatusCodeAsync(response, cancellationToken);
+            LogResponse(diagnostics, request, response, serviceName, $"<file: {response.Content.Headers.ContentLength?.ToString() ?? "unknown"} bytes>");
+            await EnsureSuccessStatusCodeAsync(response, diagnostics, cancellationToken);
 
             var totalBytes = response.Content.Headers.ContentLength ?? -1;
 
@@ -496,7 +503,7 @@ public class HttpService : IHttpService
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "POST file download failed for URL: {Url}, Service: {ServiceName}", url, serviceName);
+            LogFailure(diagnostics, serviceName, "POST file download failed", ex);
             throw;
         }
     }
@@ -521,47 +528,81 @@ public class HttpService : IHttpService
 
     #region 私有方法
 
-    private void LogRequest(HttpRequestMessage request, string serviceName, string? content)
+    private void LogRequest(HttpLogRedactor diagnostics, HttpRequestMessage request, string serviceName, string? content)
     {
-        _logger.LogTrace(
-            "HTTP request: {Method} {Url}, Service: {ServiceName}, Body: {Body}",
-            request.Method,
-            request.RequestUri,
-            serviceName,
-            content ?? "<empty>");
+        diagnostics.SetRequestUri(request.RequestUri);
+        if (_logger.IsEnabled(LogLevel.Trace))
+        {
+            _logger.LogTrace(
+                "HTTP request: {Method} {Url}, Service: {ServiceName}, Body: {Body}",
+                request.Method,
+                diagnostics.Url,
+                serviceName,
+                diagnostics.SanitizeBody(content, request.Content?.Headers.ContentType?.MediaType));
+        }
     }
 
     private void LogResponse(
+        HttpLogRedactor diagnostics,
         HttpRequestMessage request,
         HttpResponseMessage response,
         string serviceName,
-        string content)
+        string content,
+        string? mediaType = null)
     {
-        _logger.LogTrace(
-            "HTTP response: {StatusCode} {Method} {Url}, Service: {ServiceName}, Body: {Body}",
-            (int)response.StatusCode,
-            request.Method,
-            request.RequestUri,
-            serviceName,
-            content);
+        if (_logger.IsEnabled(LogLevel.Trace))
+        {
+            _logger.LogTrace(
+                "HTTP response: {StatusCode} {Method} {Url}, Service: {ServiceName}, Body: {Body}",
+                (int)response.StatusCode,
+                request.Method,
+                diagnostics.Url,
+                serviceName,
+                diagnostics.SanitizeBody(content, mediaType));
+        }
     }
 
     private void LogStreamResponse(
+        HttpLogRedactor diagnostics,
         HttpRequestMessage request,
         HttpResponseMessage response,
         string serviceName,
         string content)
     {
-        _logger.LogTrace(
-            "HTTP stream response: {StatusCode} {Method} {Url}, Service: {ServiceName}, Data: {Data}",
-            (int)response.StatusCode,
-            request.Method,
-            request.RequestUri,
-            serviceName,
-            content);
+        if (!_logger.IsEnabled(LogLevel.Trace))
+        {
+            diagnostics.SkipStreamLine(content);
+            return;
+        }
+
+        var data = diagnostics.SanitizeStreamLine(content, response.Content.Headers.ContentType?.MediaType);
+        if (data.Length > 0)
+        {
+            _logger.LogTrace(
+                "HTTP stream response: {StatusCode} {Method} {Url}, Service: {ServiceName}, Data: {Data}",
+                (int)response.StatusCode,
+                request.Method,
+                diagnostics.Url,
+                serviceName,
+                data);
+        }
     }
 
-    private static void ConfigureClientTimeout(HttpClient client, TimeSpan? timeout)
+    private void LogFailure(HttpLogRedactor diagnostics, string serviceName, string operation, Exception exception)
+    {
+        if (_logger.IsEnabled(LogLevel.Error))
+        {
+            _logger.LogError(
+                "{Operation} for URL: {Url}, Service: {ServiceName}{NewLine}{Error}",
+                operation,
+                diagnostics.Url,
+                serviceName,
+                Environment.NewLine,
+                diagnostics.SanitizeText(exception.ToString()));
+        }
+    }
+
+    private void ConfigureClientTimeout(HttpClient client, TimeSpan? timeout)
     {
         // 如果传入了超时时间，则使用传入的值，否则使用软件配置超时时间
         if (timeout.HasValue)
@@ -618,11 +659,12 @@ public class HttpService : IHttpService
         return uriBuilder.ToString();
     }
 
-    private async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    private static async Task EnsureSuccessStatusCodeAsync(
+        HttpResponseMessage response, HttpLogRedactor diagnostics, CancellationToken cancellationToken)
     {
         if (response.IsSuccessStatusCode) return;
 
-        var outerMsg = response.ReasonPhrase ?? "HTTP request failed";
+        var outerMsg = diagnostics.SanitizeText(response.ReasonPhrase ?? "HTTP request failed");
         var innerMsg = string.Empty;
 
         try
@@ -634,9 +676,12 @@ public class HttpService : IHttpService
             // 忽略读取响应内容的异常
         }
 
-        var errorMessage = string.IsNullOrEmpty(innerMsg)
-            ? $"{outerMsg}: {response.StatusCode}"
-            : $"{outerMsg}: {response.StatusCode}, Details: {innerMsg}";
+        if (innerMsg.Length > 0)
+            innerMsg = diagnostics.SanitizeBody(innerMsg, response.Content.Headers.ContentType?.MediaType);
+
+        var errorMessage = $"{outerMsg}: {(int)response.StatusCode} ({response.StatusCode})";
+        if (innerMsg.Length > 0)
+            errorMessage = $"{errorMessage}, Details: {innerMsg}";
 
         throw new HttpRequestException(errorMessage, null, response.StatusCode);
     }
