@@ -158,6 +158,8 @@ public partial class PromptEditViewModel : ObservableObject, IDisposable
         {
             // 克隆选中的 Prompt
             var copiedPrompt = SelectedPrompt.Clone();
+            // 复制的新 Prompt 生成独立 Id（Clone 保留原 Id，必须显式覆盖）
+            copiedPrompt.Id = Guid.NewGuid().ToString("N");
 
             // 生成唯一的名字
             var newName = GenerateUniqueName(SelectedPrompt.Name + _i18n.GetTranslation("NewPromptSuffix"));
