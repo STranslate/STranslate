@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows.Automation;
 
 namespace STranslate.Helpers;
@@ -55,11 +56,14 @@ internal sealed class UiaTextReader(Func<string?>? readSelection = null)
     private static string? ReadFocusedSelection()
     {
         var element = AutomationElement.FocusedElement;
-        if (element == null || element.Current.IsPassword ||
-            !element.TryGetCurrentPattern(TextPattern.Pattern, out var pattern))
-        {
+        if (element == null || element.Current.IsPassword)
             return null;
-        }
+
+        // Edge 的 TextPatternRange.GetText 可能触发原生访问冲突，直接回退到模拟复制。
+        using var process = Process.GetProcessById(element.Current.ProcessId);
+        if (string.Equals(process.ProcessName, "msedge", StringComparison.OrdinalIgnoreCase) ||
+            !element.TryGetCurrentPattern(TextPattern.Pattern, out var pattern))
+            return null;
 
         // 未选择文字时 GetSelection 返回空范围，GetText 返回空字符串。
         return string.Concat(((TextPattern)pattern).GetSelection().Select(range => range.GetText(-1)));
