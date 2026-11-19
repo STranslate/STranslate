@@ -81,7 +81,7 @@ public class HotkeyMapper
                     ? HotkeyRegistrationResult.Success
                     : HotkeyRegistrationResult.Failed;
 
-            HotkeyManager.Current.AddOrReplace(hotkeyStr, hotkey.CharKey, hotkey.ModifierKeys, (_, _) => action.Invoke());
+            HotkeyManager.Current.AddOrReplace(hotkeyStr, hotkey.CharKey, hotkey.ModifierKeys, noRepeat: true, (_, _) => action.Invoke());
             return HotkeyRegistrationResult.Success;
         }
         catch (HotkeyAlreadyRegisteredException e)
