@@ -31,7 +31,8 @@ public sealed class MouseSelectionService : IDisposable
         MouseHookService mouseHookService,
         Settings settings,
         ILogger<MouseSelectionService> logger)
-        : this(mouseHookService, settings, logger, timeout => ClipboardHelper.GetSelectedTextAsync(timeout))
+        : this(mouseHookService, settings, logger,
+            timeout => ClipboardHelper.GetSelectedTextAsync(timeout, settings.PreferUiaForSelectedText))
     {
     }
 

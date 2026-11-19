@@ -84,6 +84,8 @@
     <sys:String x:Key="General_TextSeparatorHandleTypeDescription">Замінює підкреслення або дефіси всередині латинських і цифрових ідентифікаторів на пробіли. Типово вимкнено.</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopes">Область обробки роздільників</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopesDescription">Виберіть, за яких способів отримання тексту застосовувати обробку роздільників. Якщо нічого не вибрано, текст залишається без змін.</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedText">Використовувати UI Automation у першу чергу</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedTextDescription">Спочатку виділений текст зчитується через UI Automation (UIA). У разі помилки або вимкнення цього параметра використовується імітація копіювання.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">Тайм-аут отримання тексту</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">Скільки чекати на появу нового тексту в буфері обміну після емуляції копіювання, у мілісекундах. Щойно текст оновиться, очікування припиняється; для повільних PDF-програм значення варто збільшити.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>

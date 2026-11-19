@@ -85,6 +85,8 @@
     <sys:String x:Key="General_TextSeparatorHandleTypeDescription">تبدیل خط‌تیره یا خط‌زیر در شناسه کلمات انگلیسی/عددی به فاصله. به طور پیش‌فرض غیرفعال است.</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopes">محدوده اعمال مدیریت جداکننده‌ها</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopesDescription">انتخاب ورودی‌های دریافت متن که پردازش جداکننده روی آن‌ها اعمال شود. عدم انتخاب باعث حفظ متن اصلی می‌شود.</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedText">اولویت دادن به UI Automation برای دریافت متن</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedTextDescription">ابتدا متن انتخاب‌شده از طریق UI Automation (UIA) خوانده می‌شود. در صورت خطا یا غیرفعال بودن این گزینه، از کپی شبیه‌سازی‌شده استفاده می‌شود.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">زمان مهلت دریافت متن انتخابی</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">زمان مهلت برای استعلام متن جدید از حافظه موقت پس از کپی شبیه‌سازی‌شده، بر حسب میلی‌ثانیه. به محض به‌روزرسانی متن بازمی‌گردد؛ برای برنامه‌های PDF کند این مقدار را افزایش دهید.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>

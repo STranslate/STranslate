@@ -82,14 +82,18 @@ public class ClipboardHelper
     /// <param name="timeout">剪贴板取词超时（毫秒），默认500ms；UIA 额外最多等待250ms且不超过此值</param>
     /// <param name="cancellation">可以用来取消工作的取消标记</param>
     /// <returns>返回当前选中的文本。</returns>
-    public static async Task<string?> GetSelectedTextAsync(int timeout = 500, CancellationToken cancellation = default)
+    public static Task<string?> GetSelectedTextAsync(int timeout = 500, CancellationToken cancellation = default)
+        => GetSelectedTextAsync(timeout, preferUia: true, cancellation);
+
+    internal static async Task<string?> GetSelectedTextAsync(
+        int timeout, bool preferUia, CancellationToken cancellation = default)
     {
         cancellation.ThrowIfCancellationRequested();
         var foregroundWindow = Win32Helper.GetForegroundWindow();
         if (foregroundWindow == 0)
             return null;
 
-        var text = await _uiaTextReader.TryGetSelectedTextAsync(timeout, cancellation);
+        var text = preferUia ? await _uiaTextReader.TryGetSelectedTextAsync(timeout, cancellation) : null;
         cancellation.ThrowIfCancellationRequested();
 
         // 等待 UIA 时用户可能切换窗口，不向新的前台窗口发送复制按键。

@@ -637,6 +637,16 @@
                             SelectedValuePath="Value" />
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Description="{DynamicResource General_PreferUiaForSelectedTextDescription}" Header="{DynamicResource General_PreferUiaForSelectedText}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.SelectAllOn_20_Regular}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch
+                            IsOn="{Binding Settings.PreferUiaForSelectedText, Mode=TwoWay}"
+                            OffContent="{DynamicResource Disable}"
+                            OnContent="{DynamicResource Enable}" />
+                    </ui:SettingsCard>
+
                     <ui:SettingsCard Description="{DynamicResource General_SelectedTextFetchTimeoutDescription}" Header="{DynamicResource General_SelectedTextFetchTimeout}">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Timer_24_Regular}" />

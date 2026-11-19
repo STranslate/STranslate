@@ -84,6 +84,8 @@
     <sys:String x:Key="General_TextSeparatorHandleTypeDescription">将英文/数字标识符中的下划线或中划线转换为空格，默认不处理。</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopes">分隔符处理生效范围</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopesDescription">选择哪些取词入口应用分隔符处理。未选择时保持原文本。</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedText">优先使用 UI Automation 取词</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedTextDescription">开启后优先通过 UI Automation（UIA）读取选区，失败时模拟复制。关闭后直接模拟复制取词。</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">取词超时时间</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">模拟复制后轮询剪贴板新文本的超时时间，单位：毫秒。写入成功会立即返回；部分 PDF 软件写入较慢时可适当调高。</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>

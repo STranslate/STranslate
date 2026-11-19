@@ -84,6 +84,8 @@
     <sys:String x:Key="General_TextSeparatorHandleTypeDescription">İngilizce/sayısal tanımlayıcıların içindeki alt çizgi veya kısa çizgileri boşluklara dönüştürür. Varsayılan olarak devre dışıdır.</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopes">Ayırıcı İşleme Kapsamı</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopesDescription">Metin yakalama giriş noktalarından hangilerine ayırıcı işleminin uygulanacağını seçin. Hiçbiri seçilmezse orijinal metin korunur.</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedText">Metin Yakalamada UI Automation’a Öncelik Ver</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedTextDescription">Önce UI Automation (UIA) denenir, başarısız olursa kopyalama taklit edilir. Kapalıyken doğrudan kopyalama taklit edilir.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">Metin Yakalama Zaman Aşımı</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">Simüle edilmiş kopyalamadan sonra yeni pano metnini yoklama zaman aşımı, milisaniye cinsinden. Metin güncellenir güncellenmez geri döner; yavaş güncellenen PDF uygulamaları için bu değeri artırın.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>

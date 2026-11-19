@@ -81,6 +81,8 @@
     <sys:String x:Key="General_TextSeparatorHandleTypeDescription">영문/숫자 식별자 안의 밑줄 또는 하이픈을 공백으로 변환합니다. 기본값은 처리하지 않음입니다.</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopes">구분자 처리 적용 범위</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopesDescription">구분자 처리를 적용할 텍스트 캡처 진입점을 선택합니다. 선택하지 않으면 원문을 유지합니다.</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedText">텍스트 가져오기에 UI Automation 우선 사용</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedTextDescription">UI Automation(UIA)으로 선택한 텍스트를 먼저 가져오고 실패하면 복사를 시뮬레이션합니다. 끄면 복사 시뮬레이션으로 바로 가져옵니다.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">텍스트 가져오기 시간 초과</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">복사 시뮬레이션 후 새 클립보드 텍스트를 폴링하는 시간 초과 값입니다. 단위: 밀리초. 텍스트가 업데이트되면 즉시 반환되며, 일부 PDF 앱의 업데이트가 느리면 값을 높이세요.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>

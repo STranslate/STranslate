@@ -84,6 +84,8 @@
     <sys:String x:Key="General_TextSeparatorHandleTypeDescription">Converts underscores or hyphens inside English/numeric identifiers to spaces. Disabled by default.</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopes">Separator Handling Scope</sys:String>
     <sys:String x:Key="General_TextSeparatorHandleScopesDescription">Choose which text capture entry points apply separator handling. No selection keeps original text.</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedText">Prefer UI Automation for Text Capture</sys:String>
+    <sys:String x:Key="General_PreferUiaForSelectedTextDescription">Try UI Automation (UIA) first and simulate copying if it fails. When disabled, capture always uses simulated copying.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeout">Text Capture Timeout</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutDescription">Timeout for polling new clipboard text after simulated copy, in milliseconds. Returns as soon as text is updated; increase this for PDF apps that update slowly.</sys:String>
     <sys:String x:Key="General_SelectedTextFetchTimeoutPlaceholder">500</sys:String>

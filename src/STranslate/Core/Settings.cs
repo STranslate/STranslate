@@ -238,6 +238,8 @@ public partial class Settings : ObservableObject
     /// </summary>
     [ObservableProperty] public partial TextSeparatorHandleScope TextSeparatorHandleScopes { get; set; } = TextSeparatorHandleScope.Crossword;
 
+    [ObservableProperty] public partial bool PreferUiaForSelectedText { get; set; } = true;
+
     /// <summary>
     /// 划词后等待剪贴板写入文本的最长时间（毫秒）。
     /// </summary>
