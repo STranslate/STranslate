@@ -1,35 +1,16 @@
 ## 更新
 
-- 添加：翻译前文本替换规则，支持纯文本、正则表达式、规则排序和草稿测试，适用于主窗口翻译、词典查询、替换翻译及图片翻译 @Fiveo9 #814
-- 添加：输入区与历史记录支持替换差异高亮、悬停预览和按服务复制实际发送文本，历史 CSV 可选导出请求文本及语种
-- 添加：精简图片翻译结果支持独立贴图，可选择复制文字、切换原图与译文，默认使用 Ctrl+T 贴图、Ctrl+/ 切换图片 @Lne27 #769
-- 添加：主窗口贴顶自动收起，鼠标悬停顶部感应条即可展开，支持自定义收起延时
-- 添加：乌克兰语界面及内置插件本地化 @pasharm #782
-- 添加：音频播放静音预热设置，可按需调整预热时长，改善部分设备播放开头缺失的问题 @Tom-339 #813
-- 添加：OCR 与图片翻译切换服务、语种或图片翻译分段方式后自动重新执行，支持分别开关
-- 添加：增量翻译支持按住快捷键时自动清空原输入，可在设置中关闭
-- 添加：划词取词失败支持仅发送托盘通知，保留当前输入与结果
-- 优化：图片翻译默认使用精简窗口，可在设置中切换为独立窗口
-- 优化：选中文本优先通过 UI Automation 读取，失败后自动回退到模拟复制，减少对剪贴板的占用
-- 优化：主窗口显示时加入平滑上升与淡入动画
-- 优化：切换 AI 提示词后默认自动重新翻译
-- 优化：有道翻译 API 错误提示支持所有界面语言
-- 修复：插件市场目录地址变更后无法正常加载插件列表
-- 修复：启用托盘双击操作后，单击无法切换主窗口显示状态
-- 修复：横向调整主窗口宽度后，窗口高度不再随内容自动适应
-- 修复：主窗口被意外最大化 #804
-- 修复：精简图片翻译窗口在不同缩放比例的副屏上位置或尺寸异常 @Lne27 #794
-- 修复：模拟复制与粘贴时意外激活目标应用的 Alt 菜单，并改进快捷键发送的可靠性 @XFZAIMFQ #831
-- 修复：MTranServer 插件错误提示不支持繁体中文 @NKid #820
-- 修复：OpenAI 翻译默认不再发送 temperature 参数，并提供发送开关，兼容不支持该参数的模型 @Art-Zloader
-- 修复：从备份恢复配置时，备份文件被读取流占用导致恢复失败
+- 添加：常规设置新增「优先使用 UI Automation 取词」开关，默认开启。关闭后，划词和增量翻译会直接模拟复制来读取选中文本 #844
+- 修复：HTTP 日志可能明文记录 API 密钥、访问令牌等凭据的问题，错误日志中的敏感信息也会脱敏 #835
+- 修复：长按截图翻译快捷键可能导致选区完成后没有翻译结果。全局快捷键现在每次按下只触发一次 @Wjavan #846
+- 修复：文本框尚未完成布局时，显示文本替换差异高亮可能引发异常 #843
 
 ## 其他
 
-- [插件市场](https://stranslate.zggsong.com/plugins/)
+- [插件市场](https://stranslate.zggsong.com/plugins.html)
 - [使用说明](https://stranslate.zggsong.com/docs/)
-- [集成调用](https://stranslate.zggsong.com/docs/invoke/)
-- [安装卸载](https://stranslate.zggsong.com/docs/install/)
-- [FAQ](https://stranslate.zggsong.com/docs/faq/)
+- [集成调用](https://stranslate.zggsong.com/docs/invoke.html)
+- [安装卸载](https://stranslate.zggsong.com/docs/(un)install.html)
+- [FAQ](https://stranslate.zggsong.com/docs/faq.html)
 
-**完整更新日志:** [v2.0.10...v2.0.11](https://github.com/STranslate/STranslate/compare/v2.0.10...v2.0.11)
+**完整更新日志:** [v2.0.11...v2.0.12](https://github.com/STranslate/STranslate/compare/v2.0.11...v2.0.12)
