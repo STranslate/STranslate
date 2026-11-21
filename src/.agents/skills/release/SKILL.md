@@ -83,7 +83,7 @@ description: 为 STranslate 项目创建发布版本。当用户要发布新版�
 
 ### 5. 写入 CHANGELOG.md
 
-**整文件覆盖**写入，结构严格如下（顺序、标题层级、链接不可变）：
+**整文件覆盖**写入，结构严格如下（保持区块顺序与标题层级）：
 
 ```md
 ## 更新
@@ -100,11 +100,11 @@ description: 为 STranslate 项目创建发布版本。当用户要发布新版�
 
 ## 其他
 
-- [插件市场](https://stranslate.zggsong.com/plugins.html)
+- [插件市场](https://stranslate.zggsong.com/plugins/)
 - [使用说明](https://stranslate.zggsong.com/docs/)
-- [集成调用](https://stranslate.zggsong.com/docs/invoke.html)
-- [安装卸载](https://stranslate.zggsong.com/docs/(un)install.html)
-- [FAQ](https://stranslate.zggsong.com/docs/faq.html)
+- [集成调用](https://stranslate.zggsong.com/docs/invoke/)
+- [安装卸载](https://stranslate.zggsong.com/docs/install/)
+- [FAQ](https://stranslate.zggsong.com/docs/faq/)
 
 **完整更新日志:** [v2.0.7...v2.0.8](https://github.com/STranslate/STranslate/compare/v2.0.7...v2.0.8)
 ```
@@ -113,7 +113,7 @@ description: 为 STranslate 项目创建发布版本。当用户要发布新版�
 
 - `## 更新` 永远是第一行（文件开头无 `# 标题`、无空白）。条目内顺序：先 `添加：` 再 `优化：` 再 `修复：`，每类内按重要性/相关性排列。
 - `## 插件开发` 区块**仅当本次确有插件 API / 插件版本变更时才写**；没有则整个区块省略，不要留空区块。
-- `## 其他` 区块及其五条链接**逐字照抄**，永远不变。
+- `## 其他` 区块及其五条链接沿用发版前仓库 `CHANGELOG.md` 中的最新地址。若官网迁移，同步更新本模板。
 - 最后一行 `**完整更新日志:**` 的链接：前一个 tag 和本次 tag 分别替换。仓庘认定为 `STranslate/STranslate`。
 - 若某个分类本次没有任何条目，则该分类整段省略（例如纯 bugfix 版本可能只有 `修复：`）。
 
@@ -143,7 +143,7 @@ description: 为 STranslate 项目创建发布版本。当用户要发布新版�
 - [ ] 已剔除版本号/changelog 维护提交。
 - [ ] "修复："条目均为面向用户历史版本的回归，不含本周期新功能的自修 fix。
 - [ ] 纯 chore / docs / 无用户可见效果的 refactor 已剔除。
-- [ ] `## 更新` 在文件第一行；`## 其他` 五条链接逐字一致。
+- [ ] `## 更新` 在文件第一行；`## 其他` 五条链接与官网最新地址一致。
 - [ ] 末尾 compare 链接的两个 tag 正确（前一个 tag ... 本次 tag）。
 - [ ] `## 插件开发` 仅在确有插件 API/版本变更时存在。
 - [ ] 若插件契约有变更：`<PackageVersion>` 已升 patch、`README.md` 顶部已新增对应版本记录，且三文件一并提交；若无变更则二者均未改动。

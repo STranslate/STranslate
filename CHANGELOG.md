@@ -7,10 +7,10 @@
 
 ## 其他
 
-- [插件市场](https://stranslate.zggsong.com/plugins.html)
+- [插件市场](https://stranslate.zggsong.com/plugins/)
 - [使用说明](https://stranslate.zggsong.com/docs/)
-- [集成调用](https://stranslate.zggsong.com/docs/invoke.html)
-- [安装卸载](https://stranslate.zggsong.com/docs/(un)install.html)
-- [FAQ](https://stranslate.zggsong.com/docs/faq.html)
+- [集成调用](https://stranslate.zggsong.com/docs/invoke/)
+- [安装卸载](https://stranslate.zggsong.com/docs/install/)
+- [FAQ](https://stranslate.zggsong.com/docs/faq/)
 
 **完整更新日志:** [v2.0.11...v2.0.12](https://github.com/STranslate/STranslate/compare/v2.0.11...v2.0.12)
