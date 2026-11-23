@@ -420,15 +420,32 @@
     <sys:String x:Key="DownloadFailed">Не удалось скачать: {0} {1}</sys:String>
     <sys:String x:Key="DownloadException">Ошибка при скачивании: {0}</sys:String>
     <sys:String x:Key="DeleteFailed">Не удалось удалить: {0} {1}</sys:String>
+    <sys:String x:Key="DeleteException">Ошибка при удалении: {0}</sys:String>
     <sys:String x:Key="RenameFailed">Не удалось переименовать: {0} {1}</sys:String>
     <sys:String x:Key="RenameException">Ошибка при переименовании: {0}</sys:String>
     <sys:String x:Key="BackupMethod">Способ резервного копирования</sys:String>
-    <sys:String x:Key="BackupMethodDescription">Поддерживается резервное копирование и восстановление локально и через WebDav. Во время операции программа автоматически перезапустится</sys:String>
+    <sys:String x:Key="BackupMethodDescription">Поддерживается резервное копирование и восстановление локально, через WebDav и S3. Во время операции программа автоматически перезапустится</sys:String>
     <sys:String x:Key="WebDavAddress">Адрес WebDav</sys:String>
     <sys:String x:Key="WebDavUsername">Имя пользователя WebDav</sys:String>
     <sys:String x:Key="WebDavPassword">Пароль WebDav</sys:String>
     <sys:String x:Key="WebDavBackupNotice">О резервном копировании по WebDav</sys:String>
     <sys:String x:Key="WebDavBackupNoticeDescription" xml:space="preserve">Резервное копирование по WebDav идёт в два этапа: упаковка и выгрузка. Пока идёт упаковка, не запускайте программу вручную. После автоматического перезапуска программа продолжит выгрузку; процесс завершён, когда появится уведомление о результате.&#10;Если установлено много плагинов, упаковка может занять больше времени.&#10;Если связь с сервисом WebDav нестабильна, увеличьте таймаут в разделе «Настройки → Сеть → Таймаут».</sys:String>
+    <sys:String x:Key="S3Provider">Провайдер</sys:String>
+    <sys:String x:Key="S3ProviderAwsS3">AWS S3</sys:String>
+    <sys:String x:Key="S3ProviderCloudflareR2">Cloudflare R2</sys:String>
+    <sys:String x:Key="S3ProviderMinio">MinIO</sys:String>
+    <sys:String x:Key="S3ProviderCustom">Другой</sys:String>
+    <sys:String x:Key="S3Endpoint">Конечная точка S3</sys:String>
+    <sys:String x:Key="S3EndpointDescription">Оставьте пустым, чтобы использовать стандартную конечную точку AWS S3.</sys:String>
+    <sys:String x:Key="S3Region">Регион</sys:String>
+    <sys:String x:Key="S3RegionDescription">Для Cloudflare R2 используйте auto; MinIO обычно использует us-east-1.</sys:String>
+    <sys:String x:Key="S3Bucket">Бакет</sys:String>
+    <sys:String x:Key="S3AccessKey">Ключ доступа</sys:String>
+    <sys:String x:Key="S3SecretKey">Секретный ключ</sys:String>
+    <sys:String x:Key="S3ForcePathStyle">Path-style</sys:String>
+    <sys:String x:Key="S3ForcePathStyleDescription">Включите, если S3-совместимый сервис требует path-style адресацию (обычно MinIO).</sys:String>
+    <sys:String x:Key="S3BackupNotice">О резервном копировании S3</sys:String>
+    <sys:String x:Key="S3BackupNoticeDescription" xml:space="preserve">Резервное копирование S3 использует тот же процесс сжатия и загрузки, что и WebDAV. Бакет должен быть создан заранее, копии сохраняются под префиксом STranslate/. Используйте ключ доступа с правами перечисления, чтения, записи и удаления объектов в этом бакете.</sys:String>
     <sys:String x:Key="Backup">Резервная копия</sys:String>
     <sys:String x:Key="CreateBackup">Создать резервную копию</sys:String>
     <sys:String x:Key="Restore">Восстановление</sys:String>
@@ -703,6 +720,7 @@
 
     <sys:String x:Key="BackupTypeLocal">Локально</sys:String>
     <sys:String x:Key="BackupTypeWebDav">WebDav</sys:String>
+    <sys:String x:Key="BackupTypeS3">Резервная копия S3</sys:String>
 
     <sys:String x:Key="ImageQualityLow">Низкое</sys:String>
     <sys:String x:Key="ImageQualityMedium">Среднее</sys:String>

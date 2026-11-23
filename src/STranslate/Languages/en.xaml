@@ -442,15 +442,32 @@
     <sys:String x:Key="DownloadFailed">Download failed: {0} {1}</sys:String>
     <sys:String x:Key="DownloadException">Download exception: {0}</sys:String>
     <sys:String x:Key="DeleteFailed">Delete failed: {0} {1}</sys:String>
+    <sys:String x:Key="DeleteException">Delete exception: {0}</sys:String>
     <sys:String x:Key="RenameFailed">Rename failed: {0} {1}</sys:String>
     <sys:String x:Key="RenameException">Rename exception: {0}</sys:String>
     <sys:String x:Key="BackupMethod">Backup Method</sys:String>
-    <sys:String x:Key="BackupMethodDescription">Supports local and WebDav backup/restore. The software will automatically restart during the process</sys:String>
+    <sys:String x:Key="BackupMethodDescription">Supports local, WebDav and S3 backup/restore. The software will automatically restart during the process</sys:String>
     <sys:String x:Key="WebDavAddress">WebDav Address</sys:String>
     <sys:String x:Key="WebDavUsername">WebDav Username</sys:String>
     <sys:String x:Key="WebDavPassword">WebDav Password</sys:String>
     <sys:String x:Key="WebDavBackupNotice">WebDAV Backup Information</sys:String>
     <sys:String x:Key="WebDavBackupNoticeDescription" xml:space="preserve">A WebDAV backup has two stages: compression and upload. Do not start the application manually during compression. After restarting automatically, the application will continue uploading; the process is complete when you receive the backup result notification.&#10;Compression may take longer when many plugins are installed.&#10;If the connection to your WebDAV service is unstable, increase the timeout under Settings → Network → HTTP Timeout.</sys:String>
+    <sys:String x:Key="S3Provider">Service Provider</sys:String>
+    <sys:String x:Key="S3ProviderAwsS3">AWS S3</sys:String>
+    <sys:String x:Key="S3ProviderCloudflareR2">Cloudflare R2</sys:String>
+    <sys:String x:Key="S3ProviderMinio">MinIO</sys:String>
+    <sys:String x:Key="S3ProviderCustom">Custom</sys:String>
+    <sys:String x:Key="S3Endpoint">S3 Endpoint</sys:String>
+    <sys:String x:Key="S3EndpointDescription">Leave empty to use the AWS S3 default endpoint.</sys:String>
+    <sys:String x:Key="S3Region">Region</sys:String>
+    <sys:String x:Key="S3RegionDescription">Use auto for Cloudflare R2; MinIO usually uses us-east-1.</sys:String>
+    <sys:String x:Key="S3Bucket">Bucket</sys:String>
+    <sys:String x:Key="S3AccessKey">Access Key</sys:String>
+    <sys:String x:Key="S3SecretKey">Secret Key</sys:String>
+    <sys:String x:Key="S3ForcePathStyle">Path Style</sys:String>
+    <sys:String x:Key="S3ForcePathStyleDescription">Enable this if your S3-compatible service requires path-style addressing (commonly MinIO).</sys:String>
+    <sys:String x:Key="S3BackupNotice">S3 Backup Information</sys:String>
+    <sys:String x:Key="S3BackupNoticeDescription" xml:space="preserve">S3 backup uses the same compression and upload flow as WebDAV. The bucket must already exist and backups are stored under the STranslate/ prefix. Use an access key that can list, read, write and delete objects in that bucket.</sys:String>
     <sys:String x:Key="Backup">Backup</sys:String>
     <sys:String x:Key="CreateBackup">Create Backup</sys:String>
     <sys:String x:Key="Restore">Restore</sys:String>
@@ -725,6 +742,7 @@
 
     <sys:String x:Key="BackupTypeLocal">Local</sys:String>
     <sys:String x:Key="BackupTypeWebDav">WebDav</sys:String>
+    <sys:String x:Key="BackupTypeS3">S3</sys:String>
 
     <sys:String x:Key="ImageQualityLow">Low</sys:String>
     <sys:String x:Key="ImageQualityMedium">Medium</sys:String>

@@ -412,15 +412,32 @@
     <sys:String x:Key="DownloadFailed">다운로드 실패: {0} {1}</sys:String>
     <sys:String x:Key="DownloadException">다운로드 예외: {0}</sys:String>
     <sys:String x:Key="DeleteFailed">삭제 실패: {0} {1}</sys:String>
+    <sys:String x:Key="DeleteException">삭제 예외: {0}</sys:String>
     <sys:String x:Key="RenameFailed">이름 변경 실패: {0} {1}</sys:String>
     <sys:String x:Key="RenameException">이름 변경 예외: {0}</sys:String>
     <sys:String x:Key="BackupMethod">백업 방식</sys:String>
-    <sys:String x:Key="BackupMethodDescription">로컬 및 WebDav 백업/복원을 지원하며, 과정 중 소프트웨어가 자동으로 재시작됩니다.</sys:String>
+    <sys:String x:Key="BackupMethodDescription">로컬, WebDav 및 S3 백업/복원을 지원하며, 과정 중 소프트웨어가 자동으로 재시작됩니다.</sys:String>
     <sys:String x:Key="WebDavAddress">WebDav 주소</sys:String>
     <sys:String x:Key="WebDavUsername">WebDav 사용자 이름</sys:String>
     <sys:String x:Key="WebDavPassword">WebDav 비밀번호</sys:String>
     <sys:String x:Key="WebDavBackupNotice">WebDAV 백업 안내</sys:String>
     <sys:String x:Key="WebDavBackupNoticeDescription" xml:space="preserve">WebDAV 백업은 압축과 업로드의 두 단계로 진행됩니다. 압축 중에는 애플리케이션을 수동으로 시작하지 마세요. 자동 재시작 후에도 업로드가 계속되며 백업 결과 알림을 받으면 과정이 완료됩니다.&#10;플러그인이 많으면 압축에 시간이 오래 걸릴 수 있습니다.&#10;WebDAV 서비스 연결이 불안정한 경우 “설정 → 네트워크 → HTTP 시간 초과”에서 시간 초과 값을 늘리세요.</sys:String>
+    <sys:String x:Key="S3Provider">서비스 제공자</sys:String>
+    <sys:String x:Key="S3ProviderAwsS3">AWS S3</sys:String>
+    <sys:String x:Key="S3ProviderCloudflareR2">Cloudflare R2</sys:String>
+    <sys:String x:Key="S3ProviderMinio">MinIO</sys:String>
+    <sys:String x:Key="S3ProviderCustom">사용자 지정</sys:String>
+    <sys:String x:Key="S3Endpoint">S3 엔드포인트</sys:String>
+    <sys:String x:Key="S3EndpointDescription">비워 두면 AWS S3 기본 엔드포인트를 사용합니다.</sys:String>
+    <sys:String x:Key="S3Region">리전</sys:String>
+    <sys:String x:Key="S3RegionDescription">Cloudflare R2는 auto, MinIO는 보통 us-east-1을 사용합니다.</sys:String>
+    <sys:String x:Key="S3Bucket">버킷</sys:String>
+    <sys:String x:Key="S3AccessKey">액세스 키</sys:String>
+    <sys:String x:Key="S3SecretKey">시크릿 키</sys:String>
+    <sys:String x:Key="S3ForcePathStyle">경로 스타일</sys:String>
+    <sys:String x:Key="S3ForcePathStyleDescription">S3 호환 서비스가 경로 스타일 주소 지정을 요구하는 경우(주로 MinIO) 활성화하세요.</sys:String>
+    <sys:String x:Key="S3BackupNotice">S3 백업 안내</sys:String>
+    <sys:String x:Key="S3BackupNoticeDescription" xml:space="preserve">S3 백업은 WebDAV와 동일한 압축 및 업로드 절차를 사용합니다. 버킷이 미리 생성되어 있어야 하며 백업은 STranslate/ 접두사 아래에 저장됩니다. 해당 버킷의 목록, 읽기, 쓰기, 삭제 권한이 있는 액세스 키를 사용하세요.</sys:String>
     <sys:String x:Key="Backup">백업</sys:String>
     <sys:String x:Key="CreateBackup">백업 생성</sys:String>
     <sys:String x:Key="Restore">복원</sys:String>
@@ -689,6 +706,7 @@
 
     <sys:String x:Key="BackupTypeLocal">로컬 백업</sys:String>
     <sys:String x:Key="BackupTypeWebDav">WebDav 백업</sys:String>
+    <sys:String x:Key="BackupTypeS3">S3 백업</sys:String>
 
     <sys:String x:Key="ImageQualityLow">낮음</sys:String>
     <sys:String x:Key="ImageQualityMedium">중간</sys:String>

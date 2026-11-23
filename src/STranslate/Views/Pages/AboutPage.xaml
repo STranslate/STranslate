@@ -141,6 +141,83 @@
                             </ui:SettingsCard.HeaderIcon>
                         </ui:SettingsCard>
 
+                        <ui:SettingsCard
+                            Header="{DynamicResource S3Provider}"
+                            Visibility="{Binding Settings.Backup.Type, Converter={cnvt:BackupTypeVisibilityConverter}, ConverterParameter=S3}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Globe_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <ComboBox
+                                MinWidth="200"
+                                DisplayMemberPath="Display"
+                                ItemsSource="{Binding DataProvider.S3Providers}"
+                                SelectionChanged="S3ProviderComboBox_SelectionChanged"
+                                SelectedValue="{Binding Settings.Backup.S3Provider}"
+                                SelectedValuePath="Value" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard
+                            Description="{DynamicResource S3EndpointDescription}"
+                            Header="{DynamicResource S3Endpoint}"
+                            Visibility="{Binding Settings.Backup.Type, Converter={cnvt:BackupTypeVisibilityConverter}, ConverterParameter=S3}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Globe_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <TextBox MinWidth="200" Text="{Binding Settings.Backup.S3Endpoint}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard
+                            Description="{DynamicResource S3RegionDescription}"
+                            Header="{DynamicResource S3Region}"
+                            Visibility="{Binding Settings.Backup.Type, Converter={cnvt:BackupTypeVisibilityConverter}, ConverterParameter=S3}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Globe_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <TextBox MinWidth="200" Text="{Binding Settings.Backup.S3Region}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard
+                            Header="{DynamicResource S3Bucket}"
+                            Visibility="{Binding Settings.Backup.Type, Converter={cnvt:BackupTypeVisibilityConverter}, ConverterParameter=S3}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.FolderZip_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <TextBox MinWidth="200" Text="{Binding Settings.Backup.S3Bucket}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard
+                            Header="{DynamicResource S3AccessKey}"
+                            Visibility="{Binding Settings.Backup.Type, Converter={cnvt:BackupTypeVisibilityConverter}, ConverterParameter=S3}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Person_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <TextBox MinWidth="200" Text="{Binding Settings.Backup.S3AccessKey}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard
+                            Header="{DynamicResource S3SecretKey}"
+                            Visibility="{Binding Settings.Backup.Type, Converter={cnvt:BackupTypeVisibilityConverter}, ConverterParameter=S3}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Password_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <PasswordBox
+                                MinWidth="200"
+                                plugin:PasswordBoxAssistant.Attach="True"
+                                plugin:PasswordBoxAssistant.Password="{Binding Settings.Backup.S3SecretKey}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard
+                            Description="{DynamicResource S3ForcePathStyleDescription}"
+                            Header="{DynamicResource S3ForcePathStyle}"
+                            Visibility="{Binding Settings.Backup.Type, Converter={cnvt:BackupTypeVisibilityConverter}, ConverterParameter=S3}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.FolderZip_20_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <ui:ToggleSwitch IsOn="{Binding Settings.Backup.S3ForcePathStyle}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard
+                            Description="{DynamicResource S3BackupNoticeDescription}"
+                            Header="{DynamicResource S3BackupNotice}"
+                            Visibility="{Binding Settings.Backup.Type, Converter={cnvt:BackupTypeVisibilityConverter}, ConverterParameter=S3}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Info_24_Regular}" />
+                            </ui:SettingsCard.HeaderIcon>
+                        </ui:SettingsCard>
+
                         <ui:SettingsCard Header="{DynamicResource Backup}">
                             <Button Command="{Binding BackupCommand}" Content="{DynamicResource CreateBackup}" />
                         </ui:SettingsCard>

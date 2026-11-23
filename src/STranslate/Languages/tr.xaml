@@ -421,15 +421,32 @@
     <sys:String x:Key="DownloadFailed">İndirme başarısız: {0} {1}</sys:String>
     <sys:String x:Key="DownloadException">İndirme istisnası: {0}</sys:String>
     <sys:String x:Key="DeleteFailed">Silme başarısız: {0} {1}</sys:String>
+    <sys:String x:Key="DeleteException">Silme istisnası: {0}</sys:String>
     <sys:String x:Key="RenameFailed">Yeniden adlandırma başarısız: {0} {1}</sys:String>
     <sys:String x:Key="RenameException">Yeniden adlandırma istisnası: {0}</sys:String>
     <sys:String x:Key="BackupMethod">Yedekleme Yöntemi</sys:String>
-    <sys:String x:Key="BackupMethodDescription">Yerel ve WebDav yedekleme/geri yüklemeyi destekler. İşlem sırasında yazılım otomatik olarak yeniden başlatılır.</sys:String>
+    <sys:String x:Key="BackupMethodDescription">Yerel, WebDav ve S3 yedekleme/geri yüklemeyi destekler. İşlem sırasında yazılım otomatik olarak yeniden başlatılır.</sys:String>
     <sys:String x:Key="WebDavAddress">WebDav Adresi</sys:String>
     <sys:String x:Key="WebDavUsername">WebDav Kullanıcı Adı</sys:String>
     <sys:String x:Key="WebDavPassword">WebDav Parolası</sys:String>
     <sys:String x:Key="WebDavBackupNotice">WebDAV Yedekleme Bilgisi</sys:String>
     <sys:String x:Key="WebDavBackupNoticeDescription" xml:space="preserve">WebDAV yedeklemesi sıkıştırma ve yükleme olmak üzere iki aşamadan oluşur. Sıkıştırma sırasında uygulamayı el ile başlatmayın. Otomatik yeniden başlatmanın ardından yükleme devam eder ve yedekleme sonucu bildirimi geldiğinde işlem tamamlanır.&#10;Çok sayıda eklenti yüklüyse sıkıştırma uzun sürebilir.&#10;WebDAV hizmetine bağlantı kararsızsa Ayarlar → Ağ → HTTP Zaman Aşımı bölümünden zaman aşımı süresini artırın.</sys:String>
+    <sys:String x:Key="S3Provider">Servis Sağlayıcı</sys:String>
+    <sys:String x:Key="S3ProviderAwsS3">AWS S3</sys:String>
+    <sys:String x:Key="S3ProviderCloudflareR2">Cloudflare R2</sys:String>
+    <sys:String x:Key="S3ProviderMinio">MinIO</sys:String>
+    <sys:String x:Key="S3ProviderCustom">Özel</sys:String>
+    <sys:String x:Key="S3Endpoint">S3 Uç Noktası</sys:String>
+    <sys:String x:Key="S3EndpointDescription">AWS S3 varsayılan uç noktasını kullanmak için boş bırakın.</sys:String>
+    <sys:String x:Key="S3Region">Bölge</sys:String>
+    <sys:String x:Key="S3RegionDescription">Cloudflare R2 için auto, MinIO için genellikle us-east-1 kullanın.</sys:String>
+    <sys:String x:Key="S3Bucket">Bucket</sys:String>
+    <sys:String x:Key="S3AccessKey">Erişim Anahtarı</sys:String>
+    <sys:String x:Key="S3SecretKey">Gizli Anahtar</sys:String>
+    <sys:String x:Key="S3ForcePathStyle">Yol Stili</sys:String>
+    <sys:String x:Key="S3ForcePathStyleDescription">S3 uyumlu servisiniz yol stili adresleme gerektiriyorsa (genellikle MinIO) etkinleştirin.</sys:String>
+    <sys:String x:Key="S3BackupNotice">S3 Yedekleme Bilgisi</sys:String>
+    <sys:String x:Key="S3BackupNoticeDescription" xml:space="preserve">S3 yedekleme, WebDAV ile aynı sıkıştırma ve yükleme akışını kullanır. Bucket önceden oluşturulmuş olmalıdır ve yedekler STranslate/ öneki altında saklanır. Bu bucket üzerinde listeleme, okuma, yazma ve silme izinlerine sahip bir erişim anahtarı kullanın.</sys:String>
     <sys:String x:Key="Backup">Yedekle</sys:String>
     <sys:String x:Key="CreateBackup">Yedek Oluştur</sys:String>
     <sys:String x:Key="Restore">Geri Yükle</sys:String>
@@ -705,6 +722,7 @@
 
     <sys:String x:Key="BackupTypeLocal">Yerel</sys:String>
     <sys:String x:Key="BackupTypeWebDav">WebDav</sys:String>
+    <sys:String x:Key="BackupTypeS3">S3 Yedeği</sys:String>
 
     <sys:String x:Key="ImageQualityLow">Düşük</sys:String>
     <sys:String x:Key="ImageQualityMedium">Orta</sys:String>
