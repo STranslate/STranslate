@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using STranslate.Core;
 using STranslate.Helpers;
 using STranslate.ViewModels;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Input;
@@ -26,6 +27,7 @@ public partial class MainWindow : IDisposable
     private TopEdgeAutoHideController? _topEdgeAutoHide;
     private WindowShowAnimation? _showAnimation;
     private bool _initialContentRendered;
+    private bool _showRequestedBeforeFirstRender;
     private bool _startupCloaked;
 
     public bool IsTopEdgeDocked => _topEdgeAutoHide?.IsDocked == true;
@@ -40,7 +42,11 @@ public partial class MainWindow : IDisposable
     internal void PrepareShowAnimation()
     {
         // 首次显示已在 SourceInitialized 遮蔽，保留到启动布局完成。
-        if (!_initialContentRendered) return;
+        if (!_initialContentRendered)
+        {
+            _showRequestedBeforeFirstRender = true;
+            return;
+        }
         StopShowAnimation();
         if (!IsVisible && !IsTopEdgeDocked && SystemParameters.ClientAreaAnimation)
             _showAnimation = WindowShowAnimation.TryCreate(this);
@@ -125,7 +131,7 @@ public partial class MainWindow : IDisposable
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         _viewModel.InitializeWindowLayoutConstraints();
-        _viewModel.UpdatePosition(_settings.HideOnStartup);
+        _viewModel.UpdatePosition(_settings.HideOnStartup && !_showRequestedBeforeFirstRender);
         // 等现代窗口模板安装完 WindowChrome 后再挂接，确保本钩子优先处理样式变更。
         _hwndSource = Win32Helper.AddWndProcHook(this, WndProc);
         Win32Helper.DisableMaximize(this);
@@ -142,18 +148,29 @@ public partial class MainWindow : IDisposable
             base.OnContentRendered(e);
             return;
         }
-        if (_settings.HideOnStartup)
+        if (_settings.HideOnStartup && (!_showRequestedBeforeFirstRender || !IsVisible))
         {
             _viewModel.Hide();
         }
         else
         {
+            if (_startupCloaked) StopShowAnimation();
             _viewModel.Show();
         }
 
         _initialContentRendered = true;
 
         base.OnContentRendered(e);
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        base.OnClosing(e);
+        if (e.Cancel || Application.Current is not App { IsShutdownRequested: false }) return;
+
+        // 托盘和外部调用服务仍在运行时保留主窗口。WPF 在 Closing 返回后才允许修改 Visibility。
+        e.Cancel = true;
+        Dispatcher.BeginInvoke(DispatcherPriority.Send, new Action(_viewModel.Hide));
     }
 
     protected override void OnDeactivated(EventArgs e)
