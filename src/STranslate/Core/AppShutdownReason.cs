@@ -14,4 +14,6 @@ public enum AppShutdownReason
     WebDavRestore,
     PortableModeChange,
     PluginChange,
+    S3Backup,
+    S3Restore,
 }

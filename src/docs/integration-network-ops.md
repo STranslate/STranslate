@@ -4,7 +4,7 @@
 - 提供统一 HTTP 访问层（GET/POST/流式/下载/代理测试）。
 - 管理外部调用 API（本地 HTTP 服务）与命令路由。
 - 管理应用更新（Velopack + GitHub 发布源）。
-- 管理配置备份恢复（本地 zip 与 WebDav）。
+- 管理配置备份恢复（本地 zip、WebDav 与 S3 兼容对象存储）。
 
 ## 关键入口
 - `STranslate/Core/HttpService.cs`
@@ -22,7 +22,15 @@
 - `STranslate/Core/AutoUpdateCheckerService.cs`
   - 自动检查更新调度（首次延迟 + 固定轮询间隔 + 开关判定）。
 - `STranslate/Services/BackupService.cs`
-  - 本地备份恢复与 WebDav 备份恢复。
+  - 本地备份恢复、WebDav 与 S3 备份恢复的编排与重启交接。
+- `STranslate/Services/RemoteBackupClient.cs`
+  - 远程备份客户端接口与统一结果类型。
+- `STranslate/Services/WebDavBackupClient.cs`
+  - WebDav 列表/上传/下载/删除/重命名实现。
+- `STranslate/Services/S3BackupClient.cs`
+  - S3 兼容存储实现；上传关闭分块签名以兼容 R2，S3 不支持重命名。
+- `STranslate/Controls/RemoteBackupContentDialog.xaml(.cs)`
+  - 远程备份列表、下载、删除与（仅 WebDav）重命名弹窗。
 
 ## 核心流程
 ### 从入口到结果：代理测试
@@ -66,18 +74,19 @@
 4. 开启时调用 `UpdaterService.NotifyUpdateIfAvailableAsync()`，并复用 `UpdateLock` 防并发。
 5. 发现新版本后通过托盘通知展示按钮，点击按钮会跳转到“设置-关于”页面执行更新。
 
-### 从入口到结果：本地与 WebDav 备份恢复
+### 从入口到结果：本地、WebDav 与 S3 备份恢复
 - 本地备份/恢复：
   1. 选择 zip 文件。
   2. 调用 `STranslate.Host`（`backup` 模式）对 `Plugins` 与 `Settings` 打包或还原。
   3. 程序重启并通过 `InfoFilePath` 向主程序传递提示信息。
-- WebDav 备份：
-  1. 预检查 WebDav 可达。
-  2. 重启前通过 Host 先生成本地 zip 并把路径写入 `BackupFilePath`。
-  3. 下次启动 `App.WebDavBackupOperation()` 读取路径并调用 `BackupService.PostWebDavBackupAsync()` 上传。
-- WebDav 恢复：
-  1. 拉取远端可用备份列表。
-  2. 下载所选 zip。
+- 远程（WebDav / S3）备份：
+  1. 预检查目标存储可达（WebDav `Propfind`；S3 `ListObjectsV2` 验证凭证、bucket 与列举权限）。
+  2. 重启前通过 Host 先生成本地 zip，并把 `BackupType|filePath` 写入 `BackupFilePath`。
+  3. 下次启动 `App.RemoteBackupOperation()` 通过 `BackupTransferState.Parse()` 读取类型，再调用 `PostWebDavBackupAsync()` 或 `PostS3BackupAsync()` 上传。
+  4. 上传成功后删除本地临时 zip；旧版本只写路径的 `.BACKUP` 文件按 WebDav 兼容。
+- 远程恢复：
+  1. 通过 `IRemoteBackupClient.ListAsync()` 拉取 `STranslate/` 前缀下的 zip 列表。
+  2. 在 `RemoteBackupContentDialog` 中下载所选 zip；S3 不支持重命名，因此不显示编辑入口。
   3. 通过 Host 执行还原并重启。
 
 ## 关键数据结构/配置
@@ -93,7 +102,8 @@
   - `Settings.Proxy`、`Settings.HttpTimeout`。
   - `Settings.EnableExternalCall`、`Settings.ExternalCallPort`。
   - `Settings.AutoCheckUpdate`（是否启用自动检查更新）。
-  - `Settings.Backup`（地址、账号、密码、备份类型）。
+  - `Settings.Backup`（备份类型；WebDav 地址/账号/密码；S3 预设、Endpoint、Region、Bucket、AccessKey、SecretKey、PathStyle）。
+  - `BackupTransferState`（重启前后传递备份类型与 zip 路径）。
 
 ## 关键文件
 - `STranslate/Core/HttpService.cs`
@@ -104,6 +114,11 @@
 - `STranslate/Controls/UpdateChangelogDialog.xaml.cs`
 - `STranslate/Core/AutoUpdateCheckerService.cs`
 - `STranslate/Services/BackupService.cs`
+- `STranslate/Services/RemoteBackupClient.cs`
+- `STranslate/Services/WebDavBackupClient.cs`
+- `STranslate/Services/S3BackupClient.cs`
+- `STranslate/Controls/RemoteBackupContentDialog.xaml`
+- `STranslate/Core/BackupTransferState.cs`
 - `STranslate/App.xaml.cs`
 
 ## 常见改动任务
@@ -114,3 +129,4 @@
 - 下载链路优化：优先扩展 `HttpService.DownloadFileAsync()`，保证进度、取消、异常统一。
 - 流式请求改造：优先扩展 `StreamPostAsync()` 与 `StreamPostAsyncEnumerable()` 的共同读取语义，确保取消、空行过滤和错误处理一致。
 - 备份策略增强：统一改 `BackupService` 与 Host 参数协议，避免主进程和 Host 参数不一致。
+- 新增远程备份后端：实现 `IRemoteBackupClient`，在 `BackupService` 增加预检查/上传/恢复入口，并在 `AboutViewModel` 与 `BackupType` 中接线；`BackupTransferState` 的 `|` 分隔协议保持向后兼容。

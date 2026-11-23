@@ -428,10 +428,11 @@ localhost;127.*;10.*;192.168.*;*.example.com</sys:String>
     <sys:String x:Key="DownloadFailed">دانلود ناموفق بود: {0} {1}</sys:String>
     <sys:String x:Key="DownloadException">خطای استثنا در دانلود: {0}</sys:String>
     <sys:String x:Key="DeleteFailed">حذف ناموفق بود: {0} {1}</sys:String>
+    <sys:String x:Key="DeleteException">خطای استثنا در حذف: {0}</sys:String>
     <sys:String x:Key="RenameFailed">تغییر نام ناموفق بود: {0} {1}</sys:String>
     <sys:String x:Key="RenameException">خطای استثنا در تغییر نام: {0}</sys:String>
     <sys:String x:Key="BackupMethod">روش پشتیبان‌گیری</sys:String>
-    <sys:String x:Key="BackupMethodDescription">پشتیبانی از پشتیبان‌گیری/بازیابی محلی و WebDav. نرم‌افزار در طول فرایند به طور خودکار راه‌اندازی مجدد می‌شود</sys:String>
+    <sys:String x:Key="BackupMethodDescription">پشتیبانی از پشتیبان‌گیری/بازیابی محلی، WebDav و S3. نرم‌افزار در طول فرایند به طور خودکار راه‌اندازی مجدد می‌شود</sys:String>
     <sys:String x:Key="WebDavAddress">آدرس WebDav</sys:String>
     <sys:String x:Key="WebDavUsername">نام کاربری WebDav</sys:String>
     <sys:String x:Key="WebDavPassword">رمز عبور WebDav</sys:String>
@@ -439,6 +440,22 @@ localhost;127.*;10.*;192.168.*;*.example.com</sys:String>
     <sys:String x:Key="WebDavBackupNoticeDescription" xml:space="preserve">پشتیبان‌گیری WebDAV دارای دو مرحله فشرده‌سازی و بارگذاری است. در طول فشرده‌سازی برنامه را به صورت دستی اجرا نکنید. پس از راه‌اندازی مجدد خودکار، بارگذاری ادامه می‌یابد؛ فرایند با دریافت اعلان نتیجه پایان می‌یابد.
 در صورت وجود افزونه‌های متعدد ممکن است فشرده‌سازی زمان بیشتری ببرد.
 اگر اتصال WebDAV ناپایدار است، زمان مهلت را در تنظیمات ← شبکه ← زمان مهلت HTTP افزایش دهید.</sys:String>
+    <sys:String x:Key="S3Provider">ارائه‌دهنده سرویس</sys:String>
+    <sys:String x:Key="S3ProviderAwsS3">AWS S3</sys:String>
+    <sys:String x:Key="S3ProviderCloudflareR2">Cloudflare R2</sys:String>
+    <sys:String x:Key="S3ProviderMinio">MinIO</sys:String>
+    <sys:String x:Key="S3ProviderCustom">سفارشی</sys:String>
+    <sys:String x:Key="S3Endpoint">نقطه پایانی S3</sys:String>
+    <sys:String x:Key="S3EndpointDescription">برای استفاده از نقطه پایانی پیش‌فرض AWS S3 خالی بگذارید.</sys:String>
+    <sys:String x:Key="S3Region">منطقه</sys:String>
+    <sys:String x:Key="S3RegionDescription">برای Cloudflare R2 از auto و برای MinIO معمولاً از us-east-1 استفاده کنید.</sys:String>
+    <sys:String x:Key="S3Bucket">باکت</sys:String>
+    <sys:String x:Key="S3AccessKey">کلید دسترسی</sys:String>
+    <sys:String x:Key="S3SecretKey">کلید مخفی</sys:String>
+    <sys:String x:Key="S3ForcePathStyle">سبک مسیر</sys:String>
+    <sys:String x:Key="S3ForcePathStyleDescription">اگر سرویس سازگار با S3 به آدرس‌دهی سبک مسیر نیاز دارد (معمولاً MinIO)، آن را فعال کنید.</sys:String>
+    <sys:String x:Key="S3BackupNotice">اطلاعات پشتیبان‌گیری S3</sys:String>
+    <sys:String x:Key="S3BackupNoticeDescription" xml:space="preserve">پشتیبان‌گیری S3 از همان فرآیند فشرده‌سازی و بارگذاری WebDAV استفاده می‌کند. باکت باید از قبل ایجاد شده باشد و نسخه‌های پشتیبان زیر پیشوند STranslate/ ذخیره می‌شوند. از کلید دسترسی با مجوز فهرست، خواندن، نوشتن و حذف اشیای آن باکت استفاده کنید.</sys:String>
     <sys:String x:Key="Backup">پشتیبان‌گیری</sys:String>
     <sys:String x:Key="CreateBackup">ایجاد پشتیبان</sys:String>
     <sys:String x:Key="Restore">بازیابی</sys:String>
@@ -713,6 +730,7 @@ localhost;127.*;10.*;192.168.*;*.example.com</sys:String>
 
     <sys:String x:Key="BackupTypeLocal">محلی</sys:String>
     <sys:String x:Key="BackupTypeWebDav">WebDav</sys:String>
+    <sys:String x:Key="BackupTypeS3">پشتیبان‌گیری S3</sys:String>
 
     <sys:String x:Key="ImageQualityLow">پایین</sys:String>
     <sys:String x:Key="ImageQualityMedium">متوسط</sys:String>

@@ -241,7 +241,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
             _hotkeySettings?.LazyInitialize();
             UpdateToolTip();
             CheckAndShowInfo();
-            WebDavBackupOperation();
+            RemoteBackupOperation();
             _autoUpdateCheckerService?.Start();
         };
     }
@@ -283,22 +283,32 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
         }
     }
 
-    private void WebDavBackupOperation()
+    private void RemoteBackupOperation()
     {
         if (!File.Exists(DataLocation.BackupFilePath))
             return;
 
         try
         {
-            var filePath = File.ReadAllText(DataLocation.BackupFilePath);
-            if (string.IsNullOrWhiteSpace(filePath))
+            var content = File.ReadAllText(DataLocation.BackupFilePath);
+            if (string.IsNullOrWhiteSpace(content))
             {
-                _logger?.LogWarning("The backup file is empty, will not show the message box.");
+                _logger?.LogWarning("The backup file is empty, will not upload.");
                 return;
             }
 
-            _ = Ioc.Default.GetRequiredService<BackupService>()
-                .PostWebDavBackupAsync(filePath);
+            var (type, filePath) = BackupTransferState.Parse(content);
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                _logger?.LogWarning("The backup file path is empty, will not upload.");
+                return;
+            }
+
+            var backupService = Ioc.Default.GetRequiredService<BackupService>();
+            if (type == BackupType.S3)
+                _ = backupService.PostS3BackupAsync(filePath);
+            else
+                _ = backupService.PostWebDavBackupAsync(filePath);
         }
         catch (Exception ex)
         {

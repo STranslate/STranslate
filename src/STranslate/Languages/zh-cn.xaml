@@ -442,15 +442,32 @@
     <sys:String x:Key="DownloadFailed">下载失败：{0} {1}</sys:String>
     <sys:String x:Key="DownloadException">下载异常：{0}</sys:String>
     <sys:String x:Key="DeleteFailed">删除失败：{0} {1}</sys:String>
+    <sys:String x:Key="DeleteException">删除异常：{0}</sys:String>
     <sys:String x:Key="RenameFailed">重命名失败：{0} {1}</sys:String>
     <sys:String x:Key="RenameException">重命名异常：{0}</sys:String>
     <sys:String x:Key="BackupMethod">备份方式</sys:String>
-    <sys:String x:Key="BackupMethodDescription">支持本地和WebDav的备份/恢复，过程中会自动重启软件</sys:String>
+    <sys:String x:Key="BackupMethodDescription">支持本地、WebDav 和 S3 的备份/恢复，过程中会自动重启软件</sys:String>
     <sys:String x:Key="WebDavAddress">WebDav 地址</sys:String>
     <sys:String x:Key="WebDavUsername">WebDav 用户名</sys:String>
     <sys:String x:Key="WebDavPassword">WebDav 密码</sys:String>
     <sys:String x:Key="WebDavBackupNotice">WebDAV 备份说明</sys:String>
     <sys:String x:Key="WebDavBackupNoticeDescription" xml:space="preserve">WebDAV 备份分为压缩和上传两个阶段。压缩期间请勿手动启动软件；软件自动重启后将继续上传，收到备份结果通知即表示流程结束。&#10;插件较多时压缩可能需要较长时间。&#10;如果连接 WebDAV 服务的网络状况不佳，可前往“设置 → 网络 → HTTP 超时”适当调大超时时间。</sys:String>
+    <sys:String x:Key="S3Provider">服务商预设</sys:String>
+    <sys:String x:Key="S3ProviderAwsS3">AWS S3</sys:String>
+    <sys:String x:Key="S3ProviderCloudflareR2">Cloudflare R2</sys:String>
+    <sys:String x:Key="S3ProviderMinio">MinIO</sys:String>
+    <sys:String x:Key="S3ProviderCustom">自定义</sys:String>
+    <sys:String x:Key="S3Endpoint">S3 服务地址</sys:String>
+    <sys:String x:Key="S3EndpointDescription">留空则使用 AWS S3 默认地址。</sys:String>
+    <sys:String x:Key="S3Region">区域</sys:String>
+    <sys:String x:Key="S3RegionDescription">Cloudflare R2 使用 auto；MinIO 通常使用 us-east-1。</sys:String>
+    <sys:String x:Key="S3Bucket">存储桶</sys:String>
+    <sys:String x:Key="S3AccessKey">Access Key</sys:String>
+    <sys:String x:Key="S3SecretKey">Secret Key</sys:String>
+    <sys:String x:Key="S3ForcePathStyle">路径风格</sys:String>
+    <sys:String x:Key="S3ForcePathStyleDescription">如果 S3 兼容服务要求路径风格寻址（常见于 MinIO），请开启。</sys:String>
+    <sys:String x:Key="S3BackupNotice">S3 备份说明</sys:String>
+    <sys:String x:Key="S3BackupNoticeDescription" xml:space="preserve">S3 备份与 WebDAV 使用相同的压缩和上传流程。存储桶必须已存在，备份会存放在 STranslate/ 前缀下。请使用具备该存储桶列举、读取、写入和删除权限的访问密钥。</sys:String>
     <sys:String x:Key="Backup">备份</sys:String>
     <sys:String x:Key="CreateBackup">创建备份</sys:String>
     <sys:String x:Key="Restore">恢复</sys:String>
@@ -726,6 +743,7 @@
 
     <sys:String x:Key="BackupTypeLocal">本地备份</sys:String>
     <sys:String x:Key="BackupTypeWebDav">WebDav备份</sys:String>
+    <sys:String x:Key="BackupTypeS3">S3备份</sys:String>
 
     <sys:String x:Key="ImageQualityLow">低质量</sys:String>
     <sys:String x:Key="ImageQualityMedium">中等质量</sys:String>

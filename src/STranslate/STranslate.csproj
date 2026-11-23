@@ -82,6 +82,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="AWSSDK.S3" />
         <PackageReference Include="ChefKeys" />
         <PackageReference Include="Dapper.Contrib" />
         <PackageReference Include="gong-wpf-dragdrop" />

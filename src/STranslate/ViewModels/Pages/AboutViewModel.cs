@@ -142,19 +142,35 @@ public partial class AboutViewModel(
     [RelayCommand]
     private async Task BackupAsync()
     {
-        if (Settings.Backup.Type == BackupType.Local)
-            await backupService.LocalBackupAsync();
-        else
-            await backupService.PreWebDavBackupAsync();
+        switch (Settings.Backup.Type)
+        {
+            case BackupType.Local:
+                await backupService.LocalBackupAsync();
+                break;
+            case BackupType.S3:
+                await backupService.PreS3BackupAsync();
+                break;
+            default:
+                await backupService.PreWebDavBackupAsync();
+                break;
+        }
     }
 
     [RelayCommand]
     private async Task RestoreAsync()
     {
-        if (Settings.Backup.Type == BackupType.Local)
-            await backupService.LocalRestoreAsync();
-        else
-            await backupService.WebDavRestoreAsync();
+        switch (Settings.Backup.Type)
+        {
+            case BackupType.Local:
+                await backupService.LocalRestoreAsync();
+                break;
+            case BackupType.S3:
+                await backupService.S3RestoreAsync();
+                break;
+            default:
+                await backupService.WebDavRestoreAsync();
+                break;
+        }
     }
 
     #endregion

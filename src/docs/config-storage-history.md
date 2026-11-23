@@ -42,7 +42,7 @@
 - 编辑器克隆配置，保存时校验并整体替换顶层属性以触发自动保存，取消不修改持久对象。替换文本保留实际换行；不做通用反斜线解码。
 - 旧 `Settings.json` 缺少该字段时使用默认值；字段为 null、列表损坏或结构不合法时，专用 JSON converter 保留错误值并阻止翻译，不把错误配置静默当作关闭状态。
 - 输入和历史高亮直接比较原文与保存的 `RequestText`，不存展示差异、不重新执行历史规则，无需数据库迁移。`HistoryModel.ReplacementRequests` 仅为展示提供请求快照，原文显示一份，各服务差异合并到高亮范围和 Tooltip；混合历史中的旧服务按既有未预处理语义保留原文，损坏的请求上下文不会被补算。历史更多菜单可勾选导出逐服务实际发送文本及实际语言，默认保留原 CSV 列结构。
-- 配置沿用 `AppStorage` 和现有 ZIP/WebDAV 备份范围。异步 `.bak` 恢复先释放读取流再原子替换，避免 Windows 文件占用错误。
+- 配置沿用 `AppStorage` 和现有 ZIP/WebDAV/S3 备份范围。异步 `.bak` 恢复先释放读取流再原子替换，避免 Windows 文件占用错误。
 
 ### 从入口到结果：便携/漫游路径策略
 1. `DataLocation.PortableDataLocationInUse()` 判断程序目录下是否存在便携目录。
@@ -91,6 +91,7 @@
   - 欢迎向导会复用服务页的服务创建逻辑和插件配置 UI，以 5 页流程配置语言、翻译/OCR 服务、图片翻译/替换翻译专用服务和关键快捷键。
 - `ProxySettings` 与 `BackupSettings`
   - 网络代理与备份目标配置。
+  - `BackupType`：`Local`、`WebDav`、`S3`；S3 相关字段包含预设、Endpoint、Region、Bucket、AccessKey、SecretKey 与 PathStyle。
 - `HistoryModel` / `HistoryData`
   - 历史记录主表模型与每服务结果载体。
   - `EffectiveSourceLang` / `EffectiveTargetLang`：自动识别后的实际语言快照。

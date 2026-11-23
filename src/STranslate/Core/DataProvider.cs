@@ -41,6 +41,7 @@ public class DataProvider
         DropdownDataGeneric<HistoryLimit>.UpdateLabels(HistoryLimits);
         DropdownDataGeneric<CopyAfterTranslation>.UpdateLabels(CopyAfterTranslations);
         DropdownDataGeneric<BackupType>.UpdateLabels(BackupTypes);
+        DropdownDataGeneric<S3ProviderType>.UpdateLabels(S3Providers);
         DropdownDataGeneric<ImageQuality>.UpdateLabels(ImageQualities);
         DropdownDataGeneric<DoubleClickTrayFunction>.UpdateLabels(DoubleClickTrayFunctions);
         DropdownDataGeneric<PluginMarketCdnSourceType>.UpdateLabels(PluginMarketCdnSources);
@@ -199,6 +200,10 @@ public class DataProvider
     public class BackupTypeData : DropdownDataGeneric<BackupType> { }
     public List<BackupTypeData> BackupTypes { get; } =
         DropdownDataGeneric<BackupType>.GetValues<BackupTypeData>("BackupType");
+
+    public class S3ProviderData : DropdownDataGeneric<S3ProviderType> { }
+    public List<S3ProviderData> S3Providers { get; } =
+        DropdownDataGeneric<S3ProviderType>.GetValues<S3ProviderData>("S3Provider");
 
     #endregion
 
