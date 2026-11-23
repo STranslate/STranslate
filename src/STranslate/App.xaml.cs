@@ -449,6 +449,8 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
 
     #region Register Events
 
+    internal bool IsShutdownRequested => _shutdownReason != AppShutdownReason.ExternalOrUnknown;
+
     internal static void RequestShutdown(AppShutdownReason reason)
     {
         if (Current is not App app)

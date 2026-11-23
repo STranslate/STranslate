@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using STranslate.Core;
 using STranslate.Helpers;
 using STranslate.ViewModels;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Input;
@@ -147,7 +148,7 @@ public partial class MainWindow : IDisposable
             base.OnContentRendered(e);
             return;
         }
-        if (_settings.HideOnStartup && !_showRequestedBeforeFirstRender)
+        if (_settings.HideOnStartup && (!_showRequestedBeforeFirstRender || !IsVisible))
         {
             _viewModel.Hide();
         }
@@ -160,6 +161,16 @@ public partial class MainWindow : IDisposable
         _initialContentRendered = true;
 
         base.OnContentRendered(e);
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        base.OnClosing(e);
+        if (e.Cancel || Application.Current is not App { IsShutdownRequested: false }) return;
+
+        // 托盘和外部调用服务仍在运行时保留主窗口。WPF 在 Closing 返回后才允许修改 Visibility。
+        e.Cancel = true;
+        Dispatcher.BeginInvoke(DispatcherPriority.Send, new Action(_viewModel.Hide));
     }
 
     protected override void OnDeactivated(EventArgs e)
