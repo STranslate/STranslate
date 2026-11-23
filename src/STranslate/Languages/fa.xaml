@@ -126,6 +126,8 @@
     <sys:String x:Key="General_EnableMouseSelectionTranslationDescription">متن را پس از انتخاب با کشیدن موش‌واره یا دوبار کلیک، بلافاصله کپی و ترجمه می‌کند.</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIcon">آیکون شناور پس از انتخاب متن</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIconDescription">پس از انتخاب متن با کشیدن موش‌واره یا دوبار کلیک، یک آیکون شناور نمایش می‌دهد و با کلیک روی آن ترجمه می‌کند. در صورت فعال بودن هر دو، ترجمه مستقیم اولویت دارد.</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcesses">برنامه‌هایی که انتخاب در آن‌ها همیشه متن محسوب می‌شود</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcessesDescription">در این برنامه‌ها کشیدن یا دوبار کلیک، صرف‌نظر از شکل نشانگر، انتخاب متن محسوب می‌شود (نام فرایندها با کاما جدا شوند، مثلاً wps).</sys:String>
     <sys:String x:Key="MouseSelectionIconTranslate">ترجمه</sys:String>
     <sys:String x:Key="MouseSelectionTranslationRequiresTopmost">هنگام فعال بودن ترجمه با انتخاب موش‌واره، پنجره باید همیشه در رو (Topmost) بماند.</sys:String>
     <sys:String x:Key="General_ShowHistoryNavigation">نمایش پیمایش تاریخچه</sys:String>

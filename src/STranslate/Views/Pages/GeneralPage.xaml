@@ -623,6 +623,13 @@
                             OffContent="{DynamicResource Disable}"
                             OnContent="{DynamicResource Enable}" />
                     </ui:SettingsCard>
+
+                    <ui:SettingsCard Description="{DynamicResource General_MouseSelectionTextProcessesDescription}" Header="{DynamicResource General_MouseSelectionTextProcesses}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Apps_20_Regular}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <TextBox MinWidth="200" Text="{Binding MouseSelectionTextProcessesText}" />
+                    </ui:SettingsCard>
                 </control:CardGroup>
 
                 <control:CardGroup>

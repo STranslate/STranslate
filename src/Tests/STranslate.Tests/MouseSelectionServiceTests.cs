@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using STranslate.Core;
 using STranslate.Services;
 using System.Drawing;
+using System.Text.Json;
 
 namespace STranslate.Tests;
 
@@ -123,6 +124,129 @@ public class MouseSelectionServiceTests
 
         Assert.False(CompleteClick(detector, new Point(10, 10), uint.MaxValue - 10, isIBeam: true));
         Assert.True(CompleteClick(detector, new Point(10, 10), 20, isIBeam: true));
+    }
+
+    [Fact]
+    public void GestureDetectorAcceptsDragInTextProcessWithoutIBeam()
+    {
+        var detector = CreateGestureDetector();
+
+        detector.OnLeftButtonDown(new Point(10, 10), timestamp: 100, isIBeam: false, treatAsText: true);
+        detector.OnMouseMove(new Point(30, 10), isIBeam: false);
+
+        Assert.True(detector.TryComplete(new Point(30, 10), isIBeam: false, out _));
+    }
+
+    [Fact]
+    public void GestureDetectorAcceptsDoubleClickInTextProcessWithoutIBeam()
+    {
+        var detector = CreateGestureDetector();
+
+        Assert.False(CompleteClick(detector, new Point(10, 10), 100, isIBeam: false, treatAsText: true));
+        Assert.True(CompleteClick(detector, new Point(10, 10), 200, isIBeam: false, treatAsText: true));
+    }
+
+    [Fact]
+    public void GestureDetectorRejectsDragWithoutIBeamOrTextProcess()
+    {
+        var detector = CreateGestureDetector();
+
+        detector.OnLeftButtonDown(new Point(10, 10), timestamp: 100, isIBeam: false);
+        detector.OnMouseMove(new Point(30, 10), isIBeam: false);
+
+        Assert.False(detector.TryComplete(new Point(30, 10), isIBeam: false, out _));
+    }
+
+    [Fact]
+    public void GestureDetectorRejectsDoubleClickWithoutIBeamOrTextProcess()
+    {
+        var detector = CreateGestureDetector();
+
+        Assert.False(CompleteClick(detector, new Point(10, 10), 100, isIBeam: false));
+        Assert.False(CompleteClick(detector, new Point(10, 10), 200, isIBeam: false));
+    }
+
+    [Fact]
+    public void GestureDetectorTextProcessFlagOnlyAppliesToItsOwnGesture()
+    {
+        var detector = CreateGestureDetector();
+
+        detector.OnLeftButtonDown(new Point(10, 10), timestamp: 100, isIBeam: false, treatAsText: true);
+        detector.OnMouseMove(new Point(30, 10), isIBeam: false);
+        Assert.True(detector.TryComplete(new Point(30, 10), isIBeam: false, out _));
+
+        detector.OnLeftButtonDown(new Point(100, 100), timestamp: 1000, isIBeam: false);
+        detector.OnMouseMove(new Point(130, 100), isIBeam: false);
+        Assert.False(detector.TryComplete(new Point(130, 100), isIBeam: false, out _));
+    }
+
+    [Fact]
+    public void MouseSelectionTextProcessesDefaultToWps()
+    {
+        Assert.Equal(["wps", "wpspdf"], new Settings().MouseSelectionTextProcesses);
+    }
+
+    [Fact]
+    public void MouseSelectionTextProcessesKeepDefaultWhenMissingFromJson()
+    {
+        var settings = JsonSerializer.Deserialize<Settings>("""{ "IsMouseSelectionIconEnabled": true }""");
+
+        Assert.NotNull(settings);
+        Assert.True(settings.IsMouseSelectionIconEnabled);
+        Assert.Equal(["wps", "wpspdf"], settings.MouseSelectionTextProcesses);
+    }
+
+    [Fact]
+    public void MouseSelectionTextProcessesRoundTripThroughJson()
+    {
+        var settings = new Settings { MouseSelectionTextProcesses = ["foxitreader"] };
+
+        using var document = JsonDocument.Parse(JsonSerializer.Serialize(settings));
+        var stored = document.RootElement.GetProperty(nameof(Settings.MouseSelectionTextProcesses));
+        Assert.Equal(["foxitreader"], stored.EnumerateArray().Select(item => item.GetString()));
+
+        // 只反序列化本字段：完整配置的部分 setter 依赖 WPF 运行环境。
+        var restored = JsonSerializer.Deserialize<Settings>($$"""{ "MouseSelectionTextProcesses": {{stored.GetRawText()}} }""");
+
+        Assert.NotNull(restored);
+        Assert.Equal(["foxitreader"], restored.MouseSelectionTextProcesses);
+    }
+
+    [Theory]
+    [InlineData("wps", true)]
+    [InlineData("WPS", true)]
+    [InlineData("wpspdf", true)]
+    [InlineData("wps.exe", true)]
+    [InlineData("wpsx", false)]
+    [InlineData("notepad", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void ProcessListMatchesNamesCaseInsensitively(string? processName, bool expected)
+    {
+        Assert.Equal(expected, MouseSelectionProcessList.Contains(["wps", "wpspdf"], processName));
+    }
+
+    [Fact]
+    public void ProcessListIgnoresExeSuffixAndWhitespaceInConfiguredNames()
+    {
+        Assert.True(MouseSelectionProcessList.Contains([" WPS.EXE "], "wps"));
+        Assert.False(MouseSelectionProcessList.Contains([], "wps"));
+        Assert.False(MouseSelectionProcessList.Contains(null, "wps"));
+    }
+
+    [Fact]
+    public void ProcessListParsesCommaSeparatedText()
+    {
+        Assert.Equal(["wps", "wpspdf", "et"], MouseSelectionProcessList.Parse(" wps, wpspdf.exe，et ; WPS,, "));
+        Assert.Empty(MouseSelectionProcessList.Parse("  "));
+        Assert.Empty(MouseSelectionProcessList.Parse(null));
+    }
+
+    [Fact]
+    public void ProcessListFormatsAsCommaSeparatedText()
+    {
+        Assert.Equal("wps, wpspdf", MouseSelectionProcessList.Format(["wps", "wpspdf"]));
+        Assert.Equal(string.Empty, MouseSelectionProcessList.Format(null));
     }
 
     [Fact]
@@ -337,17 +461,19 @@ public class MouseSelectionServiceTests
         MouseSelectionGestureDetector detector,
         Point point,
         uint timestamp,
-        bool isIBeam) =>
-        CompleteClick(detector, point, timestamp, isIBeam, out _);
+        bool isIBeam,
+        bool treatAsText = false) =>
+        CompleteClick(detector, point, timestamp, isIBeam, out _, treatAsText);
 
     private static bool CompleteClick(
         MouseSelectionGestureDetector detector,
         Point point,
         uint timestamp,
         bool isIBeam,
-        out Point completedPoint)
+        out Point completedPoint,
+        bool treatAsText = false)
     {
-        detector.OnLeftButtonDown(point, timestamp, isIBeam);
+        detector.OnLeftButtonDown(point, timestamp, isIBeam, treatAsText);
         return detector.TryComplete(point, isIBeam, out completedPoint);
     }
 

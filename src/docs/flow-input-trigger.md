@@ -60,6 +60,7 @@
 ### 从入口到结果：Ctrl+CC、鼠标划词、剪贴板监听
 - Ctrl+CC：`CtrlSameCHelper` 监听全局按键，500ms 内双击 `Ctrl+C` 触发 `CrosswordTranslateByCtrlSameCHandler()`。
 - 鼠标划词：拖选和双击选词共用同一条完成事件链路。`IsMouseSelectionTranslationEnabled` 和 `IsMouseSelectionIconEnabled` 是独立开关，任意一个开启都会维持同一个 Hook。处理优先级为增量翻译、直接翻译、悬浮图标；两者同时开启时直接翻译，不显示图标。
+- 鼠标划词默认要求手势中出现过系统 I 型光标；`Settings.MouseSelectionTextProcesses`（默认 `wps`、`wpspdf`）中的进程自绘光标，按下左键时由 Hook 线程按光标下根窗口的进程名匹配（按 PID 缓存），命中则整个手势视为选字。
 - 剪贴板监听：`ClipboardMonitor` 收到 `WM_CLIPBOARDUPDATE` 后读取文本，触发 `OnClipboardTextChanged -> ExecuteTranslate()`。
 
 ### 触发后的窗口置前
@@ -126,6 +127,7 @@
   - `CrosswordFetchFailedFallbackTarget`
   - `IsMouseSelectionTranslationEnabled`
   - `IsMouseSelectionIconEnabled`
+  - `MouseSelectionTextProcesses`
   - `HideInput`、`HideInputWithLangSelectControl`
 - 输入区有效显隐状态：
   - `IsInputActuallyHidden`：持久隐藏设置叠加输入翻译临时显示后的实际隐藏状态。

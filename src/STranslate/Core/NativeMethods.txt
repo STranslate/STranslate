@@ -10,6 +10,10 @@ PostThreadMessage
 PeekMessage
 GetCursorInfo
 LoadCursor
+WindowFromPoint
+GetAncestor
+OpenProcess
+QueryFullProcessImageName
 VIRTUAL_KEY
 SendInput
 MapVirtualKey

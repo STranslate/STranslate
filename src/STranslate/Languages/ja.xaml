@@ -122,6 +122,8 @@
     <sys:String x:Key="General_EnableMouseSelectionTranslationDescription">ドラッグまたはダブルクリックで選択したテキストを直ちにコピーして翻訳します。</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIcon">選択後にフローティングアイコンを表示</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIconDescription">ドラッグまたはダブルクリックでテキストを選択するとアイコンを表示し、クリック時に翻訳します。両方が有効な場合は直接翻訳が優先されます。</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcesses">テキスト選択とみなすプログラム</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcessesDescription">これらのプログラムでは、カーソルの形に関係なく、ドラッグやダブルクリックをテキスト選択として扱います（プロセス名をカンマ区切りで指定。例：wps）。</sys:String>
     <sys:String x:Key="MouseSelectionIconTranslate">翻訳</sys:String>
     <sys:String x:Key="MouseSelectionTranslationRequiresTopmost">マウス選択の直接翻訳が有効な間、ウィンドウを最前面に保つ必要があります。</sys:String>
     <sys:String x:Key="General_ShowHistoryNavigation">履歴ナビゲーションを表示</sys:String>

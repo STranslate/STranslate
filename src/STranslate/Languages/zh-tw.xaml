@@ -125,6 +125,8 @@
     <sys:String x:Key="General_EnableMouseSelectionTranslationDescription">拖曳或雙擊選中文字後立即複製並觸發翻譯。</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIcon">劃詞後顯示懸浮圖示</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIconDescription">拖曳或雙擊選中文字後顯示懸浮圖示，點擊圖示時再翻譯；直接翻譯同時啟用時優先直接翻譯。</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcesses">也視為選字的程式</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcessesDescription">在這些程式裡拖選或雙擊時，不管游標形狀都當作選取文字（以逗號分隔處理程序名稱，例如 wps）</sys:String>
     <sys:String x:Key="MouseSelectionIconTranslate">點擊翻譯</sys:String>
     <sys:String x:Key="MouseSelectionTranslationRequiresTopmost">滑鼠劃詞直接翻譯啟用時視窗必須保持置頂。</sys:String>
     <sys:String x:Key="General_ShowHistoryNavigation">顯示歷史導航</sys:String>
