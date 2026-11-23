@@ -1,9 +1,12 @@
 using Microsoft.Extensions.Logging;
+using STranslate.Core;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.System.Threading;
 using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace STranslate.Services;
@@ -12,11 +15,15 @@ namespace STranslate.Services;
 /// 在专用消息线程中监听全局鼠标选词手势。
 /// </summary>
 /// <param name="logger">日志记录器。</param>
-public sealed class MouseHookService(ILogger<MouseHookService> logger) : IMouseHookService
+/// <param name="settings">应用配置，用于读取不检查光标形状的进程名单。</param>
+public sealed class MouseHookService(ILogger<MouseHookService> logger, Settings settings) : IMouseHookService
 {
     private static readonly TimeSpan ThreadTransitionTimeout = TimeSpan.FromSeconds(2);
+    private const int ProcessNameCacheCapacity = 32;
     private readonly Lock _stateLock = new();
     private readonly Lock _eventDispatchLock = new();
+    // 仅在 Hook 线程访问，无需加锁。
+    private readonly Dictionary<uint, string?> _processNameCache = [];
     private Task _eventDispatchTask = Task.CompletedTask;
     private Thread? _hookThread;
     private ManualResetEventSlim? _startupCompleted;
@@ -182,6 +189,7 @@ public sealed class MouseHookService(ILogger<MouseHookService> logger) : IMouseH
             _hookProc = null;
             _gestureDetector = null;
             _iBeamCursor = HCURSOR.Null;
+            _processNameCache.Clear();
 
             lock (_stateLock)
             {
@@ -204,7 +212,7 @@ public sealed class MouseHookService(ILogger<MouseHookService> logger) : IMouseH
 
         if (message == PInvoke.WM_LBUTTONDOWN)
         {
-            _gestureDetector.OnLeftButtonDown(point, data.time, IsIBeamCursor());
+            _gestureDetector.OnLeftButtonDown(point, data.time, IsIBeamCursor(), IsTextSelectionProcessAt(point));
             QueueEvent(() => SelectionStarted?.Invoke(this, point));
         }
         else if (message == PInvoke.WM_MOUSEMOVE)
@@ -226,6 +234,66 @@ public sealed class MouseHookService(ILogger<MouseHookService> logger) : IMouseH
     {
         var cursorInfo = new CURSORINFO { cbSize = (uint)Marshal.SizeOf<CURSORINFO>() };
         return PInvoke.GetCursorInfo(ref cursorInfo) && cursorInfo.hCursor == _iBeamCursor;
+    }
+
+    /// <summary>
+    /// 判断光标下的窗口是否属于配置中「也视为选字的程序」。
+    /// 在 Hook 线程上执行，任何失败都按未列出处理，不向 Hook 回调抛出异常。
+    /// </summary>
+    private bool IsTextSelectionProcessAt(Point point)
+    {
+        try
+        {
+            var processNames = settings.MouseSelectionTextProcesses;
+            if (processNames is not { Count: > 0 })
+                return false;
+
+            var window = PInvoke.WindowFromPoint(point);
+            if (window.IsNull)
+                return false;
+
+            var rootWindow = PInvoke.GetAncestor(window, GET_ANCESTOR_FLAGS.GA_ROOT);
+            if (!rootWindow.IsNull)
+                window = rootWindow;
+
+            PInvoke.GetWindowThreadProcessId(window, out var processId);
+            return processId != 0 && MouseSelectionProcessList.Contains(processNames, GetProcessName(processId));
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex, "Failed to resolve the process under the cursor for mouse selection.");
+            return false;
+        }
+    }
+
+    private string? GetProcessName(uint processId)
+    {
+        if (_processNameCache.TryGetValue(processId, out var cachedName))
+            return cachedName;
+
+        var processName = QueryProcessName(processId);
+        if (_processNameCache.Count >= ProcessNameCacheCapacity)
+            _processNameCache.Clear();
+
+        _processNameCache[processId] = processName;
+        return processName;
+    }
+
+    private static string? QueryProcessName(uint processId)
+    {
+        using var process = PInvoke.OpenProcess_SafeHandle(
+            PROCESS_ACCESS_RIGHTS.PROCESS_QUERY_LIMITED_INFORMATION,
+            false,
+            processId);
+        if (process.IsInvalid)
+            return null;
+
+        Span<char> buffer = stackalloc char[1024];
+        var length = (uint)buffer.Length;
+        if (!PInvoke.QueryFullProcessImageName(process, PROCESS_NAME_FORMAT.PROCESS_NAME_WIN32, buffer, ref length))
+            return null;
+
+        return Path.GetFileNameWithoutExtension(buffer[..(int)length]).ToString();
     }
 
     private void QueueEvent(Action callback)
@@ -310,13 +378,14 @@ internal sealed class MouseSelectionGestureDetector(
 
     internal bool IsTracking => _isLeftButtonDown;
 
-    internal void OnLeftButtonDown(Point point, uint timestamp, bool isIBeam)
+    /// <param name="treatAsText">为 true 时（如自绘光标的程序）整个手势都按已见过文本光标处理。</param>
+    internal void OnLeftButtonDown(Point point, uint timestamp, bool isIBeam, bool treatAsText = false)
     {
         _startPoint = point;
         _startTime = timestamp;
         _isLeftButtonDown = true;
         _isDragging = false;
-        _hasSeenIBeam = isIBeam;
+        _hasSeenIBeam = isIBeam || treatAsText;
         _isPotentialSecondClick = IsWithinDoubleClickBounds(point, timestamp);
     }
 
@@ -389,6 +458,58 @@ internal sealed class MouseSelectionGestureDetector(
         _hasSeenIBeam = false;
         _hasPendingClick = false;
         _isPotentialSecondClick = false;
+    }
+}
+
+/// <summary>
+/// 解析与匹配「也视为选字的程序」进程名单（不含 .exe，忽略大小写）。
+/// </summary>
+internal static class MouseSelectionProcessList
+{
+    private static readonly char[] Separators = [',', '，', ';', '；', '\r', '\n'];
+
+    /// <summary>
+    /// 将逗号分隔的文本解析为去重后的进程名列表。
+    /// </summary>
+    internal static List<string> Parse(string? text) =>
+        string.IsNullOrWhiteSpace(text)
+            ? []
+            : text.Split(Separators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(Normalize)
+                .Where(name => name.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+    /// <summary>
+    /// 将进程名列表格式化为逗号分隔文本。
+    /// </summary>
+    internal static string Format(IEnumerable<string>? names) =>
+        names is null ? string.Empty : string.Join(", ", names);
+
+    /// <summary>
+    /// 判断进程名是否在名单中。
+    /// </summary>
+    internal static bool Contains(IEnumerable<string>? names, string? processName)
+    {
+        if (names is null || string.IsNullOrWhiteSpace(processName))
+            return false;
+
+        var target = Normalize(processName);
+        foreach (var name in names)
+        {
+            if (name is not null && string.Equals(Normalize(name), target, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static string Normalize(string name)
+    {
+        var trimmed = name.Trim();
+        return trimmed.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
+            ? trimmed[..^4].TrimEnd()
+            : trimmed;
     }
 }
 

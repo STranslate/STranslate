@@ -125,6 +125,8 @@
     <sys:String x:Key="General_EnableMouseSelectionTranslationDescription">Копіювати й одразу перекладати текст, виділений перетягуванням або подвійним клацанням.</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIcon">Спливний значок після виділення мишею</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIconDescription">Показувати спливний значок після виділення тексту перетягуванням або подвійним клацанням і перекладати після натискання на нього. Якщо ввімкнено обидві можливості, пріоритет має негайний переклад.</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcesses">Програми, де виділення завжди вважається текстом</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcessesDescription">У цих програмах перетягування або подвійне клацання вважаються виділенням тексту незалежно від форми курсора (імена процесів через кому, наприклад wps).</sys:String>
     <sys:String x:Key="MouseSelectionIconTranslate">Перекласти</sys:String>
     <sys:String x:Key="MouseSelectionTranslationRequiresTopmost">Поки ввімкнено переклад за виділенням мишею, вікно має бути закріплене поверх усіх вікон.</sys:String>
     <sys:String x:Key="General_ShowHistoryNavigation">Показувати навігацію історією</sys:String>

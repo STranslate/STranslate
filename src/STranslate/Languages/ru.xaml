@@ -125,6 +125,8 @@
     <sys:String x:Key="General_EnableMouseSelectionTranslationDescription">Копировать и сразу переводить текст, выделенный перетаскиванием или двойным щелчком.</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIcon">Всплывающий значок после выделения мышью</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIconDescription">Показывать всплывающий значок после выделения текста перетаскиванием или двойным щелчком и переводить по нажатию на него. Если включены обе возможности, приоритет у немедленного перевода.</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcesses">Программы, где выделение всегда считается текстом</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcessesDescription">В этих программах перетаскивание или двойной щелчок считаются выделением текста независимо от формы курсора (имена процессов через запятую, например wps).</sys:String>
     <sys:String x:Key="MouseSelectionIconTranslate">Перевести</sys:String>
     <sys:String x:Key="MouseSelectionTranslationRequiresTopmost">Пока включён перевод по выделению мышью, окно должно быть закреплено поверх всех окон.</sys:String>
     <sys:String x:Key="General_ShowHistoryNavigation">Показывать навигацию по истории</sys:String>

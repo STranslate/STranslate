@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Input;
 using STranslate.Core;
 using STranslate.Helpers;
 using STranslate.Plugin;
+using STranslate.Services;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -158,6 +159,26 @@ public partial class GeneralViewModel : SearchViewModelBase
         set => SetTextSeparatorScope(TextSeparatorHandleScope.SilentOcr, value);
     }
 
+    /// <summary>
+    /// 「也视为选字的程序」的逗号分隔文本，写回时整体替换 <see cref="Settings.MouseSelectionTextProcesses"/>。
+    /// </summary>
+    public string MouseSelectionTextProcessesText
+    {
+        get => MouseSelectionProcessList.Format(Settings.MouseSelectionTextProcesses);
+        set
+        {
+            var processes = MouseSelectionProcessList.Parse(value);
+            if (Settings.MouseSelectionTextProcesses?.SequenceEqual(processes) == true)
+            {
+                // 内容未变时仍刷新一次，让输入框显示规范化后的文本。
+                OnPropertyChanged();
+                return;
+            }
+
+            Settings.MouseSelectionTextProcesses = processes;
+        }
+    }
+
     private bool IsTextSeparatorScopeEnabled(TextSeparatorHandleScope scope)
         => (Settings.TextSeparatorHandleScopes & scope) == scope;
 
@@ -177,6 +198,10 @@ public partial class GeneralViewModel : SearchViewModelBase
         if (e.PropertyName == nameof(Settings.TextSeparatorHandleScopes))
         {
             OnTextSeparatorScopePropertiesChanged();
+        }
+        else if (e.PropertyName == nameof(Settings.MouseSelectionTextProcesses))
+        {
+            OnPropertyChanged(nameof(MouseSelectionTextProcessesText));
         }
     }
 

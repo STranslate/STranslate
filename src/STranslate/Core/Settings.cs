@@ -79,6 +79,12 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial bool IsMouseSelectionIconEnabled { get; set; } = false;
 
+    /// <summary>
+    /// 鼠标划词时不检查光标形状的进程名（不含 .exe，忽略大小写）。
+    /// 这些程序自绘光标，拖选或双击时一律视为选中文字。修改时整体替换列表，不要原地修改。
+    /// </summary>
+    [ObservableProperty] public partial List<string> MouseSelectionTextProcesses { get; set; } = ["wps", "wpspdf"];
+
     [ObservableProperty] public partial bool IsHistoryNavigationVisible { get; set; } = true;
 
     [ObservableProperty] public partial bool IsOcrVisible { get; set; } = true;

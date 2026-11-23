@@ -125,6 +125,8 @@
     <sys:String x:Key="General_EnableMouseSelectionTranslationDescription">Copy and translate text immediately after selecting it by dragging or double-clicking.</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIcon">Floating Icon After Mouse Selection</sys:String>
     <sys:String x:Key="General_EnableMouseSelectionIconDescription">Show a floating icon after selecting text by dragging or double-clicking, and translate when it is clicked. Direct translation takes priority when both features are enabled.</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcesses">Treat Selection as Text in These Programs</sys:String>
+    <sys:String x:Key="General_MouseSelectionTextProcessesDescription">In these programs, dragging or double-clicking counts as selecting text regardless of the cursor shape (comma-separated process names, e.g. wps).</sys:String>
     <sys:String x:Key="MouseSelectionIconTranslate">Translate</sys:String>
     <sys:String x:Key="MouseSelectionTranslationRequiresTopmost">The window must remain topmost while mouse selection translation is enabled.</sys:String>
     <sys:String x:Key="General_ShowHistoryNavigation">Show History Navigation</sys:String>
