@@ -3,7 +3,7 @@ using System.Windows.Automation;
 namespace STranslate.Helpers;
 
 /// <summary>
-/// 在后台读取焦点元素的文字选区，不操作剪贴板。
+/// 在后台读取焦点元素或其所在文档的文字选区，不操作剪贴板。
 /// </summary>
 internal sealed class UiaTextReader(Func<string?>? readSelection = null)
 {
@@ -55,13 +55,29 @@ internal sealed class UiaTextReader(Func<string?>? readSelection = null)
     private static string? ReadFocusedSelection()
     {
         var element = AutomationElement.FocusedElement;
-        if (element == null || element.Current.IsPassword ||
-            !element.TryGetCurrentPattern(TextPattern.Pattern, out var pattern))
-        {
+        if (element == null || element.Current.IsPassword)
             return null;
-        }
+
+        var pattern = FindTextPattern(element);
+        if (pattern == null)
+            return null;
 
         // 未选择文字时 GetSelection 返回空范围，GetText 返回空字符串。
-        return string.Concat(((TextPattern)pattern).GetSelection().Select(range => range.GetText(-1)));
+        return string.Concat(pattern.GetSelection().Select(range => range.GetText(-1)));
+    }
+
+    /// <summary>
+    /// 网页中的焦点常落在包含文字的可聚焦容器或按钮上，这类元素不支持 TextPattern，
+    /// 选区由所在文档提供，因此从焦点元素开始向上查找最近的支持 TextPattern 的元素。
+    /// </summary>
+    private static TextPattern? FindTextPattern(AutomationElement element)
+    {
+        for (var current = element; current != null; current = TreeWalker.ControlViewWalker.GetParent(current))
+        {
+            if (current.TryGetCurrentPattern(TextPattern.Pattern, out var pattern))
+                return (TextPattern)pattern;
+        }
+
+        return null;
     }
 }
