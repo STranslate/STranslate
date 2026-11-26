@@ -24,7 +24,7 @@
 - `STranslate/Helpers/ClipboardMonitor.cs`
   - `AddClipboardFormatListener` 监听剪贴板变更。
 - `STranslate/Helpers/UiaTextReader.cs`
-  - 在后台读取焦点元素的 UIA `TextPattern` 选区，焦点元素不支持时沿父级查找最近的支持 `TextPattern` 的元素（通常是所在网页文档）；空结果、异常或超时返回 null，由 `ClipboardHelper` 回退到模拟复制。
+  - 在后台读取焦点元素的 UIA `TextPattern` 选区，焦点元素不支持时沿父级查找最近的支持 `TextPattern` 的元素（通常是所在网页文档），途经支持 `SelectionPattern` 或 `GridPattern` 的控件（表格、列表等）时停止查找；空结果、异常或超时返回 null，由 `ClipboardHelper` 回退到模拟复制。
 - `STranslate/ViewModels/MainWindowViewModel.cs`
   - `ExecuteTranslate()` / `InputClear()` / `Show()`：完成文本入口收敛、窗口显示与统一置前。
 - `STranslate/Core/Settings.cs`
@@ -71,7 +71,7 @@
 - 主窗口失焦时按 `HideWhenDeactivated` 自动隐藏；置顶窗口不受此逻辑影响。
 
 ### 从入口到结果：取词超时、后处理与失败回退
-1. 快捷键划词、鼠标划词、增量翻译以及共用取词入口的操作将 `Settings.PreferUiaForSelectedText` 和 `Settings.SelectedTextFetchTimeoutMs` 传入 `ClipboardHelper.GetSelectedTextAsync()`。默认优先通过 `UiaTextReader` 读取焦点元素的 `TextPattern.GetSelection()`；网页中焦点常落在不支持 `TextPattern` 的可聚焦容器或按钮上，此时改为读取最近的支持 `TextPattern` 的父级元素，取不到再执行 `GetSelectedTextFromClipboardAsync()`。UIA 成功时直接返回选区内容。关闭「优先使用 UI Automation 取词」后，下次取词直接模拟复制。`Ctrl+C+C` 和剪贴板监听直接读取用户已经复制的内容。
+1. 快捷键划词、鼠标划词、增量翻译以及共用取词入口的操作将 `Settings.PreferUiaForSelectedText` 和 `Settings.SelectedTextFetchTimeoutMs` 传入 `ClipboardHelper.GetSelectedTextAsync()`。默认优先通过 `UiaTextReader` 读取焦点元素的 `TextPattern.GetSelection()`；网页中焦点常落在不支持 `TextPattern` 的可聚焦容器或按钮上，此时改为读取最近的支持 `TextPattern` 的父级元素。表格、列表等控件有自己的选区，父级文档的文字选区与用户选中的内容无关，因此查找途中遇到支持 `SelectionPattern` 或 `GridPattern` 的控件即停止。取不到选区时再执行 `GetSelectedTextFromClipboardAsync()`。UIA 成功时直接返回选区内容。关闭「优先使用 UI Automation 取词」后，下次取词直接模拟复制。`Ctrl+C+C` 和剪贴板监听直接读取用户已经复制的内容。
 2. UIA 在后台 MTA 线程执行，最多等待 250 毫秒且不超过 `SelectedTextFetchTimeoutMs`；空结果、不支持 UIA、异常或超时均回退到原有模拟复制流程。UIA 跨进程调用无法强行取消，上次调用未结束时后续请求直接走剪贴板，避免堆积后台调用；迟到的 UIA 结果会被丢弃。等待期间前台窗口变化则本次取词结束，不向新窗口模拟复制。剪贴板回退仍使用完整的 `SelectedTextFetchTimeoutMs`，该值限制为 50~5000 毫秒，鼠标划词监听通过委托实时读取当前配置。取消请求会终止等待，避免继续回退或返回旧剪贴板内容。
 3. 取到文本后统一进入 `MainWindowViewModel.HandleCapturedText(text, scope)`：
    - 先执行 `LineBreakHandleType` 换行处理。

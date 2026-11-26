@@ -58,24 +58,45 @@ internal sealed class UiaTextReader(Func<string?>? readSelection = null)
         if (element == null || element.Current.IsPassword)
             return null;
 
-        var pattern = FindTextPattern(element);
-        if (pattern == null)
+        return ReadSelection(element);
+    }
+
+    /// <summary>
+    /// 从指定元素开始查找选区来源并读取选区；找不到时返回 null，由调用方回退到模拟复制。
+    /// </summary>
+    internal static string? ReadSelection(AutomationElement element)
+    {
+        var source = FindSelectionSource(
+            element,
+            TreeWalker.ControlViewWalker.GetParent,
+            current => (bool)current.GetCurrentPropertyValue(AutomationElement.IsTextPatternAvailableProperty),
+            current => (bool)current.GetCurrentPropertyValue(AutomationElement.IsSelectionPatternAvailableProperty) ||
+                       (bool)current.GetCurrentPropertyValue(AutomationElement.IsGridPatternAvailableProperty));
+        if (source == null)
             return null;
 
         // 未选择文字时 GetSelection 返回空范围，GetText 返回空字符串。
+        var pattern = (TextPattern)source.GetCurrentPattern(TextPattern.Pattern);
         return string.Concat(pattern.GetSelection().Select(range => range.GetText(-1)));
     }
 
     /// <summary>
     /// 网页中的焦点常落在包含文字的可聚焦容器或按钮上，这类元素不支持 TextPattern，
     /// 选区由所在文档提供，因此从焦点元素开始向上查找最近的支持 TextPattern 的元素。
+    /// 表格、列表等控件有自己的选区，复制的是其中选中的项；查找到这类控件时停止，
+    /// 避免读到外层文本控件中残留的选区。
     /// </summary>
-    private static TextPattern? FindTextPattern(AutomationElement element)
+    internal static T? FindSelectionSource<T>(
+        T element, Func<T, T?> getParent, Func<T, bool> hasTextPattern, Func<T, bool> hasOwnSelection)
+        where T : class
     {
-        for (var current = element; current != null; current = TreeWalker.ControlViewWalker.GetParent(current))
+        for (var current = element; current != null; current = getParent(current))
         {
-            if (current.TryGetCurrentPattern(TextPattern.Pattern, out var pattern))
-                return (TextPattern)pattern;
+            if (hasTextPattern(current))
+                return current;
+
+            if (hasOwnSelection(current))
+                return null;
         }
 
         return null;
