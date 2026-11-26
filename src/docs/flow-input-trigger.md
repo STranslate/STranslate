@@ -23,6 +23,8 @@
   - 协调直接翻译、悬浮图标与增量翻译共享 Hook，并按优先级分发划词结果。
 - `STranslate/Helpers/ClipboardMonitor.cs`
   - `AddClipboardFormatListener` 监听剪贴板变更。
+- `STranslate/Helpers/ClipboardHelper.cs`
+  - `GetSelectedTextFromClipboardAsync()` 模拟复制读到文本后，立即以相同文本重写剪贴板，并附加 `Clipboard Viewer Ignore` 与 `ExcludeClipboardContentFromMonitorProcessing` 格式，使 Ditto、Windows 剪贴板历史等工具不记录这次复制；重写后剪贴板只保留纯文本。
 - `STranslate/Helpers/UiaTextReader.cs`
   - 在后台读取焦点元素的 UIA `TextPattern` 选区；空结果、异常或超时返回 null，由 `ClipboardHelper` 回退到模拟复制。
 - `STranslate/ViewModels/MainWindowViewModel.cs`
