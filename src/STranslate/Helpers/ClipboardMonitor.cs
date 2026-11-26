@@ -86,6 +86,12 @@ public class ClipboardMonitor(Window window) : IDisposable
             {
                 // 延迟确保剪贴板数据已完全写入
                 await Task.Delay(100);
+
+                // 带忽略标记的内容不触发翻译，包括划词取词时的模拟复制：追加标记会再触发一次剪贴板变更，
+                // 而划词本身已经翻译过这段文字。
+                if (ClipboardHelper.HasIgnoreFormat())
+                    return;
+
                 var text = ClipboardHelper.GetText();
 
                 if (!string.IsNullOrWhiteSpace(text) && text != _lastText)

@@ -22,9 +22,9 @@
 - `STranslate/Services/MouseSelectionService.cs`
   - 协调直接翻译、悬浮图标与增量翻译共享 Hook，并按优先级分发划词结果。
 - `STranslate/Helpers/ClipboardMonitor.cs`
-  - `AddClipboardFormatListener` 监听剪贴板变更。
+  - `AddClipboardFormatListener` 监听剪贴板变更；带 `Clipboard Viewer Ignore` 或 `ExcludeClipboardContentFromMonitorProcessing` 标记的内容不触发翻译。
 - `STranslate/Helpers/ClipboardHelper.cs`
-  - `GetSelectedTextFromClipboardAsync()` 模拟复制读到文本后，立即以相同文本重写剪贴板，并附加 `Clipboard Viewer Ignore` 与 `ExcludeClipboardContentFromMonitorProcessing` 格式，使 Ditto、Windows 剪贴板历史等工具不记录这次复制；重写后剪贴板只保留纯文本。
+  - `GetSelectedTextFromClipboardAsync()` 模拟复制读到文本后，立即在同一份剪贴板内容上追加上述两个忽略标记，原有格式不变；读取后剪贴板已被改写或正被占用时不追加。Ditto 在剪贴板变化约 100 毫秒后才保存内容，并通过 Win32 剪贴板 API 检查标记，因此会跳过这次复制。以下两种情况仍会记录这次复制：工具在标记追加之前已读取剪贴板；源程序通过 OLE（`OleSetClipboard`）写入剪贴板（如 Thunderbird、Firefox 等基于 Gecko 的程序，以及 WinForms、WPF 程序），而工具也通过 OLE 读取剪贴板，此时读到的是源程序的数据对象，看不到追加的标记。Windows 剪贴板历史属于后一种情况。
 - `STranslate/Helpers/UiaTextReader.cs`
   - 在后台读取焦点元素的 UIA `TextPattern` 选区；空结果、异常或超时返回 null，由 `ClipboardHelper` 回退到模拟复制。
 - `STranslate/ViewModels/MainWindowViewModel.cs`
