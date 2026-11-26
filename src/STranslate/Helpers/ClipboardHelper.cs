@@ -142,7 +142,11 @@ public class ClipboardHelper
         }
 
         cancellation.ThrowIfCancellationRequested();
-        var currentText = GetText();
+        var currentText = GetText(out var textSequence);
+
+        // 模拟复制写入的内容会被 Ditto 等剪贴板历史工具记录，在这次复制的内容上追加忽略标记。
+        if (hasSequenceChanged && !string.IsNullOrEmpty(currentText))
+            TryAddIgnoreFormats(textSequence);
 
         // 如果序列号变化了，或者内容发生了变化，或者原本就没有内容
         if (hasSequenceChanged ||
@@ -178,6 +182,58 @@ public class ClipboardHelper
     private const uint CustomFormat3 = 49504; // 自定义格式 3
     private const uint CustomFormat4 = 50103; // 自定义格式 4
     private const uint CustomFormat5 = 50104; // 自定义格式 5
+
+    // 剪贴板监听和历史工具识别的忽略标记：Ditto 等第三方工具识别 Clipboard Viewer Ignore；
+    // Windows 剪贴板历史与云剪贴板识别 ExcludeClipboardContentFromMonitorProcessing。
+    // https://learn.microsoft.com/windows/win32/dataxchg/clipboard-formats#cloud-clipboard-and-clipboard-history-formats
+    private static readonly Lazy<uint[]> IgnoreFormats = new(() =>
+    [
+        PInvoke.RegisterClipboardFormat("Clipboard Viewer Ignore"),
+        PInvoke.RegisterClipboardFormat("ExcludeClipboardContentFromMonitorProcessing")
+    ]);
+
+    /// <summary>
+    ///     当前剪贴板内容是否带有忽略标记。
+    /// </summary>
+    internal static bool HasIgnoreFormat() => IgnoreFormats.Value.Any(format => PInvoke.IsClipboardFormatAvailable(format));
+
+    /// <summary>
+    ///     在序列号为 <paramref name="sequence" /> 的剪贴板内容上追加忽略标记，保留原有格式。
+    ///     Ditto 在剪贴板变化约 100 毫秒后才保存，保存前会再次检查标记，因此会跳过这次复制；
+    ///     在标记追加之前已读取剪贴板的工具仍会记录。源程序通过 OLE 写入剪贴板时，
+    ///     通过 OLE 读取剪贴板的工具（如 Windows 剪贴板历史）读到的是源程序的数据对象，看不到追加的标记。
+    /// </summary>
+    private static unsafe void TryAddIgnoreFormats(uint sequence)
+    {
+        // 剪贴板被占用时跳过，不重试；取词结果不受影响。
+        if (!PInvoke.OpenClipboard(default))
+            return;
+
+        try
+        {
+            // 读取之后已有新的复制时跳过，避免把标记加到用户新复制的内容上。
+            if (PInvoke.GetClipboardSequenceNumber() != sequence)
+                return;
+
+            // 不调用 EmptyClipboard，直接追加格式；标记只需存在，内容不会被读取。
+            foreach (var format in IgnoreFormats.Value)
+            {
+                var hGlobal = PInvoke.GlobalAlloc(GLOBAL_ALLOC_FLAGS.GHND, 1);
+                if (hGlobal.IsNull)
+                    return;
+
+                if (PInvoke.SetClipboardData(format, new HANDLE(hGlobal.Value)).IsNull)
+                {
+                    PInvoke.GlobalFree(hGlobal);
+                    return;
+                }
+            }
+        }
+        finally
+        {
+            PInvoke.CloseClipboard();
+        }
+    }
 
     // https://github.com/CopyText/TextCopy/blob/main/src/TextCopy/WindowsClipboard.cs
 
@@ -239,10 +295,14 @@ public class ClipboardHelper
         }
     }
 
-    public static string? GetText()
+    public static string? GetText() => GetText(out _);
+
+    /// <param name="sequence">读取时的剪贴板序列号，用于之后确认剪贴板没有再被改写。</param>
+    private static string? GetText(out uint sequence)
     {
         // 先占有剪贴板，再检查可用格式，减少 TOCTTOU 竞态
         TryOpenClipboard();
+        sequence = PInvoke.GetClipboardSequenceNumber();
 
         var support = SupportedFormats.Any(format => PInvoke.IsClipboardFormatAvailable(format));
         if (!support)
